@@ -1,0 +1,23 @@
+{% extends "_base.html.j2" %}
+{% block content %}
+{# images_root passed in context, e.g. "output/<slug>/images" #}
+{% for sc in article.spread_copy %}
+  {% if sc.type == 'cover' %}
+    {% include "_components/cover.html.j2" %}
+  {% elif sc.type == 'toc' %}
+    {% include "_components/toc.html.j2" %}
+  {% elif sc.type == 'feature-spread' %}
+    {% include "_components/feature-spread.html.j2" %}
+  {% elif sc.type == 'pull-quote' %}
+    {% include "_components/pull-quote.html.j2" %}
+  {% elif sc.type == 'portrait-wall' %}
+    {% include "_components/portrait-wall.html.j2" %}
+  {% elif sc.type == 'colophon' %}
+    {% include "_components/colophon.html.j2" %}
+  {% elif sc.type == 'back-cover' %}
+    {% include "_components/back-cover.html.j2" %}
+  {% else %}
+    <section class="spread unknown"><h2>Unknown spread type: {{ sc.type }}</h2></section>
+  {% endif %}
+{% endfor %}
+{% endblock %}
