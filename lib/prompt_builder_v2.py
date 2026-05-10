@@ -1,0 +1,108 @@
+"""prompt_builder_v2 — role-driven upscale prompts + multi-aspect storyboard.
+
+For v0.3 editorial pipeline. v0.2 prompt_builder still serves legacy plain-* layouts.
+"""
+from __future__ import annotations
+
+import pathlib
+
+from lib.placeholder_resolver import build_placeholder_map
+
+
+SKILL_ROOT = pathlib.Path(__file__).resolve().parents[1]
+TEMPLATES_DIR = SKILL_ROOT / "library" / "templates"
+
+
+ROLE_TEMPLATES = {
+    "portrait":     "upscale_portrait.prompt.md",
+    "scene":        "upscale_scene.prompt.md",
+    "environment":  "upscale_environment.prompt.md",
+    "detail":       "upscale_detail.prompt.md",
+    "cover_hero":   "upscale_cover_hero.prompt.md",
+    "back_coda":    "upscale_back_coda.prompt.md",
+}
+
+
+def _read_template(name: str) -> str:
+    p = TEMPLATES_DIR / name
+    if not p.is_file():
+        raise FileNotFoundError(f"template not found: {p}")
+    return p.read_text(encoding="utf-8")
+
+
+def _apply(template: str, mapping: dict[str, str]) -> str:
+    out = template
+    for k, v in mapping.items():
+        out = out.replace(k, str(v))
+    return out
+
+
+def build_upscale_prompt(
+    *,
+    role: str,
+    spec: dict,
+    layers: dict,
+    slot_id: str,
+    scene: str,
+    aspect: str,
+) -> str:
+    if role not in ROLE_TEMPLATES:
+        raise ValueError(f"unknown role {role!r}; expected one of {list(ROLE_TEMPLATES)}")
+    template = _read_template(ROLE_TEMPLATES[role])
+    pmap = build_placeholder_map(spec, layers)
+    pmap["{{SCENE}}"] = scene
+    pmap["{{ASPECT}}"] = aspect
+    pmap["{{SLOT_ID}}"] = slot_id
+    return _apply(template, pmap)
+
+
+def build_storyboard_prompt_v2(
+    spec: dict,
+    layers: dict,
+    *,
+    plan: dict,
+    scenes_by_slot: dict[str, str],
+) -> str:
+    template = _read_template("storyboard_v2.prompt.md")
+    pmap = build_placeholder_map(spec, layers)
+
+    # Build a lookup from slot_id (full or short form) → role from layout's image_slots.
+    role_lookup = _build_role_lookup(layers)
+
+    cell_lines = []
+    for cell in plan["cells"]:
+        slot_id = cell["slot_id"]
+        scene = scenes_by_slot.get(slot_id, "")
+        role = role_lookup.get(slot_id) or role_lookup.get(_short_id(slot_id), "portrait")
+        line = (
+            f"{cell['page_label']} - {slot_id} "
+            f"({cell['aspect']} {role}) - {scene}"
+        ).rstrip(" -")
+        cell_lines.append(line)
+
+    pmap["{{OUTER_W}}"] = str(plan["outer_size_px"][0])
+    pmap["{{OUTER_H}}"] = str(plan["outer_size_px"][1])
+    pmap["{{GRID_ROWS}}"] = str(plan.get("grid", {}).get("rows", "?"))
+    pmap["{{GRID_COLS}}"] = str(plan.get("grid", {}).get("cols", "?"))
+    pmap["{{CELL_COUNT}}"] = str(len(plan["cells"]))
+    pmap["{{CELL_LIST}}"] = "\n".join(cell_lines)
+
+    return _apply(template, pmap)
+
+
+def _short_id(slot_id: str) -> str:
+    """'spread-03.feature_hero' -> 'feature_hero' (drop the spread-NN prefix)."""
+    return slot_id.split(".", 1)[-1] if "." in slot_id else slot_id
+
+
+def _build_role_lookup(layers: dict) -> dict[str, str]:
+    """Map both full slot_id and short id (no spread- prefix) to role."""
+    lookup: dict[str, str] = {}
+    for s in layers.get("layout", {}).get("image_slots", []) or []:
+        sid = s.get("id", "")
+        role = s.get("role", "portrait")
+        lookup[sid] = role
+        spread_idx = s.get("spread_idx") or s.get("in_spread")
+        if spread_idx:
+            lookup[f"spread-{int(spread_idx):02d}.{sid}"] = role
+    return lookup
