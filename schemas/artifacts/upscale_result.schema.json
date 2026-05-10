@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Upscale result artifact",
+  "type": "object",
+  "required": ["images", "vertex_calls_made", "total_cost_usd", "spec_slug"],
+  "properties": {
+    "images": {"type": "array", "items": {"type": "string"}},
+    "vertex_calls_made": {"type": "integer"},
+    "total_cost_usd": {"type": "number"},
+    "spec_slug": {"type": "string"}
+  }
+}

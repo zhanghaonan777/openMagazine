@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Research brief artifact",
+  "type": "object",
+  "required": ["traits", "style_anchor", "theme_world", "magazine_name", "page_count", "spec_slug"],
+  "properties": {
+    "traits": {"type": "string"},
+    "style_anchor": {"type": "string"},
+    "theme_world": {"type": "string"},
+    "magazine_name": {"type": "string"},
+    "cover_line": {"type": "string"},
+    "page_count": {"type": "integer", "minimum": 1, "maximum": 64},
+    "spec_slug": {"type": "string"}
+  }
+}

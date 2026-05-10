@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Pipeline manifest",
+  "type": "object",
+  "required": ["name", "version", "stages", "budget_default_usd"],
+  "properties": {
+    "name": {"type": "string"},
+    "version": {"type": "string"},
+    "description": {"type": "string"},
+    "budget_default_usd": {"type": "number"},
+    "max_wall_time_minutes": {"type": "number"},
+    "stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "skill", "produces"],
+        "properties": {
+          "name": {"type": "string"},
+          "skill": {"type": "string"},
+          "produces": {"oneOf": [{"type": "string"}, {"type": "array"}]},
+          "checkpoint": {"enum": ["required", "optional", "off"]},
+          "reviewer": {"enum": ["enabled", "disabled"]}
+        }
+      }
+    }
+  }
+}

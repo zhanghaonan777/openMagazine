@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Publish report artifact",
+  "type": "object",
+  "required": ["pdf_path", "contact_sheet_path", "total_cost_usd", "wall_time_min", "spec_slug"],
+  "properties": {
+    "pdf_path": {"type": "string"},
+    "contact_sheet_path": {"type": "string"},
+    "total_cost_usd": {"type": "number"},
+    "wall_time_min": {"type": "number"},
+    "auto_persisted_spec_path": {"type": ["string", "null"]},
+    "spec_slug": {"type": "string"}
+  }
+}

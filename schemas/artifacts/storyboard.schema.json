@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Storyboard artifact",
+  "type": "object",
+  "required": ["png_path", "cells_dir", "rows", "cols", "cell_count", "page_plan", "spec_slug"],
+  "properties": {
+    "png_path": {"type": "string"},
+    "cells_dir": {"type": "string"},
+    "rows": {"type": "integer", "minimum": 1, "maximum": 8},
+    "cols": {"type": "integer", "minimum": 1, "maximum": 8},
+    "cell_count": {"type": "integer", "minimum": 1, "maximum": 64},
+    "top_crop_px_used": {"type": "integer", "minimum": 0},
+    "page_plan": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["page", "scene_summary"],
+        "properties": {
+          "page": {"type": "integer", "minimum": 1},
+          "scene_summary": {"type": "string"},
+          "shot_scale": {"type": "string"}
+        }
+      }
+    },
+    "spec_slug": {"type": "string"}
+  }
+}
