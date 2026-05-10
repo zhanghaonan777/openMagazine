@@ -1,0 +1,109 @@
+name: editorial-16page
+version: "1.0"
+schema_version: 2
+description: 16-page editorial A4 magazine with multi-image spreads + real PDF text.
+category: editorial
+stability: experimental
+budget_default_usd: 5.50
+max_wall_time_minutes: 30
+
+reference_input:
+  supported: true
+  analysis_depth: shallow
+
+orchestration:
+  parallelism: 3
+
+required_skills:
+  - pipelines/editorial-16page/research-director
+  - pipelines/editorial-16page/proposal-director
+  - pipelines/editorial-16page/articulate-director
+  - pipelines/editorial-16page/storyboard-director
+  - pipelines/editorial-16page/upscale-director
+  - pipelines/editorial-16page/compose-director
+  - pipelines/editorial-16page/publish-director
+  - meta/reviewer
+  - meta/checkpoint-protocol
+  - meta/cost-budget-enforcer
+  - meta/article-writer
+
+stages:
+  - name: research
+    skill: pipelines/editorial-16page/research-director
+    produces: research_brief.json
+    checkpoint: "off"
+    reviewer: "enabled"
+    success_criteria:
+      - schema-valid research_brief.json
+      - 6 layer references resolved (subject/style/theme/layout/brand/article)
+
+  - name: proposal
+    skill: pipelines/editorial-16page/proposal-director
+    produces: proposal.json
+    checkpoint: "off"
+    reviewer: "enabled"
+    success_criteria:
+      - cost_estimate_usd ≤ budget_default_usd
+      - 21 image_slots accounted for
+
+  - name: articulate
+    skill: pipelines/editorial-16page/articulate-director
+    produces: article.yaml
+    checkpoint: "required"
+    reviewer: "enabled"
+    success_criteria:
+      - article schema valid
+      - article ↔ layout consistency check passes
+
+  - name: storyboard
+    skill: pipelines/editorial-16page/storyboard-director
+    produces:
+      - storyboard.png
+      - storyboard.json
+      - cells/spread-NN/<slot_id>.png × 21
+    checkpoint: "required"
+    reviewer: "enabled"
+    success_criteria:
+      - 21 cell PNGs in output/<slug>/cells/
+      - storyboard.png 2:3 aspect, top-crop applied
+      - user explicit OK in checkpoint sidecar
+
+  - name: upscale
+    skill: pipelines/editorial-16page/upscale-director
+    produces:
+      - images/spread-NN/<slot_id>.png × 21
+      - upscale_result.json
+    checkpoint: "off"
+    reviewer: "enabled"
+    success_criteria:
+      - 21 4K PNGs in output/<slug>/images/
+      - cumulative cost ≤ budget
+
+  - name: compose
+    skill: pipelines/editorial-16page/compose-director
+    produces:
+      - magazine.pdf
+      - magazine.html
+      - compose_result.json
+    checkpoint: "off"
+    reviewer: "enabled"
+    success_criteria:
+      - magazine.pdf at output/<slug>/, page count == 16, 30-150 MB total
+
+  - name: publish
+    skill: pipelines/editorial-16page/publish-director
+    produces:
+      - publish_report.json
+      - contact_sheet.jpg
+    checkpoint: "off"
+    reviewer: "disabled"
+    success_criteria:
+      - publish_report.json schema-valid
+      - contact_sheet.jpg exists
+
+defaults:
+  storyboard_grid_outer: "2:3"
+  storyboard_size_px: [1024, 1536]
+  total_image_slots: 21
+  page_count: 16
+  aspect: "2:3"
