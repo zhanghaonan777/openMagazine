@@ -59,7 +59,7 @@ stages:
     skill: pipelines/smoke-test-4page/upscale-director
     produces:
       - images/page-NN.png × 4
-      - 4k.json
+      - upscale_result.json
     checkpoint: "off"
     reviewer: "enabled"
     success_criteria:
@@ -70,7 +70,7 @@ stages:
     skill: pipelines/smoke-test-4page/compose-director
     produces:
       - magazine.pdf
-      - compose.json
+      - compose_result.json
     checkpoint: "off"
     reviewer: "enabled"
     success_criteria:
