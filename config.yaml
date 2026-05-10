@@ -1,0 +1,21 @@
+# Project-level configuration. Environment variables override these.
+schema_version: 1
+
+vertex:
+  project_id: project-5e0283e4-4d09-4f51-a5f      # OPEN_ZAZHI_GCP_PROJECT overrides
+  location: global                                  # do not change; required by gemini-3-pro-image-preview
+  model: gemini-3-pro-image-preview
+  vision_model: gemini-2.5-flash
+
+network:
+  proxy: http://127.0.0.1:7897                      # OPEN_ZAZHI_PROXY overrides; "none" to disable
+
+defaults:
+  storyboard_grid: 4x4
+  page_count: 16
+  aspect: "2:3"
+  top_crop_px: 60
+  parallelism: 3
+  budget_per_issue_usd: 3.84
+  cost_warning_pct: 80
+  cost_hard_stop_pct: 110
