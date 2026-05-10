@@ -1,0 +1,75 @@
+schema_version: 2
+name: editorial-classic
+display_name: Editorial Classic
+masthead: "{{MASTHEAD}}"
+default_language: en
+
+typography:
+  display:
+    family: "Playfair Display"
+    weights: [700, 900]
+    source: google-fonts
+  body:
+    family: "Source Serif 4"
+    weights: [400, 600]
+    source: google-fonts
+    size_pt: 10
+    leading: 1.45
+    align: justify
+    hyphenate: true
+  kicker:
+    family: "IBM Plex Mono"
+    weight: 500
+    transform: uppercase
+    letter_spacing: 0.08em
+    size_pt: 8
+  caption:
+    family: "IBM Plex Mono"
+    weight: 400
+    style: italic
+    size_pt: 8
+  pull_quote:
+    family: "Playfair Display"
+    weight: 900
+    style: italic
+    size_pt: 32
+  drop_cap:
+    enabled: true
+    family: "Playfair Display"
+    weight: 900
+    lines: 3
+    color_token: accent
+  page_number:
+    family: "IBM Plex Mono"
+    weight: 400
+    size_pt: 9
+  pairing_notes: |
+    Playfair Display (didone-adjacent display) + Source Serif 4 (comfortable
+    body) + IBM Plex Mono (editorial meta labels). The classic editorial
+    pairing — high-contrast hero, readable long-form, distinctive metadata.
+
+print_specs:
+  page_size: A4
+  page_size_custom_mm: ~
+  bleed_mm: 3
+  trim_marks: true
+  registration_marks: false
+  binding: saddle-stitch
+  binding_gutter_mm: 8
+  margin_top_mm: 20
+  margin_bottom_mm: 22
+  margin_outer_mm: 18
+  margin_inner_mm: 22
+  baseline_grid_mm: 4
+  paper_stock_note: "80gsm uncoated"
+  color_mode: rgb
+
+visual_tokens:
+  color_bg_paper: "#f5efe6"
+  color_ink_primary: "#1a1a1a"
+  color_ink_secondary: "#6b6b6b"
+  color_accent: "#c2272d"
+  color_quote_bg: "#1a1a1a"
+  color_quote_fg: "#f5efe6"
+  rule_thickness_pt: 1.5
+  margin_note_indent_mm: 4
