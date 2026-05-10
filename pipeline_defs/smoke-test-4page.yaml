@@ -1,0 +1,94 @@
+name: smoke-test-4page
+version: "1.0"
+description: 4-page photo magazine smoke test (~$0.96 + 1 codex storyboard).
+category: smoke-test
+stability: production
+budget_default_usd: 0.96
+max_wall_time_minutes: 15
+
+reference_input:
+  supported: true
+  analysis_depth: shallow
+
+orchestration:
+  parallelism: 3
+
+required_skills:
+  - pipelines/smoke-test-4page/research-director
+  - pipelines/smoke-test-4page/proposal-director
+  - pipelines/smoke-test-4page/storyboard-director
+  - pipelines/smoke-test-4page/upscale-director
+  - pipelines/smoke-test-4page/compose-director
+  - pipelines/smoke-test-4page/publish-director
+  - meta/reviewer
+  - meta/checkpoint-protocol
+  - meta/cost-budget-enforcer
+  - meta/onboarding
+
+stages:
+  - name: research
+    skill: pipelines/smoke-test-4page/research-director
+    produces: research_brief.json
+    checkpoint: "off"
+    reviewer: "enabled"
+    success_criteria:
+      - schema-valid research_brief.json artifact
+      - all 5 layer references resolved (via spec_validate or free-form inference)
+  - name: proposal
+    skill: pipelines/smoke-test-4page/proposal-director
+    produces: proposal.json
+    checkpoint: "off"
+    reviewer: "enabled"
+    success_criteria:
+      - 4-page plan with shot-scale variety (≥3 distinct scales)
+      - cost_estimate_usd ≤ budget_default_usd
+  - name: storyboard
+    skill: pipelines/smoke-test-4page/storyboard-director
+    produces:
+      - storyboard.png
+      - cells/cell-NN.png × 4
+      - storyboard.json
+    checkpoint: "required"
+    reviewer: "enabled"
+    success_criteria:
+      - storyboard.png exists at output/<slug>/storyboard.png
+      - 4 cells in output/<slug>/cells/ each ≥ 256 px short edge
+      - top-crop applied so no page-number labels in cells
+      - user explicit OK in checkpoint sidecar
+  - name: upscale
+    skill: pipelines/smoke-test-4page/upscale-director
+    produces:
+      - images/page-NN.png × 4
+      - 4k.json
+    checkpoint: "off"
+    reviewer: "enabled"
+    success_criteria:
+      - 4 page images in output/<slug>/images/, each ≥ 5 MB
+      - all 2:3 portrait
+      - cumulative cost ≤ budget
+  - name: compose
+    skill: pipelines/smoke-test-4page/compose-director
+    produces:
+      - magazine.pdf
+      - compose.json
+    checkpoint: "off"
+    reviewer: "enabled"
+    success_criteria:
+      - magazine.pdf at output/<slug>/, page count == 4, ≥ 50 MB total
+  - name: publish
+    skill: pipelines/smoke-test-4page/publish-director
+    produces:
+      - publish_report.json
+      - contact_sheet.jpg
+    checkpoint: "off"
+    reviewer: "disabled"
+    success_criteria:
+      - publish_report.json schema-valid
+      - contact_sheet.jpg exists
+      - if free-form input: library/issue-specs/<slug>.yaml auto-persisted
+
+defaults:
+  storyboard_grid: 2x2
+  page_count: 4
+  aspect: "2:3"
+  top_crop_px: 60
