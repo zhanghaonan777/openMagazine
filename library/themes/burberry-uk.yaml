@@ -1,0 +1,28 @@
+schema_version: 1
+name: burberry-uk
+display_name:
+  en: Burberry British Heritage
+  zh: 英伦风衣世界
+
+theme_world: |
+  British heritage countryside and London-rain mood. Lake District fells,
+  damp cobblestone streets, Yorkshire stone walls, English afternoon tea
+  interiors with wool and dark wood, weather-ready trench-coat aesthetic.
+
+lighting_principles: |
+  Natural overcast sky as primary key light. Damp air, slight haze. No
+  sunlight, no harsh shadows. Tactile fabric weave and wet stone reflections
+  visible. Color palette: archive beige / deep brown / moss green / black /
+  oxblood / cream — muted, earthy, all-natural.
+
+default_cover_line:
+  en: "THE LITTLE TRENCH ISSUE"
+  zh: "小风衣号"
+
+# 4 page plan hints (matches plain-4 layout for smoke tests)
+# For 16-page version, expand to 16 hints following the standard arc.
+page_plan_hints:
+  - "01: cover hero — character on a stone step, draped tartan blanket and umbrella handle in foreground, weathered British wall behind"
+  - "02: action mid — character walking wet London cobblestone, Big Ben silhouette in misty distance, umbrella-carrying figures background"
+  - "03: quiet overhead — top-down still life, character sits center-left on tartan rug, cup of milk tea + leather notebook + ceramic vessel"
+  - "04: back coda — distant wide of Lake District fells, character tiny at lower right, stone wall and trench-coat hanging on fence as set dressing"

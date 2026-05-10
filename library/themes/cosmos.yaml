@@ -1,0 +1,41 @@
+schema_version: 1
+name: cosmos
+display_name:
+  en: Cosmos
+  zh: 太空号
+
+theme_world: |
+  Outer space, vast, sublime. ISS-style modules and lunar surfaces. Single
+  hard sun, no atmospheric scatter. Earth visible as a small blue marble on
+  the upper-right horizon.
+
+lighting_principles: |
+  Single hard sun from front-left. No fill light, no rim light. Sky is pure
+  black with crisp pinhole stars (sparse, not dense). Long sharp shadows
+  point lower-right. Earth's blue is the only saturated color in any frame;
+  everything else stays desaturated lunar gray + white spacecraft.
+
+default_cover_line:
+  en: "THE COSMOS ISSUE / {{PROTAGONIST_NAME}} walks the Moon"
+  zh: "太空号 / {{PROTAGONIST_NAME}} 行走于月球"
+
+# 16 page plan hints — one per page in narrative arc:
+#   01 cover / 02 opening / 03-09 exploration / 10 tension /
+#   11-13 climax / 14-15 reflection / 16 back-cover coda
+page_plan_hints:
+  - "01: cover hero portrait — character framed center-left at ISS-module windowsill, Earth horizon upper-right, low-angle hero feel"
+  - "02: opening EVA approach — wide reportage, character walking lunar regolith toward camera, footprints behind"
+  - "03: medium close-up of paw / footprints in regolith, Earth blurred in background"
+  - "04: overhead wide of lunar landscape, character occupies bottom-third"
+  - "05: medium action — character climbing/exploring lunar boulder field"
+  - "06: tight close-up portrait — character looks up to camera, helmet reflection of stars"
+  - "07: wide environmental — lunar plain stretches, spacecraft small in distance"
+  - "08: medium — character at module airlock entrance, gloved paw on hatch"
+  - "09: dutch-angle dramatic — interior of ISS-style module, character peering out window"
+  - "10: TENSION — quiet pause, character alone in vast empty regolith plain, sun at low angle"
+  - "11: CLIMAX 1 — full-frame Earthrise from lunar surface with character silhouette"
+  - "12: CLIMAX 2 — intimate close, character helmet-off (or in module) at viewport, awe"
+  - "13: CLIMAX 3 — wide spacewalk silhouette against star field"
+  - "14: REFLECTION — character returning toward base, long shadows, pensive"
+  - "15: REFLECTION — interior, character at table with mission patch / artifacts"
+  - "16: back-cover coda — distant wide-fade silhouette in regolith, mostly negative space"

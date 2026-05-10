@@ -1,0 +1,15 @@
+schema_version: 1
+name: luna
+display_name:
+  en: Luna
+  zh: Luna
+species: cat
+breed: British Shorthair
+reference_image: ../../examples/luna-cosmos/refs/luna.png
+                                # placeholder; user updates per-issue
+                                # or supplies via spec.overrides.reference_image
+traits: |
+  Luna, healthy adult British Shorthair cat, silver-golden coat with
+  beige-gray tabby markings on forehead and back, round face, clear
+  bright amber eyes, upright ears, white tuft on the chin, slightly
+  chubby build, age roughly four years.

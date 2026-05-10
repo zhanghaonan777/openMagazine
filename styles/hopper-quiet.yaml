@@ -1,0 +1,49 @@
+schema_version: 1
+name: hopper-quiet
+type: painter
+display_name:
+  en: Edward Hopper Quiet (Photo-rewrite)
+  zh: 爱德华·霍珀的安静（摄影改写版）
+
+trigger_keywords:
+  - "hopper"
+  - "edward hopper"
+  - "霍珀"
+  - "american realism"
+  - "美式安静"
+  - "都市孤独"
+  - "nighthawks"
+
+needs_rewrite: true
+
+style_anchor: |
+  Edward Hopper-inspired interior, photographed by Saul Leiter for
+  Apartamento. Hopper's vocabulary shows up in this scene as: window-cast
+  rectangles of late-afternoon sun across a wooden floor, single figure
+  in a quiet pose with face turned away from camera, large painted-wall
+  blocks of muted color (mustard yellow, dusty teal, faded green), one
+  isolated lamp or window as the room's psychological focal point.
+  Hopper's mood is the COMPOSITION + LIGHT, not the rendering medium.
+  Single hard window-light from the side at low angle, long warm-amber
+  shadow stretching across the room. Shot on Leica M11 with Summicron
+  50mm f/2, Kodak Portra 160 grain, raw uncorrected file, slight warm
+  roll-off in highlights, no aggressive LUT, no post-processing.
+  Editorial photo magazine finish — fabric texture, dust in light beam
+  visible. NOT a painting, NOT illustration; a photograph of a
+  Hopper-mood interior.
+
+photographer_pool:
+  - Saul Leiter
+  - William Eggleston
+  - Gregory Crewdson
+
+camera_pool:
+  - "Leica M11 + Summicron 50mm f/2 + Kodak Portra 160"
+  - "Hasselblad 503CW + 80mm f/2.8 + Kodak Ektar 100"
+  - "Mamiya 7 II + 80mm f/4 + Fujifilm Pro 400H"
+
+source_notes: |
+  Painter-rewrite type. Hopper's "psychological emptiness + window light"
+  is reframed as composition + lighting recipe; photo medium enforced by
+  camera/film. Avoid: oil-paint rendering, brush stroke visibility,
+  flatness — these all signal "painting" to the model.

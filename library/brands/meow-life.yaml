@@ -1,0 +1,12 @@
+schema_version: 1
+name: meow-life
+display_name:
+  en: MEOW LIFE
+  zh: 主子号
+
+masthead: MEOW LIFE
+url: meowlife.cn
+persona: |
+  Editor-in-chief: the cat itself. Magazine is a first-person editorial
+  voice from the cat's perspective. Cover lines should sound like the
+  cat is the protagonist of the issue, not its subject.

@@ -1,0 +1,42 @@
+schema_version: 1
+name: burberry-heritage
+type: mood
+display_name:
+  en: Burberry Heritage Editorial
+  zh: Burberry 英伦风衣编辑感
+
+trigger_keywords:
+  - "burberry"
+  - "Burberry 风格"
+  - "英伦 Burberry"
+  - "heritage trench"
+  - "British heritage editorial"
+  - "gabardine trench"
+  - "archive check"
+
+needs_rewrite: false
+
+style_anchor: |
+  Burberry-inspired British heritage luxury editorial photography. Weather-ready countryside and London-rain mood: archive beige gabardine, deep brown, moss green, black, oxblood, cream, and restrained check-pattern textiles used as set dressing rather than logos. Functional elegance: trench-coat silhouettes, wool scarves, umbrellas, wet stone, old wood, and soft outdoor protection. Raw but polished campaign portraiture in the Tyrone Lebon / Alasdair McLellan tradition: natural overcast sky as key light, damp air, matte shadows, tactile fabric weave, honest fur texture, no glossy beauty retouching. Shot on Leica M11 with Summicron 50mm f/2 and Kodak Portra 400 grain, raw uncorrected, muted highlights, no LUTs. Editorial fashion photograph, not product catalog, no brand wordmarks or counterfeit logos.
+
+photographer_pool:
+  - Tyrone Lebon
+  - Alasdair McLellan
+  - Tim Walker
+
+camera_pool:
+  - "Leica M11 + Summicron 50mm f/2 + Kodak Portra 400"
+  - "Hasselblad H6D-100c + 80mm f/2.8 + Kodak Portra 160"
+  - "Sony Alpha 7R V + Sigma 35mm f/1.4 Art + Kodak Portra 400"
+
+source_notes: |
+  Burberry Winter 2024 official brand notes emphasize the Lake District,
+  UK and Ireland landscapes, Tyrone Lebon campaign photography, and earthy
+  browns, greens, beiges, and custard cream. Burberry heritage materials
+  anchor the recipe in gabardine trench function, British weather, and
+  archive check lining. The Impression campaign reviews reinforce the
+  place-first British landscape mood under Daniel Lee. Sources:
+  https://www.burberryplc.com/news/brand/2024/introducing-winter-2024-designed-by-daniel-lee,
+  https://theimpression.com/burberry-winter-2024-ad-campaign-review/,
+  https://us.burberry.com/c/burberry-world/heritage/trench-coat/,
+  https://us.burberry.com/c/burberry-world/heritage/check/.

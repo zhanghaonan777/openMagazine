@@ -1,0 +1,19 @@
+# Example issue spec — cosmos × luna × matisse-fauve × plain-16 × meow-life
+# Run with: agent says "用 cosmos-luna-01 spec 跑"
+schema_version: 1
+
+slug: cosmos-luna-01
+issue_number: "01"
+date: "MAY 2026"
+
+# 5 layer references (resolves to templates/<layer>s/<name>.yaml)
+subject: luna
+style: matisse-fauve
+theme: cosmos
+layout: plain-16
+brand: meow-life
+
+# Optional spec-level overrides (take precedence over layer defaults)
+overrides: {}
+  # cover_line: "..."        # would override theme.default_cover_line
+  # masthead: "..."          # would override brand.masthead

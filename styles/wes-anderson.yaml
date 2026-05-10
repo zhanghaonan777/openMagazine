@@ -1,0 +1,45 @@
+schema_version: 1
+name: wes-anderson
+type: mood
+display_name:
+  en: Wes Anderson Symmetric
+  zh: 韦斯·安德森对称风
+
+trigger_keywords:
+  - "wes anderson"
+  - "韦斯安德森"
+  - "韦斯·安德森"
+  - "symmetric pastel"
+  - "对称构图"
+  - "the grand budapest hotel"
+  - "moonrise kingdom"
+
+needs_rewrite: false
+
+style_anchor: |
+  Wes Anderson editorial photography mood. Strict bilateral symmetry —
+  subject centered, background elements mirrored left-right. Flat front-on
+  perspective; no Dutch angles, no hand-held tilt. Pastel accent palette
+  on neutral wall: sage on cream / blush on bone / mustard on slate.
+  Single soft overhead source, even and shadowless. Mid-format film grain
+  visible. Composed deadpan mood — subject still and direct, no posed
+  smile. Shot on Hasselblad H6D-100c with 80mm f/2.8 prime, raw
+  uncorrected file, slight cyan-shadow / yellow-highlight pull (NOT
+  teal-orange LUT — much more subtle). Editorial mood-photography in the
+  symmetrical-frontal tradition of Wes Anderson cinematography.
+
+photographer_pool:
+  - Christoph Niemann (when he photographs)
+  - Aaron Tilley
+  - Tim Walker
+
+camera_pool:
+  - "Hasselblad H6D-100c + 80mm f/2.8"
+  - "Phase One IQ4 + 80mm f/2.8"
+  - "Mamiya 7 II + 80mm f/4 (medium format film)"
+
+source_notes: |
+  Symmetrical, frontal, pastel-on-neutral, deadpan. Cinematic reference
+  is Wes Anderson; photography reference is the still-frame discipline
+  in his films. Avoid: hand-held, asymmetric, hard rim light, dramatic
+  shadow, action verbs.

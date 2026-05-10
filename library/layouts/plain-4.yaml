@@ -1,0 +1,16 @@
+schema_version: 1
+name: plain-4
+display_name: Plain 4-page smoke test
+
+page_count: 4
+aspect: "2:3"
+storyboard_grid: "2x2"          # 2 rows × 2 cols = 4 cells
+top_crop_px_default: 60
+typography_mode: full-bleed
+caption_overlay: false
+
+notes: |
+  Reduced 4-page layout for smoke testing simple mode end-to-end.
+  Page roles: cover hero / action mid / quiet overhead / back coda.
+  Cost: ~$0.96 Vertex 4K + 1 codex storyboard.
+  Wall time: ~10 minutes.

@@ -1,0 +1,42 @@
+schema_version: 1
+name: national-geographic
+type: magazine
+display_name:
+  en: National Geographic
+  zh: 国家地理
+
+trigger_keywords:
+  - "国家地理"
+  - "natgeo"
+  - "nat geo"
+  - "national geographic"
+  - "纪录片摄影"
+  - "纪录片风"
+
+needs_rewrite: false
+
+style_anchor: |
+  National Geographic photojournalism. Hand-held documentary feel,
+  authentic environmental context, single ambient sun as primary light,
+  no fill, no rim. Slight ISO 400 grain. Deep blacks; muted desaturated
+  palette except for one anchored saturated accent (e.g., the subject's
+  eyes, or one cultural object). Natural fur / skin / fabric texture
+  visible — micro-shadows, no atmospheric softening on the subject.
+  Shot on Leica M11 with Summicron 50mm f/2, Tri-X 400 grain, raw
+  uncorrected file, no LUTs, no post-processing. Editorial photojournalism
+  finish — confident, restrained, photoreal.
+
+photographer_pool:
+  - Steve McCurry
+  - Sebastião Salgado
+  - Jimmy Chin
+
+camera_pool:
+  - "Leica M11 + Summicron 50mm f/2 + Tri-X 400"
+  - "Canon EOS R5 + RF 35mm f/1.8 + Kodak Portra 400"
+  - "Nikon Z9 + 24-70mm f/2.8 + Fujifilm Pro 400H"
+
+source_notes: |
+  Hand-held documentary aesthetic, hard ambient light, deep blacks, slight
+  grain. Decades of NGM editorial established this as THE photojournalism
+  reference. Avoid: glossy cinematic LUT, teal-orange grade, studio fill.

@@ -1,0 +1,46 @@
+schema_version: 1
+name: dreamy-warm
+type: mood
+display_name:
+  en: Dreamy Warm
+  zh: 梦幻温暖
+
+trigger_keywords:
+  - "dreamy"
+  - "梦幻"
+  - "warm dreamy"
+  - "温暖梦幻"
+  - "梦幻温暖"
+  - "金色时光"
+  - "golden hour"
+  - "summer warmth"
+
+needs_rewrite: false
+
+style_anchor: |
+  Dreamy warm editorial photography. Golden-hour low-side light, sun
+  source one hour before sunset — long warm shadows, amber rim on
+  window-side surfaces. Slight atmospheric haze (dust, pollen, soft
+  vapor) catching the light. Painterly bokeh from wide aperture; shallow
+  depth of field; subject sharp, foreground and far background fall off
+  softly. Warm-tone roll-off in highlights without aggressive teal-orange
+  LUT — the warmth is IN the scene's lighting, not added in post. Slight
+  kodachrome-like grain. Shot on Leica M11 with Summicron 50mm f/2,
+  Kodak Portra 400, raw uncorrected file, no LUTs, no aggressive grading.
+  Editorial photography in the warm-summer / golden-light / nostalgic-
+  intimate tradition.
+
+photographer_pool:
+  - Saul Leiter (warm version)
+  - Ryan McGinley
+  - Petra Collins
+
+camera_pool:
+  - "Leica M11 + Summicron 50mm f/2 + Kodak Portra 400"
+  - "Sony Alpha 7R V + 85mm f/1.4 GM + Cinestill 800T daylight"
+  - "Fuji X-T5 + 56mm f/1.2 + Fujifilm Pro 400H"
+
+source_notes: |
+  Golden-hour light + slight haze + warm bokeh. Common request for
+  intimate / nostalgic / "summer afternoon" magazines. Avoid: harsh
+  shadow, blue cool tone, clinical sharpness everywhere, teal-orange LUT.

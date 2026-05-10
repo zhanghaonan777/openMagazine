@@ -1,0 +1,12 @@
+schema_version: 1
+name: naipi
+display_name:
+  en: Naipi
+  zh: 奶啤
+species: dog
+breed: West Highland White Terrier-like (small fluffy white)
+reference_image: ../../examples/naipi-burberry/refs/protagonist-1.jpg
+traits: |
+  奶啤, small fluffy white terrier-like dog, cream-white long soft coat,
+  upright triangular feathered ears, round dark eyes, black button nose,
+  compact small body, rounded muzzle, gentle curious expression.

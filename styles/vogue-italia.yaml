@@ -1,0 +1,44 @@
+schema_version: 1
+name: vogue-italia
+type: magazine
+display_name:
+  en: Vogue Italia
+  zh: 意大利 Vogue
+
+trigger_keywords:
+  - "vogue"
+  - "vogue italia"
+  - "意大利 vogue"
+  - "fashion editorial"
+  - "高级时装大片"
+  - "时尚大片"
+
+needs_rewrite: false
+
+style_anchor: |
+  Vogue Italia high-fashion editorial photography. Calm, desaturated
+  palette with one or two anchored saturated accents (typically the
+  subject's lips, or a single fabric color). Dramatic single-source
+  lighting — hard key from one direction, deep shadow on the opposite
+  side. Steven Meisel composition discipline: subject occupies upper
+  two-thirds of frame, negative space is intentional, lines are clean.
+  Skin micro-shadows and fabric textures visible at full resolution. No
+  retouching gloss, no beauty-filter softening. Shot on Hasselblad
+  H6D-100c with 80mm f/2.8 prime, raw uncorrected file, no color grading,
+  large-format detail. Editorial photography in the Steven Meisel /
+  Paolo Roversi tradition.
+
+photographer_pool:
+  - Steven Meisel
+  - Paolo Roversi
+  - Tim Walker
+
+camera_pool:
+  - "Hasselblad H6D-100c + 80mm f/2.8"
+  - "Phase One IQ4 + 80mm f/2.8"
+  - "Sony Alpha 7R V + 85mm f/1.4 GM"
+
+source_notes: |
+  Calm desaturated palette + hard single-source key. Vogue Italia
+  established this aesthetic in the 90s under Franca Sozzani. Avoid:
+  saturated everywhere, fill light, rim light, glamour-portrait gloss.

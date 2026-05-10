@@ -1,0 +1,49 @@
+schema_version: 1
+name: hokusai-ukiyo
+type: movement
+display_name:
+  en: Hokusai Ukiyo-e (Photo-rewrite)
+  zh: 葛饰北斋浮世绘（摄影改写版）
+
+trigger_keywords:
+  - "hokusai"
+  - "葛饰北斋"
+  - "ukiyo-e"
+  - "浮世绘"
+  - "japanese woodblock"
+  - "great wave"
+  - "神奈川冲浪里"
+
+needs_rewrite: true
+
+style_anchor: |
+  Hokusai-ukiyo-e-inspired environment, photographed by Hiroshi Sugimoto
+  for Apartamento. Ukiyo-e's vocabulary shows up in this scene as:
+  cresting wave / mountain / pine silhouettes as actual landscape
+  geometry; bold blue-and-bone palette as natural sky-and-shore color;
+  flat layered planes of distance as real atmospheric perspective haze;
+  one or two anchored deep-Prussian-blue accents (water, fabric,
+  ceramic glaze). Ukiyo-e's vocabulary is the ENVIRONMENT and PALETTE,
+  not the rendering medium. Soft overcast natural light, slight cold
+  side cast from sky, no rim. Shot on Hasselblad H6D-100c with 80mm
+  f/2.8 prime, raw uncorrected file, slight cyan-shadow pull, no LUTs,
+  large-format detail. Editorial photojournalism finish — water surface
+  texture, fabric weave, atmospheric grain visible. NOT a woodblock
+  print, NOT illustration; a photograph of a Hokusai-mood landscape or
+  interior.
+
+photographer_pool:
+  - Hiroshi Sugimoto
+  - Rinko Kawauchi
+  - Daido Moriyama (when atmospheric)
+
+camera_pool:
+  - "Hasselblad H6D-100c + 80mm f/2.8 + Kodak Portra 160"
+  - "Mamiya 7 II + 80mm f/4 + Fujifilm Pro 160NS"
+  - "Pentax 645Z + 75mm f/2.8 + Kodak Ektar 100"
+
+source_notes: |
+  Movement-rewrite type. Ukiyo-e's flat-plane composition + cold-blue
+  palette reframed as actual landscape + atmospheric photo recipe.
+  Avoid: woodblock cut lines, flat illustration shading, missing
+  micro-texture — these all signal "print" to the model.

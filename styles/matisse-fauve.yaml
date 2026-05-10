@@ -1,0 +1,50 @@
+schema_version: 1
+name: matisse-fauve
+type: painter
+display_name:
+  en: Matisse Fauvism (Photo-rewrite)
+  zh: 马蒂斯野兽派（摄影改写版）
+
+trigger_keywords:
+  - "matisse"
+  - "马蒂斯"
+  - "fauvism"
+  - "野兽派"
+  - "fauve"
+  - "马蒂斯风"
+
+needs_rewrite: true
+
+# IMPORTANT: this style_anchor is ALREADY the photo-medium-rewrite of the
+# painter style. Do NOT rewrite again at runtime. Use verbatim.
+style_anchor: |
+  Matisse-fauvism-inspired interior, photographed by Annie Leibovitz for
+  Vogue Italia. Matisse fauvism shows up in this scene as: bold flat
+  color blocks rendered as set-design painted walls, simplified contour
+  lines as natural lighting edges along furniture, decorative pattern
+  woven into textiles and rugs and ceramic vessels, organic plant-cutout
+  shapes as actual potted plants and shadow play. Matisse's color
+  language is the SET DESIGN, not the rendering medium. Single warm side
+  light at 30° off-camera-left; deep matte shadow on opposite side. Shot
+  on Sony Alpha 7R V with Sigma 35mm f/1.4 Art lens, ISO 400, Kodak
+  Portra 400 grain, raw uncorrected file, no LUTs, no post-processing.
+  Editorial photojournalism finish — fabric textures, skin micro-shadows,
+  honest film grain visible. NOT a drawing, NOT a painting, NOT a poster
+  illustration; a photograph of a Matisse-styled interior.
+
+photographer_pool:
+  - Annie Leibovitz
+  - Tim Walker
+
+camera_pool:
+  - "Sony Alpha 7R V + Sigma 35mm f/1.4 Art + Kodak Portra 400"
+  - "Hasselblad H6D-100c + 80mm f/2.8 + Kodak Portra 160"
+
+source_notes: |
+  Painter-rewrite type. Original painter "Matisse" → reframed as
+  set-design + lighting-language while photo medium is enforced by
+  camera + film + photographer references. This is the canonical
+  worked-example documented in references/simple-mode-prompts.md
+  Obligation 2. Failure mode if rewrite missing: model outputs flat
+  cartoon illustration instead of photo (validated 2026-05-10 in
+  naigai-fauvist 4-page test).

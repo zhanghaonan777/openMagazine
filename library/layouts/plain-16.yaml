@@ -1,0 +1,14 @@
+schema_version: 1
+name: plain-16
+display_name: Plain 16-page A4 portrait
+
+page_count: 16
+aspect: "2:3"
+storyboard_grid: "4x4"          # 4 rows × 4 cols = 16 cells
+top_crop_px_default: 60
+typography_mode: full-bleed     # cover/back masthead+colophon integrated INTO photo
+caption_overlay: false          # no per-page caption strips (typography is in cover/back only)
+
+notes: |
+  Default layout for full-issue simple mode runs.
+  16 4K images → 16 A4 portrait PDF pages, 1:1 mapping.

@@ -1,0 +1,18 @@
+# Example issue spec — burberry-uk × naipi × burberry-heritage × plain-4 × naipi-mag
+# This is a reverse-persisted spec from the naipi-burberry-spec-test-01 free-form run
+# (storyboard gate approved 2026-05-10, end-to-end completed).
+# Run again with: agent says "用 naipi-burberry-spec-test-01 spec 跑"
+schema_version: 1
+
+slug: naipi-burberry-spec-test-01
+issue_number: "01"
+date: "MAY 2026"
+
+subject: naipi
+style: burberry-heritage
+theme: burberry-uk
+layout: plain-4
+brand: naipi-mag
+
+overrides:
+  cover_line: "THE LITTLE TRENCH ISSUE"

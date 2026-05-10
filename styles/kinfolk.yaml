@@ -1,0 +1,42 @@
+schema_version: 1
+name: kinfolk
+type: magazine
+display_name:
+  en: Kinfolk
+  zh: Kinfolk 极简文艺
+
+trigger_keywords:
+  - "kinfolk"
+  - "极简文艺"
+  - "minimalist editorial"
+  - "minimalist lifestyle"
+  - "性冷淡风"
+  - "quiet lifestyle"
+
+needs_rewrite: false
+
+style_anchor: |
+  Kinfolk magazine aesthetic. Diffused window light, never harsh.
+  Muted palette of warm neutrals — bone, oat, dusty rose, stone gray, soft
+  sage. Shallow but honest depth of field. Gentle film grain. Composed
+  but unposed: subject doing something quiet with hands or paws — no
+  posing, no hero-shot framing. Generous negative space. Symmetric or
+  rule-of-thirds composition; no extreme angles. Shot on Canon EOS R5
+  with RF 35mm f/1.8, Kodak Portra 400 grain, raw uncorrected, slight
+  warm-tone roll-off without LUT. Quiet lifestyle photography in the
+  Saul Leiter / William Eggleston tradition.
+
+photographer_pool:
+  - Saul Leiter
+  - William Eggleston
+  - Wolfgang Tillmans
+
+camera_pool:
+  - "Canon EOS R5 + RF 35mm f/1.8 + Kodak Portra 400"
+  - "Fuji X-T5 + 23mm f/2 + Fujifilm Pro 400H"
+  - "Leica Q2 + 28mm f/1.7 + Kodak Portra 160"
+
+source_notes: |
+  Window light, muted neutrals, intentional negative space. Kinfolk has
+  defined the "quiet lifestyle" editorial since 2011. Avoid: saturated
+  color, dramatic key light, studio backdrops, action verbs in scene.
