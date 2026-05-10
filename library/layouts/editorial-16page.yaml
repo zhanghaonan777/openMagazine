@@ -1,0 +1,61 @@
+schema_version: 2
+name: editorial-16page
+display_name: Editorial 16-page A4 Spread
+typography_mode: editorial-spread
+
+format:
+  page_count: 16
+  spreads: 9
+  page_size: A4
+  bleed_mm: 3
+  binding: saddle-stitch
+
+spread_plan:
+  - {idx: 1, type: cover,           pages: [1]}
+  - {idx: 2, type: toc,             pages: [2, 3]}
+  - {idx: 3, type: feature-spread,  pages: [4, 5]}
+  - {idx: 4, type: feature-spread,  pages: [6, 7]}
+  - {idx: 5, type: pull-quote,      pages: [8, 9]}
+  - {idx: 6, type: feature-spread,  pages: [10, 11]}
+  - {idx: 7, type: portrait-wall,   pages: [12, 13]}
+  - {idx: 8, type: colophon,        pages: [14, 15]}
+  - {idx: 9, type: back-cover,      pages: [16]}
+
+# 21 image slots total. spread_idx tells which spread each lives in.
+image_slots:
+  - {id: cover_hero,            role: cover_hero,   aspect: "3:4",   min_long_edge_px: 3500, spread_idx: 1}
+  - {id: feature_hero,          role: portrait,     aspect: "3:4",   min_long_edge_px: 3000, spread_idx: 3}
+  - {id: feature_hero,          role: portrait,     aspect: "3:4",   min_long_edge_px: 3000, spread_idx: 4}
+  - {id: feature_hero,          role: portrait,     aspect: "3:4",   min_long_edge_px: 3000, spread_idx: 6}
+  - {id: feature_captioned.1,   role: scene,        aspect: "3:2",   min_long_edge_px: 2500, spread_idx: 3}
+  - {id: feature_captioned.2,   role: scene,        aspect: "3:2",   min_long_edge_px: 2500, spread_idx: 3}
+  - {id: feature_captioned.3,   role: scene,        aspect: "3:2",   min_long_edge_px: 2500, spread_idx: 3}
+  - {id: feature_captioned.1,   role: scene,        aspect: "3:2",   min_long_edge_px: 2500, spread_idx: 4}
+  - {id: feature_captioned.2,   role: scene,        aspect: "3:2",   min_long_edge_px: 2500, spread_idx: 4}
+  - {id: feature_captioned.3,   role: scene,        aspect: "3:2",   min_long_edge_px: 2500, spread_idx: 4}
+  - {id: feature_captioned.1,   role: scene,        aspect: "3:2",   min_long_edge_px: 2500, spread_idx: 6}
+  - {id: feature_captioned.2,   role: scene,        aspect: "3:2",   min_long_edge_px: 2500, spread_idx: 6}
+  - {id: feature_captioned.3,   role: scene,        aspect: "3:2",   min_long_edge_px: 2500, spread_idx: 6}
+  - {id: pullquote_environment, role: environment,  aspect: "16:10", min_long_edge_px: 3500, spread_idx: 5}
+  - {id: portrait_wall.1,       role: portrait,     aspect: "1:1",   min_long_edge_px: 1500, spread_idx: 7}
+  - {id: portrait_wall.2,       role: portrait,     aspect: "1:1",   min_long_edge_px: 1500, spread_idx: 7}
+  - {id: portrait_wall.3,       role: portrait,     aspect: "1:1",   min_long_edge_px: 1500, spread_idx: 7}
+  - {id: portrait_wall.4,       role: portrait,     aspect: "1:1",   min_long_edge_px: 1500, spread_idx: 7}
+  - {id: portrait_wall.5,       role: portrait,     aspect: "1:1",   min_long_edge_px: 1500, spread_idx: 7}
+  - {id: portrait_wall.6,       role: portrait,     aspect: "1:1",   min_long_edge_px: 1500, spread_idx: 7}
+  - {id: back_coda,             role: back_coda,    aspect: "2:3",   min_long_edge_px: 2500, spread_idx: 9}
+
+text_slots_required:
+  cover: [cover_line, cover_kicker]
+  toc: [table_of_contents]
+  feature-spread: [title, kicker, lead, body]
+  pull-quote: [quote, attribution]
+  portrait-wall: [title, captions]
+  colophon: [credits]
+  back-cover: [quote, attribution]
+
+defaults:
+  storyboard_grid_outer: "2:3"
+  storyboard_size_px: [1024, 1536]
+  total_image_slots: 21
+  vertex_cost_estimate_usd: 5.04
