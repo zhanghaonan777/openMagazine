@@ -1,0 +1,215 @@
+schema_version: 1
+slug: cosmos-luna-may-2026
+display_title:
+  en: "Luna Walks the Moon"
+  zh: "月行猫"
+
+masthead_override: ~
+issue_label:
+  en: "ISSUE 03 / MAY 2026"
+  zh: "第 03 期 / 2026 年 5 月"
+cover_line:
+  en: "A small astronaut on the lunar regolith"
+  zh: "月尘上的微小宇航员"
+cover_kicker:
+  en: "FEATURE STORY"
+  zh: "封面故事"
+
+spread_copy:
+  - idx: 1
+    type: cover
+    notes: "cover_line + cover_kicker provided above"
+    image_slot_overrides:
+      cover_hero: "Luna in EVA suit standing on lunar regolith, hero portrait, Earth horizon upper-right"
+
+  - idx: 2
+    type: toc
+    table_of_contents:
+      - {page: 4,  en: "Departure",       zh: "启程"}
+      - {page: 6,  en: "Lunar Plain",     zh: "月之平原"}
+      - {page: 8,  en: "The Pause",       zh: "停顿"}
+      - {page: 10, en: "Earthrise",       zh: "地升"}
+      - {page: 12, en: "Stills From a Mission", zh: "任务剪影"}
+      - {page: 14, en: "Colophon",        zh: "出版信息"}
+
+  - idx: 3
+    type: feature-spread
+    pages: [4, 5]
+    title:
+      en: "DEPARTURE"
+      zh: "启程"
+    kicker:
+      en: "Chapter 01"
+      zh: "第一章"
+    lead:
+      en: "She steps from the module into a silence that has waited four billion years for the sound of a paw."
+      zh: "她踏出舱门，进入一个等待了四十亿年才迎来一只猫爪声响的寂静。"
+    body:
+      en: |
+        First steps onto the lunar surface are quieter than anyone tells you. The
+        suit's life support hums; the regolith makes no sound. Luna's footprints
+        will outlast every photograph in this issue.
+
+        She moves with the slow deliberation of low gravity — each step a small
+        flight, ending in a deeper-than-expected sink as the dust gives way.
+        Earth is a small blue marble in the upper right of frame, and she will
+        be photographed against it for the next eleven days.
+
+        The light here is unforgiving. There is no atmospheric scatter to soften
+        the shadows; there is no fill. What you see is what the sun gives you,
+        and the sun on the Moon is a single hard key from above the horizon.
+      zh: |
+        踏上月面的第一步比任何人告诉你的都要安静。生命维持系统嗡鸣；月尘无声。
+        Luna 的脚印将比这一期里所有照片都活得更久。
+
+        她以低重力的缓慢步态移动——每一步都是一次小小的飞翔，最终陷入比预想更深的
+        尘土。地球是画面右上角的一颗蓝色弹珠，接下来的十一天里，她都将以它为背景被拍摄。
+
+        这里的光毫不留情。没有大气散射柔化阴影；没有补光。你看到的就是太阳给你的，
+        而月球上的太阳是一束来自地平线上方的单一硬光。
+    image_slot_overrides:
+      feature_hero: "Luna in EVA suit at module airlock, hand on hatch, hero portrait at moment of egress, Earth visible upper right"
+      feature_captioned.1: "Luna's footprints in lunar regolith, 3:2 wide angle, low sun raking shadows"
+      feature_captioned.2: "Luna mid-stride on lunar plain, 3:2 medium wide, Earth small in upper-right of frame"
+      feature_captioned.3: "Luna's gloved paw on rock surface, 3:2 close-up, regolith grain visible"
+
+  - idx: 4
+    type: feature-spread
+    pages: [6, 7]
+    title:
+      en: "LUNAR PLAIN"
+      zh: "月之平原"
+    kicker:
+      en: "Chapter 02"
+      zh: "第二章"
+    lead:
+      en: "There is more nothing here than anywhere on Earth, and yet she finds something to look at in every direction."
+      zh: "这里比地球上任何地方都更虚无，但她在每个方向都能找到值得看的东西。"
+    body:
+      en: |
+        The Sea of Tranquility is misnamed. It is not a sea, and on the
+        timescale of a lunar day, it is anything but tranquil — temperature
+        swings of three hundred degrees, micro-meteorites arriving without
+        warning, the occasional moonquake from the slowly cooling core.
+
+        Luna walks for an hour. She finds a boulder the size of a delivery van,
+        casts of impact craters in the dust, the curving line of an old rille
+        she has been told to look for. She does not find life, but she did not
+        expect to.
+
+        The most photographed astronauts are the ones who came back. Luna
+        intends to be one of them.
+      zh: |
+        宁静海名不副实。它不是海，在月昼的时间尺度上，它远谈不上宁静——三百度的
+        温度起伏，毫无预警的微流星，缓慢冷却的内核偶尔送来的月震。
+
+        Luna 走了一个小时。她发现一块送货车大小的巨石、月尘里撞击坑的形状、一条
+        她被嘱咐要寻找的古老月谷的曲线。她没找到生命，但她也没指望找到。
+
+        被拍得最多的宇航员，是那些活着回来的。Luna 打算成为其中之一。
+    image_slot_overrides:
+      feature_hero: "Luna at boulder, hero portrait 3:4, hand resting on rock surface, Earth small in distance"
+      feature_captioned.1: "wide shot of lunar plain, 3:2, Luna small in lower-third, vast emptiness"
+      feature_captioned.2: "close-up of impact crater rim in dust, 3:2, low sun, micro-shadow detail"
+      feature_captioned.3: "Luna walking away from camera into distance, 3:2, footprints leading away"
+
+  - idx: 5
+    type: pull-quote
+    pages: [8, 9]
+    quote:
+      en: "The most photographed astronaut\nis the one who never came back."
+      zh: "被拍得最多的宇航员，\n是再没回来的那位。"
+    quote_attribution:
+      en: "— field notes, May 2026"
+      zh: "—— 现场笔记，2026 年 5 月"
+    image_slot_overrides:
+      pullquote_environment: "wide environmental 16:10, sweeping lunar landscape with Luna as a tiny figure on the horizon, dramatic raking light, deep negative space"
+
+  - idx: 6
+    type: feature-spread
+    pages: [10, 11]
+    title:
+      en: "EARTHRISE"
+      zh: "地升"
+    kicker:
+      en: "Chapter 03"
+      zh: "第三章"
+    lead:
+      en: "She turns to face the Earth and realizes, for the first time, that she has been facing away from it the whole time."
+      zh: "她转身面对地球，第一次意识到自己一直背对着它。"
+    body:
+      en: |
+        Earthrise is misnamed too — the Earth doesn't rise on the Moon, because
+        the Moon's rotation is locked. Earth sits in the same patch of sky for
+        anyone standing in the same place. But the first time you see it, your
+        body insists otherwise: it is rising the way a memory rises.
+
+        Luna stops moving. She has been told this is the moment to stop moving.
+
+        The blue is too bright. She had been ready for the silence, ready for
+        the gravity, ready for the cold. She had not been ready for the colour
+        of the planet she came from.
+      zh: |
+        地升也是个误称——月球上地球不会升起，因为月球的自转是锁定的。地球停留在
+        天空中的同一片区域，对任何在同一地点的人都是如此。但第一次看到它时，你的
+        身体坚持相反的事实：它在升起，像记忆在升起的方式。
+
+        Luna 停下脚步。她被告知这是该停下来的时刻。
+
+        蓝色太亮了。她已经为寂静做好准备，为重力做好准备，为寒冷做好准备。她没
+        准备好的，是她来自的那颗星球的颜色。
+    image_slot_overrides:
+      feature_hero: "Luna facing Earth, hero portrait 3:4, three-quarter back view, Earthrise dominant in upper frame"
+      feature_captioned.1: "tight close-up of Luna's helmet visor reflecting Earth, 3:2"
+      feature_captioned.2: "Luna's silhouette against Earth disc, 3:2 medium-wide, dramatic backlight"
+      feature_captioned.3: "Luna gloved paw raised toward Earth, 3:2, gesture of acknowledgment"
+
+  - idx: 7
+    type: portrait-wall
+    pages: [12, 13]
+    title:
+      en: "STILLS FROM A MISSION"
+      zh: "任务剪影"
+    captions:
+      - {slot: portrait_wall.1, en: "Approach",  zh: "接近"}
+      - {slot: portrait_wall.2, en: "Pause",     zh: "停顿"}
+      - {slot: portrait_wall.3, en: "Touch",     zh: "触碰"}
+      - {slot: portrait_wall.4, en: "Listen",    zh: "聆听"}
+      - {slot: portrait_wall.5, en: "Climb",     zh: "攀登"}
+      - {slot: portrait_wall.6, en: "Look Back", zh: "回望"}
+    image_slot_overrides:
+      portrait_wall.1: "Luna in EVA suit, square crop 1:1, approaching boulder, three-quarter front, neutral mood"
+      portrait_wall.2: "Luna paused mid-stride, square 1:1, head turned slightly toward Earth, contemplative"
+      portrait_wall.3: "Luna touching rock surface with gloved paw, square 1:1, close mid-shot"
+      portrait_wall.4: "Luna head tilted as if listening, square 1:1, ears subtly forward, intent expression"
+      portrait_wall.5: "Luna climbing low boulder, square 1:1, dynamic pose, low angle"
+      portrait_wall.6: "Luna looking back over shoulder toward Earth, square 1:1, three-quarter back, final pause"
+
+  - idx: 8
+    type: colophon
+    pages: [14, 15]
+    credits:
+      en:
+        photographer: "Luna (self-portrait series)"
+        art_direction: "MEOW LIFE editorial team"
+        printing: "Saddle-stitched A4 portrait, 80gsm uncoated"
+        copyright: "© 2026 MEOW LIFE. All rights reserved."
+        contact: "letters@meowlife.example"
+      zh:
+        photographer: "Luna（自拍系列）"
+        art_direction: "MEOW LIFE 编辑团队"
+        printing: "骑马钉装订 A4 竖版，80g 非涂布纸"
+        copyright: "© 2026 MEOW LIFE 版权所有"
+        contact: "letters@meowlife.example"
+
+  - idx: 9
+    type: back-cover
+    pages: [16]
+    quote:
+      en: "Look up. The Moon\nwas always watching."
+      zh: "抬头。月亮\n一直在看着。"
+    quote_attribution:
+      en: ""
+      zh: ""
+    image_slot_overrides:
+      back_coda: "Luna small distant figure on lunar horizon, 2:3 portrait, lots of negative space, quiet coda mood, looking up at sky"
