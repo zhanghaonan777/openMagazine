@@ -42,12 +42,20 @@ Layer 3:
 
 ## Procedure
 
-### 1. Per-page prompt construction
+### 1. Build per-page prompts
 
-Substitute `{{TRAITS}}`, `{{STYLE_ANCHOR}}`, `{{THEME_WORLD}}`,
-`{{MAGAZINE_NAME}}`, `{{COVER_LINE}}`, `{{SCENE_NN}}`, `{{ACTION_VERB_NN}}`
-verbatim from `research_brief.json` and `storyboard.page_plan[*]`. Never
-paraphrase between stages; the storyboard locked these strings.
+All 4K prompts are rendered from layout-driven templates. The 4 pages map to
+3 templates:
+
+| Page index | Template | Builder function |
+|---|---|---|
+| 01 | `library/templates/upscale_cover.prompt.md` | `build_cover_prompt(spec, layers)` |
+| 02 — N-1 | `library/templates/upscale_inner.prompt.md` | `build_inner_prompt(spec, layers, scene=...)` |
+| N (last) | `library/templates/upscale_back.prompt.md` | `build_back_prompt(spec, layers, scene=...)` |
+
+Where N is the layout's `page_count`. For the 4-page smoke test, N=4 → page
+01 is cover, pages 02-03 are inner, page 04 is back. For a 9-page variant,
+pages 02-08 would all use the inner template.
 
 References per call (order matters — first ref dominates composition):
 
@@ -58,116 +66,36 @@ References per call (order matters — first ref dominates composition):
 | 03 inner | `cells/cell-03.png`, `refs/protagonist-1.jpg` | `images/page-03.png` |
 | 04 back | `cells/cell-04.png`, `refs/protagonist-1.jpg` | `images/page-04.png` |
 
-#### Page 01 — Cover prompt template (Phase 4 cover, adapted from predecessor)
+Per-page scene comes from `layers['theme'].page_plan_hints[i-1]` with the
+leading `NN: ` prefix stripped. Use `page_plan_scene_for(layers, i)` to get
+it.
 
-~~~text
-Subject: {{TRAITS}}, in a hero pose appropriate to {{THEME_WORLD}}.
+~~~python
+from lib.spec_loader import load_spec, resolve_layers
+from lib.prompt_builder import (
+    build_cover_prompt,
+    build_inner_prompt,
+    build_back_prompt,
+    page_plan_scene_for,
+)
+import pathlib
 
-Scene: cover hero composition. The subject occupies the upper two-thirds
-of the frame, looking off-frame slightly to the right (eyeline gives the
-masthead room to breathe).
+spec, _ = load_spec(pathlib.Path("library/issue-specs/<slug>.yaml"))
+layers = resolve_layers(spec)
+page_count = int(layers["layout"]["page_count"])
 
-Composition: maintain framing and lighting direction from the FIRST
-reference image (cell-01). Character identity from SUBSEQUENT reference
-images (protagonist photos).
-
-Lighting: dramatic single key light, deep shadow side. No rim light.
-
-Camera: shot on Hasselblad H6D-100c with 80mm f/2.8 prime. Raw uncorrected,
-no color grading.
-
-Typography (rendered as if hand-painted / printed lettering integrated
-INTO the photograph itself, NOT as a separate footer bar overlaying the
-photo, NOT a clip-art-style barcode strip):
-- Masthead at top: "{{MAGAZINE_NAME}}" extra-large serif, all caps,
-  dominant; treat as a true title block painted onto the wall surface
-  or printed into a real banner element of the scene.
-- Cover line stacked lower-left: "{{COVER_LINE}}" — large serif, all
-  caps, 2-3 stacked lines maximum, integrated against the actual
-  photo background (e.g., painted on the same wall as the masthead, or
-  printed onto a fabric banner in the scene).
-- NO bottom-strip footer bar with VOL/DATE numerals. NO barcode. NO
-  ISSN. NO PDF-mockup-like horizontal band cutting across the bottom
-  of the image. The cover should feel a full-bleed editorial
-  photograph, not a photo-plus-UI-footer composite.
-
-Style: {{STYLE_ANCHOR}}, with high-end editorial photography finish — slight
-paper grain and ink density visible.
-
-Negative prompt: lorem ipsum, gibberish letterforms, garbled type, broken
-serifs, watermarks, logos that aren't the masthead, AI-looking type, deformed
-anatomy, anime cute, oversized eyes, plastic skin/fur, oily highlights, rim
-lighting, footer bar / footer strip / horizontal band of solid color across
-the bottom of the image, barcode, ISSN, version numerals, date strip,
-"VOL." text, no visible page numbers, no cell labels, no annotation
-overlays, no scratch tracing of storyboard guides.
+prompts = {}
+for i in range(1, page_count + 1):
+    if i == 1:
+        prompts[i] = build_cover_prompt(spec, layers)
+    elif i == page_count:
+        prompts[i] = build_back_prompt(spec, layers, scene=page_plan_scene_for(layers, i))
+    else:
+        prompts[i] = build_inner_prompt(spec, layers, scene=page_plan_scene_for(layers, i))
 ~~~
 
-#### Pages 02 & 03 — Inner page prompt template (Phase 3 inner)
-
-~~~text
-Subject: {{TRAITS}}.
-
-Scene: {{SCENE_NN}}. {{ACTION_VERB_NN}}.
-
-Composition: maintain the layout, character placement, and lighting
-direction from the FIRST reference image (the storyboard cell). Maintain
-character identity (face, markings, build, expression) from the SUBSEQUENT
-reference images (the protagonist photos).
-
-Camera: shot on Sony Alpha 7R V with Sigma 35mm f/1.4 Art lens. ISO 200,
-1/500s shutter. Raw uncorrected file, no color grading, no LUTs, no
-post-processing.
-
-Texture detail: surface imperfections visible — individual fur strands,
-skin pores, fabric weave; micro-shadows; natural light falloff; subtle
-motion blur on action elements.
-
-Style: {{STYLE_ANCHOR}}
-
-Negative prompt: cartoonish, AI-looking, plastic skin/fur, over-smoothed,
-glossy CGI rendering, anime cute, oversized eyes, perfect grooming,
-beauty-filter aesthetic, plush show appearance, 3D render look, oily
-highlights, rim lighting, painted whiskers, mournful expression, droopy
-eyes, sad/sick face, extra limbs, deformed anatomy, garbled typography,
-watermarks, logos, no visible page numbers, no cell labels, no annotation
-overlays, no scratch tracing of storyboard guides.
-~~~
-
-#### Page 04 — Back cover prompt template (Phase 4 back-cover)
-
-~~~text
-Subject: {{TRAITS}}, quiet coda pose appropriate to {{THEME_WORLD}}.
-
-Scene: a single small element of the subject in mostly empty space. Calm,
-quiet, restrained. Bottom 30% of frame is negative space.
-
-Composition: maintain framing from the FIRST reference image (cell-04).
-Character identity from SUBSEQUENT reference images.
-
-Lighting: soft, diffused, low-contrast. Late-day or pre-dawn quality.
-
-Camera: shot on Leica M11 with Summicron 50mm. Raw uncorrected.
-
-Typography (rendered as if hand-painted / printed lettering integrated
-INTO the photograph itself, NOT as a separate footer bar):
-- Optional lower-third: a single short quote in small italic serif, 1-2
-  lines, painted onto a wall surface or fabric in the scene. If
-  photographically awkward to integrate, prefer NO typography at all
-  on the back cover — full-bleed quiet coda photo is the goal.
-- NO masthead. NO cover line. NO bottom-strip footer bar with VOL/DATE
-  numerals. NO barcode. NO ISSN. NO horizontal solid-color band across
-  the bottom. NO colophon footer band.
-
-Style: {{STYLE_ANCHOR}}.
-
-Negative prompt: same as cover prompt above. Especially important here:
-no visible page numbers, no cell labels, no annotation overlays, no
-scratch tracing of storyboard guides — the back-cover storyboard cell
-often has "04" or "back" page-number markers that leak into 4K output if
-not explicitly negated (validated failure mode: naigai-fauvist 4-page
-test, 2026-05-10 — page-04 retained the cell-04 top-left "04" marker).
-~~~
+Verify each prompt has all placeholders filled (no `{{...}}` tokens remain)
+before the Vertex calls.
 
 ### 2. Run all 4 calls (concurrently)
 
@@ -185,12 +113,7 @@ import pathlib
 tool = VertexGeminiImage()
 issue_dir = pathlib.Path("output/<slug>")
 
-jobs = [
-    (1, cover_prompt),
-    (2, inner_02),
-    (3, inner_03),
-    (4, back_prompt),
-]
+jobs = [(i, prompts[i]) for i in range(1, page_count + 1)]
 
 def _run_one(page_idx, prompt):
     return tool.run(

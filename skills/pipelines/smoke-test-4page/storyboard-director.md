@@ -37,61 +37,42 @@ Layer 3 — technology details:
 
 ## Procedure
 
-### 1. Construct the storyboard prompt
+### 1. Build the storyboard prompt
 
-Adapted from the predecessor's Phase 1 template, **2×2 (4 cells) variant**.
-Substitute `{{TRAITS}}`, `{{STYLE_ANCHOR}}`, `{{THEME_WORLD}}`, and the
-per-cell `{{SCENE_NN}}` / `{{ACTION_VERB_NN}}` from `research_brief.json` and
-`proposal.page_plan[*]` verbatim — **never paraphrase** between stages.
+The storyboard prompt is rendered from the layout-driven template at
+`library/templates/storyboard.prompt.md`. Grid size, page count, and per-page
+plan are pulled from the resolved layers — adding a 9-page (3×3) or 16-page
+(4×4) variant requires NO change to this director, only a new layout yaml.
 
-~~~text
-OUTPUT IMAGE FORMAT (HARD CONSTRAINT):
-- The OUTPUT IMAGE itself must be 2:3 PORTRAIT orientation (e.g., 1024×1536), NOT square.
-- Inside that portrait canvas: a 2×2 grid of 4 cells, each cell also 2:3 PORTRAIT (e.g., ~512×768).
-- Page numbers (01/02/03/04) drawn inside each cell at the top.
-- White ~24px gutters between cells and around the grid.
-- DO NOT produce a square overall image. DO NOT produce landscape cells.
+~~~python
+from lib.spec_loader import load_spec, resolve_layers
+from lib.prompt_builder import build_storyboard_prompt
+import pathlib
 
-Generate a single image: a 2×2 grid storyboard for a 4-page photo magazine.
-
-Layout: 2 columns × 2 rows. Thin white gutters between cells. Each cell is
-a vertical 2:3 frame. Top-left of each cell shows a small page number 01-04.
-
-Subject in EVERY cell (locked, identical across all 4):
-{{TRAITS}}
-
-Theme world: {{THEME_WORLD}}
-
-Style locked across all cells: {{STYLE_ANCHOR}}
-
-Page plan (each scene must be visually distinct; mix wide / medium / close-up
-/ overhead; no two adjacent pages should share the same shot scale):
-
-01 — Cover: hero composition appropriate to {{THEME_WORLD}}, dramatic
-            framing, character occupies upper two-thirds. Low-angle or
-            strong asymmetric composition. NEVER a flat centered subject.
-02 — Action: {{ACTION_VERB_02}} — {{SCENE_02}}.
-03 — Quiet beat: {{SCENE_03}}, contrasting shot scale from page 02.
-04 — Back cover: a quiet coda. Single small element, mostly negative space,
-            distant silhouette OR overhead OR large empty frame. NEVER
-            mirror the cover composition.
-
-Constraints:
-- SAME character across all cells (face / markings / build / baseline
-  expression all identical).
-- SAME color palette across all cells.
-- SAME lighting language across all cells.
-- Each cell is low-detail but composition and mood must read clearly.
-- No text inside cells except the page number.
-- No watermarks, no logos, no caption boxes.
+spec, _ = load_spec(pathlib.Path("library/issue-specs/<slug>.yaml"))
+layers = resolve_layers(spec)
+prompt = build_storyboard_prompt(spec, layers)
+print(prompt)
 ~~~
 
-Embed shot scale + camera angle + subject screen-fraction directly into each
-`{{SCENE_NN}}` string. Don't leave them implicit. Example:
+The rendered prompt is what gets passed to Codex's `image_gen.imagegen`.
+Verify it before the call:
+- All `{{...}}` tokens are filled (no literal placeholders remain).
+- The grid declaration matches the layout (`storyboard_grid` from
+  `library/layouts/<name>.yaml`).
+- The page plan section has one entry per page.
+
+If you need to inspect or override the prompt manually, view the template at
+`library/templates/storyboard.prompt.md` directly. Do not paste a different
+prompt — that breaks layout-driven configuration for future variants.
+
+Author obligation: when authoring `themes/<name>.yaml.page_plan_hints`, embed
+shot scale + camera angle + subject screen-fraction directly into each entry.
+Don't leave them implicit. Example:
 
 ~~~text
-✗  "03 — kitchen scene"
-✓  "03 — kitchen, low-angle close-up from floor level looking up at subject
+✗  "03: kitchen scene"
+✓  "03: kitchen, low-angle close-up from floor level looking up at subject
         on counter, subject fills upper-third of frame, shallow DOF"
 ~~~
 

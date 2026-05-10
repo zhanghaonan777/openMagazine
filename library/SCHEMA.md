@@ -247,3 +247,22 @@ python tools/validation/spec_validate.py library/issue-specs/cosmos-luna-01.yaml
 ```
 
 Exit 0 if valid; non-zero with diagnostics if not.
+
+---
+
+## library/templates/
+
+Prompt templates referenced by `lib.prompt_builder`. Each `.prompt.md` is a
+markdown file using `{{PLACEHOLDER}}` tokens filled by
+`lib.placeholder_resolver.build_placeholder_map`.
+
+| Template | Used by |
+|---|---|
+| `storyboard.prompt.md` | Stage 3 storyboard (layout-driven 2×2 / 3×3 / 4×4) |
+| `upscale_cover.prompt.md` | Stage 4 page 01 (cover) |
+| `upscale_inner.prompt.md` | Stage 4 inner pages |
+| `upscale_back.prompt.md` | Stage 4 final page (back cover) |
+
+Adding a new prompt variant: drop the `.prompt.md` file in this directory,
+add a corresponding `build_*_prompt` function to `lib/prompt_builder.py`,
+and reference it from the relevant stage director.
