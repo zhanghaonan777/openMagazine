@@ -1,0 +1,75 @@
+schema_version: 2
+name: humanist-warm
+display_name: Humanist Warm
+masthead: "{{MASTHEAD}}"
+default_language: en
+
+typography:
+  display:
+    family: "Cormorant Garamond"
+    weights: [600, 700]
+    source: google-fonts
+  body:
+    family: "Lora"
+    weights: [400, 500]
+    source: google-fonts
+    size_pt: 10.5
+    leading: 1.5
+    align: justify
+    hyphenate: true
+  kicker:
+    family: "Lora"
+    weight: 500
+    transform: uppercase
+    letter_spacing: 0.1em
+    size_pt: 8
+  caption:
+    family: "Lora"
+    weight: 400
+    style: italic
+    size_pt: 8.5
+  pull_quote:
+    family: "Cormorant Garamond"
+    weight: 700
+    style: italic
+    size_pt: 30
+  drop_cap:
+    enabled: true
+    family: "Cormorant Garamond"
+    weight: 700
+    lines: 4
+    color_token: accent
+  page_number:
+    family: "Lora"
+    weight: 400
+    size_pt: 9
+  pairing_notes: |
+    Cormorant Garamond (humanist serif, warm proportions) + Lora (low-contrast
+    serif body, optimized for screen + print). Warmer, slower than editorial-
+    classic. Pairs with literary, slow-living, lifestyle content.
+
+print_specs:
+  page_size: A4
+  page_size_custom_mm: ~
+  bleed_mm: 3
+  trim_marks: true
+  registration_marks: false
+  binding: saddle-stitch
+  binding_gutter_mm: 8
+  margin_top_mm: 22
+  margin_bottom_mm: 24
+  margin_outer_mm: 20
+  margin_inner_mm: 24
+  baseline_grid_mm: 4.5
+  paper_stock_note: "100gsm cream uncoated"
+  color_mode: rgb
+
+visual_tokens:
+  color_bg_paper: "#f7f1e8"
+  color_ink_primary: "#2b2519"
+  color_ink_secondary: "#7a6f5c"
+  color_accent: "#a64a2e"
+  color_quote_bg: "#3d3528"
+  color_quote_fg: "#f7f1e8"
+  rule_thickness_pt: 0.75
+  margin_note_indent_mm: 5
