@@ -137,6 +137,33 @@ def test_page_plan_scene_for_out_of_range(layers_4page):
     assert page_plan_scene_for(layers_4page, 0) == ""
 
 
+def test_placeholder_map_typography_v1_brand_empty(spec, layers_4page):
+    """Without brand.typography (v1), typography placeholders fall back to ''
+    so prompts that reference them don't ship literal `{{...}}` tokens."""
+    pmap = build_placeholder_map(spec, layers_4page)
+    assert pmap["{{TYPOGRAPHY_DISPLAY_FAMILY}}"] == ""
+    assert pmap["{{TYPOGRAPHY_BODY_FAMILY}}"] == ""
+    assert pmap["{{COLOR_ACCENT}}"] == ""
+
+
+def test_placeholder_map_typography_v2_brand(spec, layers_4page):
+    layers_4page["brand"] = {
+        "masthead": "MEOW LIFE",
+        "typography": {
+            "display": {"family": "Playfair Display"},
+            "body": {"family": "Source Serif 4"},
+            "pairing_notes": "Editorial classic",
+        },
+        "visual_tokens": {"color_accent": "#c2272d", "color_bg_paper": "#f5efe6"},
+    }
+    pmap = build_placeholder_map(spec, layers_4page)
+    assert pmap["{{TYPOGRAPHY_DISPLAY_FAMILY}}"] == "Playfair Display"
+    assert pmap["{{TYPOGRAPHY_BODY_FAMILY}}"] == "Source Serif 4"
+    assert pmap["{{TYPOGRAPHY_PAIRING_HINT}}"] == "Editorial classic"
+    assert pmap["{{COLOR_ACCENT}}"] == "#c2272d"
+    assert pmap["{{COLOR_BG_PAPER}}"] == "#f5efe6"
+
+
 def test_layout_default_when_missing():
     """If spec has no layout (edge case), default to 2x2."""
     spec = {"issue_number": "01", "date": "MAY 2026", "overrides": {}}

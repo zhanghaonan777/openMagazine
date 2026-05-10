@@ -50,7 +50,7 @@ def build_placeholder_map(spec: dict, layers: dict) -> dict[str, str]:
     hints = theme.get("page_plan_hints") or []
     page_plan_block = _render_page_plan_block(hints)
 
-    return {
+    pmap = {
         "{{TRAITS}}": subject.get("traits", ""),
         "{{STYLE_ANCHOR}}": (style or {}).get("style_anchor", ""),
         "{{THEME_WORLD}}": theme.get("theme_world", ""),
@@ -65,6 +65,26 @@ def build_placeholder_map(spec: dict, layers: dict) -> dict[str, str]:
         "{{PAGE_NUMBER_RANGE}}": f"01-{int(page_count):02d}",
         "{{PAGE_PLAN_BLOCK}}": page_plan_block,
     }
+
+    # v0.3 brand schema_version 2: typography pack + visual tokens.
+    # v1 brands have no `typography` / `visual_tokens` keys; the values fall
+    # back to "" so prompts using these placeholders won't end up with
+    # literal `{{...}}` tokens.
+    typography = brand.get("typography") or {}
+    visual_tokens = brand.get("visual_tokens") or {}
+    pmap["{{TYPOGRAPHY_DISPLAY_FAMILY}}"] = (
+        typography.get("display", {}).get("family", "")
+    )
+    pmap["{{TYPOGRAPHY_BODY_FAMILY}}"] = (
+        typography.get("body", {}).get("family", "")
+    )
+    pmap["{{TYPOGRAPHY_PAIRING_HINT}}"] = (
+        typography.get("pairing_notes", "").strip()
+    )
+    pmap["{{COLOR_ACCENT}}"] = visual_tokens.get("color_accent", "")
+    pmap["{{COLOR_BG_PAPER}}"] = visual_tokens.get("color_bg_paper", "")
+
+    return pmap
 
 
 def _last_digits(text: str) -> str:
