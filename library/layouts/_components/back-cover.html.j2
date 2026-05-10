@@ -1,0 +1,17 @@
+{% set spread_idx = sc.idx %}
+{% set img = images_root ~ '/spread-' ~ '{:02d}'.format(spread_idx) ~ '/back_coda.png' %}
+
+<section class="spread back-cover" data-spread-idx="{{ spread_idx }}">
+  <div style="position: relative; width: 100%; height: 100vh; overflow: hidden;">
+    <img class="slot" src="{{ img }}"
+         style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;">
+    {% if sc.quote and sc.quote[language] %}
+    <blockquote class="pull-quote"
+                style="position: absolute; left: 16mm; right: 16mm; bottom: 24mm; z-index: 2;
+                       color: var(--color-bg-paper); mix-blend-mode: difference;
+                       text-align: center; font-size: 22pt;">
+      {{ sc.quote[language] }}
+    </blockquote>
+    {% endif %}
+  </div>
+</section>
