@@ -42,12 +42,41 @@ SPEC_REQUIRED_FIELDS = {
     "brand",
 }
 
+SPEC_REQUIRED_FIELDS_V2 = {
+    "schema_version",
+    "slug",
+    "subject",
+    "style",
+    "theme",
+    "layout",
+    "brand",
+    "article",
+}
+
 LAYER_DIRS = {
     "subject": LIBRARY_DIR / "subjects",
     "theme": LIBRARY_DIR / "themes",
     "layout": LIBRARY_DIR / "layouts",
     "brand": LIBRARY_DIR / "brands",
     "style": STYLES_DIR,           # top-level, not under library/
+}
+
+LAYER_DIRS_V2 = {
+    "subject": LIBRARY_DIR / "subjects",
+    "theme":   LIBRARY_DIR / "themes",
+    "layout":  LIBRARY_DIR / "layouts",
+    "brand":   LIBRARY_DIR / "brands",
+    "article": LIBRARY_DIR / "articles",
+    "style":   STYLES_DIR,
+}
+
+# Expected schema_version per layer for v2 specs
+LAYER_EXPECTED_VERSION_V2 = {
+    "subject": 1,
+    "theme":   1,
+    "layout":  2,
+    "brand":   2,
+    "article": 1,
 }
 
 LAYER_REQUIRED_FIELDS = {
@@ -92,15 +121,29 @@ def _parse_grid(grid_str: str) -> tuple[int, int]:
 
 
 def validate_spec(spec_path: pathlib.Path) -> list[str]:
-    """Return a list of error messages. Empty list = valid."""
-    errors: list[str] = []
+    """Return a list of error messages. Empty list = valid.
 
+    Routes to v1 or v2 validator based on spec.schema_version.
+    """
+    errors: list[str] = []
     try:
         spec = _load_yaml(spec_path)
     except FileNotFoundError as e:
         return [str(e)]
     except Exception as e:
         return [f"failed to parse {spec_path}: {e}"]
+
+    schema_version = spec.get("schema_version")
+    if schema_version == 1:
+        return _validate_spec_v1(spec, spec_path)
+    if schema_version == 2:
+        return _validate_spec_v2(spec, spec_path)
+    return [f"spec.schema_version must be 1 or 2, got {schema_version!r}"]
+
+
+def _validate_spec_v1(spec: dict[str, Any], spec_path: pathlib.Path) -> list[str]:
+    """v1 spec validation (5 layers: subject/style/theme/layout/brand)."""
+    errors: list[str] = []
 
     spec_dir = spec_path.parent
 
@@ -190,6 +233,72 @@ def validate_spec(spec_path: pathlib.Path) -> list[str]:
             )
 
     # 7. overrides — soft type-check, no required fields
+    overrides = spec.get("overrides", {})
+    if overrides is not None and not isinstance(overrides, dict):
+        errors.append("spec.overrides must be a mapping (or omitted/empty)")
+
+    return errors
+
+
+def _validate_spec_v2(spec: dict[str, Any], spec_path: pathlib.Path) -> list[str]:
+    """v2 spec validation (6 layers, including article + cross-validates article↔layout)."""
+    errors: list[str] = []
+
+    # 1. spec required fields (v2 adds 'article')
+    errors += _check_required(spec, SPEC_REQUIRED_FIELDS_V2, "spec")
+    if errors:
+        return errors
+
+    if spec.get("schema_version") != 2:
+        errors.append(f"spec.schema_version must be 2, got {spec.get('schema_version')!r}")
+
+    # 2. Each layer reference resolves to a file
+    layer_yamls: dict[str, dict] = {}
+    layer_paths: dict[str, pathlib.Path] = {}
+    for layer_field, dir_name in LAYER_DIRS_V2.items():
+        ref_name = spec.get(layer_field)
+        if not isinstance(ref_name, str) or not ref_name:
+            errors.append(f"spec.{layer_field} must be a non-empty string")
+            continue
+
+        layer_yaml_path = dir_name / f"{ref_name}.yaml"
+        if not layer_yaml_path.is_file():
+            if layer_field == "style":
+                # style is exempt — Tier 2 scaffold-style fallback handles missing styles
+                errors.append(
+                    f"NOTE: spec.style={ref_name!r} not in {layer_yaml_path}; "
+                    f"will trigger scaffold-style meta-protocol at runtime "
+                    f"(Tier 2). This is allowed."
+                )
+                continue
+            errors.append(
+                f"spec.{layer_field}={ref_name!r} → {layer_yaml_path} not found"
+            )
+            continue
+
+        try:
+            layer_yamls[layer_field] = _load_yaml(layer_yaml_path)
+            layer_paths[layer_field] = layer_yaml_path
+        except Exception as e:
+            errors.append(f"failed to load {layer_yaml_path}: {e}")
+
+    # 3. Each layer yaml has expected schema_version
+    for layer_field, expected_v in LAYER_EXPECTED_VERSION_V2.items():
+        if layer_field not in layer_yamls:
+            continue
+        actual = layer_yamls[layer_field].get("schema_version")
+        if actual != expected_v:
+            errors.append(
+                f"{layer_field} yaml ({spec[layer_field]}): schema_version must be "
+                f"{expected_v}, got {actual!r}"
+            )
+
+    # 4. Cross-validate article ↔ layout when both resolved
+    if "article" in layer_paths and "layout" in layer_paths:
+        from tools.validation.article_validate import validate_article  # noqa: E402
+        errors += validate_article(layer_paths["article"], layer_paths["layout"])
+
+    # 5. overrides — soft type-check
     overrides = spec.get("overrides", {})
     if overrides is not None and not isinstance(overrides, dict):
         errors.append("spec.overrides must be a mapping (or omitted/empty)")
