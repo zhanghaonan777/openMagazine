@@ -46,13 +46,17 @@ image_slots:
   - {id: back_coda,             role: back_coda,    aspect: "2:3",   min_long_edge_px: 2500, spread_idx: 9}
 
 text_slots_required:
-  cover: [cover_line, cover_kicker]
+  # cover_line and cover_kicker live on the article root, not in
+  # spread_copy[0] — see library/articles/README.md and the
+  # skills/meta/article-writer.md cover row. spread_copy[0] only
+  # carries `idx` + `type` + an optional `notes` line.
+  cover: []
   toc: [table_of_contents]
   feature-spread: [title, kicker, lead, body]
-  pull-quote: [quote, attribution]
+  pull-quote: [quote, quote_attribution]
   portrait-wall: [title, captions]
   colophon: [credits]
-  back-cover: [quote, attribution]
+  back-cover: [quote, quote_attribution]
 
 defaults:
   storyboard_grid_outer: "2:3"

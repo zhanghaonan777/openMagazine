@@ -21,10 +21,10 @@ For `editorial-16page`:
 | `cover` | `cover_line` + `cover_kicker` (article-level, not in spread_copy) |
 | `toc` | `table_of_contents` (list of `{page, en, zh}`) |
 | `feature-spread` | `title` + `kicker` + `lead` + `body` |
-| `pull-quote` | `quote` + `attribution` (or `quote_attribution`) |
+| `pull-quote` | `quote` + `quote_attribution` |
 | `portrait-wall` | `title` + `captions` (list of `{slot, en, zh}`) |
 | `colophon` | `credits` (`photographer` / `art_direction` / `printing` / `copyright` / `contact`) |
-| `back-cover` | `quote` + `attribution` |
+| `back-cover` | `quote` + `quote_attribution` |
 
 ### 2. Length targets
 
