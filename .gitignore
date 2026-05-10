@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+.pytest_cache/
+
+# Project artifacts
+output/
+.DS_Store
+
+# Editor
+.idea/
+.vscode/
+*.swp
+
+# Local env
+.env
