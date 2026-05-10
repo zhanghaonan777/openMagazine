@@ -36,3 +36,41 @@ def test_base_tool_requires_capability():
         class BrokenTool(BaseTool):
             pass
         BrokenTool()
+
+
+def test_tools_by_capability_unknown_returns_empty():
+    r = ToolRegistry()
+    r.register(FakeImageTool())
+    assert r.tools_by_capability("nonexistent") == []
+
+
+def test_register_rejects_non_basetool():
+    import pytest
+    r = ToolRegistry()
+    with pytest.raises(TypeError):
+        r.register("not a tool")
+
+
+def test_descriptor_shape():
+    t = FakeImageTool()
+    d = t.descriptor()
+    assert set(d.keys()) == {
+        "name", "capability", "provider",
+        "cost_per_call_usd", "agent_skills", "status",
+    }
+    assert d["name"] == "FakeImageTool"
+    assert d["capability"] == "image_generation"
+    assert d["provider"] == "fake"
+    assert d["cost_per_call_usd"] == 0.10
+    assert d["agent_skills"] == ["fake-skill-doc"]
+    assert d["status"] == "active"
+
+
+def test_agent_skills_instances_isolated():
+    """Mutating one instance's agent_skills must not affect another instance or the class."""
+    a = FakeImageTool()
+    b = FakeImageTool()
+    a.agent_skills.append("dynamic-skill")
+    assert "dynamic-skill" in a.agent_skills
+    assert "dynamic-skill" not in b.agent_skills
+    assert "dynamic-skill" not in FakeImageTool.agent_skills

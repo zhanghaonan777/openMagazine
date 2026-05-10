@@ -29,6 +29,8 @@ class BaseTool(ABC):
             raise AttributeError(
                 f"{type(self).__name__} must declare a 'capability' class attribute"
             )
+        # Defensive copy so subclasses' class-level list isn't mutated across instances.
+        self.agent_skills = list(type(self).agent_skills)
 
     @abstractmethod
     def run(self, *args, **kwargs) -> Any:
