@@ -84,6 +84,47 @@ def split_storyboard(
     return rows * cols
 
 
+def split_by_plan(
+    storyboard_path: pathlib.Path,
+    out_dir: pathlib.Path,
+    *,
+    plan: dict,
+) -> int:
+    """Split a storyboard into per-slot cell PNGs using a plan from
+    `lib.storyboard_planner.plan_storyboard`. Each cell is saved at
+    {out_dir}/{spread-NN}/{slot}.png if its slot_id contains ".",
+    otherwise at {out_dir}/{slot_id}.png.
+
+    Returns count of files written.
+    """
+    from PIL import Image
+
+    img = Image.open(storyboard_path)
+    out_dir = pathlib.Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    count = 0
+    for cell in plan["cells"]:
+        x, y, w, h = cell["bbox_px"]
+        crop = img.crop((x, y, x + w, y + h))
+        slot_id = cell["slot_id"]  # e.g. "spread-03.feature_hero"
+        if "." in slot_id:
+            head, tail = slot_id.split(".", 1)
+            sub = out_dir / head
+            sub.mkdir(parents=True, exist_ok=True)
+            out_path = sub / f"{tail}.png"
+        else:
+            out_path = out_dir / f"{slot_id}.png"
+        crop.save(out_path)
+        count += 1
+
+    print(
+        f"[pillow_split.split_by_plan] {count} cells → {out_dir}",
+        file=sys.stderr,
+    )
+    return count
+
+
 # Auto-register
 from tools.tool_registry import registry  # noqa: E402
 

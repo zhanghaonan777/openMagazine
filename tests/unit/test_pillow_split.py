@@ -134,3 +134,42 @@ def test_split_top_crop_excessive_raises(tmp_path):
     with pytest.raises(ValueError, match="top_crop_px"):
         split_storyboard(sb, tmp_path / "cells", rows=2, cols=2, gutter=8,
                          top_crop_px=200)
+
+
+def test_split_by_plan(tmp_path):
+    """split_by_plan slices an irregular grid using bbox_px values from a
+    storyboard_planner plan. Files land in spread-NN/<slot>.png subdirs."""
+    from PIL import Image
+    sb = tmp_path / "sb.png"
+    Image.new("RGB", (1024, 1536), color="white").save(sb)
+    plan = {
+        "outer_size_px": [1024, 1536],
+        "cells": [
+            {"slot_id": "spread-01.cover_hero", "bbox_px": [0, 0, 512, 768]},
+            {"slot_id": "spread-03.feature_captioned.1", "bbox_px": [512, 0, 512, 768]},
+            {"slot_id": "spread-09.back_coda", "bbox_px": [0, 768, 1024, 768]},
+        ],
+    }
+    out = tmp_path / "cells"
+    from tools.image.pillow_split import split_by_plan
+    n = split_by_plan(sb, out, plan=plan)
+    assert n == 3
+    assert (out / "spread-01" / "cover_hero.png").is_file()
+    assert (out / "spread-03" / "feature_captioned.1.png").is_file()
+    assert (out / "spread-09" / "back_coda.png").is_file()
+
+
+def test_split_by_plan_flat_slot_id(tmp_path):
+    """slot_id without '.' lands directly under out_dir."""
+    from PIL import Image
+    sb = tmp_path / "sb.png"
+    Image.new("RGB", (200, 300), color="white").save(sb)
+    plan = {
+        "outer_size_px": [200, 300],
+        "cells": [{"slot_id": "single", "bbox_px": [0, 0, 200, 300]}],
+    }
+    out = tmp_path / "out"
+    from tools.image.pillow_split import split_by_plan
+    n = split_by_plan(sb, out, plan=plan)
+    assert n == 1
+    assert (out / "single.png").is_file()
