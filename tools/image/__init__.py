@@ -2,4 +2,4 @@
 # All sibling modules auto-register on import.
 from tools.image import codex_image_gen  # noqa: F401
 from tools.image import vertex_gemini_image  # noqa: F401
-# Other modules added in subsequent tasks (image_selector, etc.)
+from tools.image import image_selector  # noqa: F401
