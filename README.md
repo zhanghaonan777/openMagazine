@@ -20,7 +20,7 @@ source .venv/bin/activate
 uv pip install -e ".[dev]"
 
 # Verify Vertex auth (one-time)
-gcloud auth login --no-launch-browser --update-adc
+gcloud auth application-default login --no-launch-browser
 gcloud config set project <your-gcp-project-id>
 
 # Symlink to codex skills directory

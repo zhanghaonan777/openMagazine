@@ -1,5 +1,7 @@
 # openMagazine — Agent Guide
 
+> **v0.1 MVP status:** Some files this guide references (`skills/`, `pipeline_defs/`, `CODEX.md`, `CLAUDE.md`, `.agents/skills/`) land in later MVP tasks. If you hit a missing path, see [`README.md`](README.md) for current status before improvising.
+
 ## First Interaction
 
 If user input is vague (e.g., "what can you do", "make me something"), read [`skills/meta/onboarding.md`](skills/meta/onboarding.md) before doing anything else. Skip onboarding if user gave an actionable request (e.g., "make a 4-page magazine of my cat in cosmos style").
