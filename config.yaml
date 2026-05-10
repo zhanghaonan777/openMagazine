@@ -15,7 +15,7 @@ defaults:
   page_count: 16
   aspect: "2:3"
   top_crop_px: 60
-  parallelism: 3
+  parallelism: 3                                    # OPENMAGAZINE_PARALLELISM env var overrides; ≤3 to avoid Vertex 503 storms
   budget_per_issue_usd: 3.84
   cost_warning_pct: 80
   cost_hard_stop_pct: 110

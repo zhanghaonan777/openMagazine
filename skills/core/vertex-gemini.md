@@ -28,7 +28,7 @@ tool.run(
 ## Key constraints
 
 - Cost: $0.24 per call (4K Gemini 3 Pro Image)
-- Concurrency: ≤3 parallel calls (4+ → 503 storms; empirical from predecessor)
+- Concurrency: ≤3 parallel calls (4+ → 503 storms; empirical). Use `lib.config_loader.get_parallelism()` to read the configured value rather than hardcoding.
 - File size sanity: success file should be 15-30 MB; <5 MB likely a failure
 - Aspect: tested with 2:3 portrait
 

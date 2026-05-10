@@ -169,18 +169,31 @@ not explicitly negated (validated failure mode: naigai-fauvist 4-page
 test, 2026-05-10 — page-04 retained the cell-04 top-left "04" marker).
 ~~~
 
-### 2. Run all 4 calls
+### 2. Run all 4 calls (concurrently)
 
-Driver call (parallelism gated by `config.yaml` → `defaults.parallelism: 3`):
+The 4 Vertex calls are independent — drive them through a thread pool. Concurrency
+is read from config (`config.yaml` → `defaults.parallelism`, default 3) and can be
+overridden via the `OPENMAGAZINE_PARALLELISM` env var. The hard cap is 3 — Vertex
+Gemini 3 Pro Image emits 503 storms above that.
 
 ~~~python
+from concurrent.futures import ThreadPoolExecutor
 from tools.image.vertex_gemini_image import VertexGeminiImage
+from lib.config_loader import get_parallelism
 import pathlib
 
 tool = VertexGeminiImage()
 issue_dir = pathlib.Path("output/<slug>")
-for page_idx, prompt in [(1, cover_prompt), (2, inner_02), (3, inner_03), (4, back_prompt)]:
-    tool.run(
+
+jobs = [
+    (1, cover_prompt),
+    (2, inner_02),
+    (3, inner_03),
+    (4, back_prompt),
+]
+
+def _run_one(page_idx, prompt):
+    return tool.run(
         prompt=prompt,
         refs=[
             issue_dir / f"cells/cell-{page_idx:02d}.png",
@@ -191,9 +204,17 @@ for page_idx, prompt in [(1, cover_prompt), (2, inner_02), (3, inner_03), (4, ba
         size="4k",
         skip_existing=True,
     )
+
+max_workers = get_parallelism()  # config-driven, hard cap 3
+with ThreadPoolExecutor(max_workers=max_workers) as ex:
+    results = list(ex.map(lambda j: _run_one(*j), jobs))
 ~~~
 
-`skip_existing=True` makes regeneration cheap — if a single page comes back
+Wall time: with 4 jobs at parallelism 3, expect 2 batches (3+1) ≈ 1.5× one
+single call's latency, vs 4× for serial. Typical: ~60-90 s per 4K call → ~2-3
+minutes total parallel vs ~4-6 minutes serial.
+
+`skip_existing=True` keeps regeneration cheap — if a single page comes back
 broken, delete just `images/page-NN.png` and re-run; the other 3 are skipped.
 
 ### 3. Cost announcement
