@@ -106,15 +106,14 @@ body {
 .body p { margin-bottom: 0.7em; }
 
 {% if brand.typography.drop_cap.enabled %}
+/* Raised initial (not floated drop-cap): WeasyPrint asserts BlockReplacedBox
+   on floated ::first-letter, so we render a stick-up cap inline instead. */
 .drop-cap p:first-of-type::first-letter {
   font-family: '{{ brand.typography.drop_cap.family }}', serif;
   font-weight: {{ brand.typography.drop_cap.weight }};
-  font-size: calc({{ brand.typography.body.size_pt }}pt
-                 * {{ brand.typography.drop_cap.lines }}
-                 * {{ brand.typography.body.leading }});
-  float: left;
-  line-height: 0.85;
-  margin: 0 0.1em -0.1em 0;
+  font-size: 2.4em;
+  line-height: 0.9;
+  padding-right: 0.08em;
   color: var(--color-{{ brand.typography.drop_cap.color_token }});
 }
 {% endif %}

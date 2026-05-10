@@ -2,18 +2,18 @@
 {% set env_img = images_root ~ '/spread-' ~ '{:02d}'.format(spread_idx) ~ '/pullquote_environment.png' %}
 
 <section class="spread pull-quote-spread" data-spread-idx="{{ spread_idx }}">
-  <div style="position: relative; width: 100%; height: 100vh; overflow: hidden;">
+  <div style="position: relative; width: 100%; height: 277mm; overflow: hidden;">
     <img class="slot" src="{{ env_img }}"
-         style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;
-                filter: brightness(0.6);">
-    <div style="position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.0), rgba(0,0,0,0.5)); z-index: 1;"></div>
+         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;">
+    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.45); z-index: 1;"></div>
     <blockquote class="pull-quote"
-                style="position: absolute; left: 16mm; right: 16mm; bottom: 32mm; z-index: 2;
+                style="position: absolute; left: 16mm; right: 16mm; bottom: 60mm; z-index: 2;
                        color: var(--color-bg-paper); text-align: center;">
       {{ sc.quote[language] }}
     </blockquote>
     <cite class="caption"
-          style="position: absolute; left: 0; right: 0; bottom: 22mm; z-index: 2;
+          style="position: absolute; left: 0; right: 0; bottom: 45mm; z-index: 2;
                  text-align: center; color: var(--color-bg-paper); opacity: 0.8;
                  font-style: normal;">
       {{ sc.quote_attribution[language] }}
