@@ -1,0 +1,19 @@
+{% set spread_idx = sc.idx %}
+{% set base = images_root ~ '/spread-' ~ '{:02d}'.format(spread_idx) %}
+
+<section class="spread portrait-wall" data-spread-idx="{{ spread_idx }}">
+  <div style="padding: 18mm 16mm; height: 100%; display: flex; flex-direction: column;">
+    <div class="kicker" style="margin-bottom: 4mm;">{{ sc.title[language] }}</div>
+    <hr class="accent">
+    <div class="grid-3x2" style="flex: 1; gap: 6mm; margin-top: 8mm;">
+      {% for cap in sc.captions %}
+      {% set n = loop.index %}
+      <figure style="display: flex; flex-direction: column; gap: 2mm;">
+        <img class="slot" src="{{ base }}/portrait_wall.{{ n }}.png"
+             style="aspect-ratio: 1/1; width: 100%; object-fit: cover;">
+        <figcaption class="caption">{{ cap[language] }}</figcaption>
+      </figure>
+      {% endfor %}
+    </div>
+  </div>
+</section>
