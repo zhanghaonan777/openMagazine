@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+<head>
+<meta charset="utf-8">
+<title>{{ article.display_title[language] | default('Magazine') }}</title>
+
+{# Google Fonts: collect all unique families requested by typography pack #}
+{%- set families = [] -%}
+{%- for slot in ['display','body','kicker','caption','pull_quote','drop_cap','page_number'] -%}
+  {%- set tp = brand.typography[slot] -%}
+  {%- if tp and tp.source == 'google-fonts' and tp.family not in families -%}
+    {%- set _ = families.append(tp.family) -%}
+  {%- endif -%}
+{%- endfor %}
+{%- if families %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?{% for f in families %}family={{ f|replace(' ','+') }}:wght@400;500;600;700;900&{% endfor %}display=swap" rel="stylesheet">
+{%- endif %}
+
+<style>
+@page {
+  size: {{ brand.print_specs.page_size }};
+  bleed: {{ brand.print_specs.bleed_mm }}mm;
+  marks: {% if brand.print_specs.trim_marks %}crop{% if brand.print_specs.registration_marks %} cross{% endif %}{% else %}none{% endif %};
+  margin:
+    {{ brand.print_specs.margin_top_mm }}mm
+    {{ brand.print_specs.margin_outer_mm }}mm
+    {{ brand.print_specs.margin_bottom_mm }}mm
+    {{ brand.print_specs.margin_inner_mm }}mm;
+
+  @bottom-center {
+    content: counter(page);
+    font-family: '{{ brand.typography.page_number.family }}', monospace;
+    font-size: {{ brand.typography.page_number.size_pt }}pt;
+    color: var(--color-ink-secondary);
+  }
+}
+@page :left  { margin-right: {{ brand.print_specs.margin_inner_mm }}mm; }
+@page :right { margin-left:  {{ brand.print_specs.margin_inner_mm }}mm; }
+@page cover  { @bottom-center { content: ""; } }
+@page back-cover { @bottom-center { content: ""; } }
+
+:root {
+  --color-bg-paper:       {{ brand.visual_tokens.color_bg_paper }};
+  --color-ink-primary:    {{ brand.visual_tokens.color_ink_primary }};
+  --color-ink-secondary:  {{ brand.visual_tokens.color_ink_secondary }};
+  --color-accent:         {{ brand.visual_tokens.color_accent }};
+  --color-quote-bg:       {{ brand.visual_tokens.color_quote_bg }};
+  --color-quote-fg:       {{ brand.visual_tokens.color_quote_fg }};
+  --rule-thickness:       {{ brand.visual_tokens.rule_thickness_pt }}pt;
+  --baseline-mm:          {{ brand.print_specs.baseline_grid_mm }}mm;
+
+  --font-display:         '{{ brand.typography.display.family }}', serif;
+  --font-body:            '{{ brand.typography.body.family }}', serif;
+  --font-kicker:          '{{ brand.typography.kicker.family }}', monospace;
+  --font-caption:         '{{ brand.typography.caption.family }}', monospace;
+  --font-pull-quote:      '{{ brand.typography.pull_quote.family }}', serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-body);
+  font-size: {{ brand.typography.body.size_pt }}pt;
+  line-height: {{ brand.typography.body.leading }};
+  hyphens: {% if brand.typography.body.hyphenate %}auto{% else %}manual{% endif %};
+  text-align: {{ brand.typography.body.align }};
+  background: var(--color-bg-paper);
+  color: var(--color-ink-primary);
+}
+
+.spread {
+  break-after: page;
+  page: auto;
+}
+.spread.cover       { page: cover; }
+.spread.back-cover  { page: back-cover; }
+
+.kicker {
+  font-family: var(--font-kicker);
+  text-transform: {{ brand.typography.kicker.transform }};
+  letter-spacing: {{ brand.typography.kicker.letter_spacing }};
+  font-size: {{ brand.typography.kicker.size_pt }}pt;
+  color: var(--color-ink-secondary);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  line-height: 1.05;
+  margin: 0.4em 0;
+}
+.title-xl  { font-size: 48pt; }
+.title-l   { font-size: 36pt; }
+.title-m   { font-size: 24pt; }
+
+.lead {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 13pt;
+  line-height: 1.4;
+  margin: 0.6em 0 0.9em 0;
+}
+
+.body p { margin-bottom: 0.7em; }
+
+{% if brand.typography.drop_cap.enabled %}
+.drop-cap p:first-of-type::first-letter {
+  font-family: '{{ brand.typography.drop_cap.family }}', serif;
+  font-weight: {{ brand.typography.drop_cap.weight }};
+  font-size: calc({{ brand.typography.body.size_pt }}pt
+                 * {{ brand.typography.drop_cap.lines }}
+                 * {{ brand.typography.body.leading }});
+  float: left;
+  line-height: 0.85;
+  margin: 0 0.1em -0.1em 0;
+  color: var(--color-{{ brand.typography.drop_cap.color_token }});
+}
+{% endif %}
+
+.pull-quote {
+  font-family: var(--font-pull-quote);
+  font-style: {{ brand.typography.pull_quote.style }};
+  font-size: {{ brand.typography.pull_quote.size_pt }}pt;
+  line-height: 1.15;
+  white-space: pre-line;
+}
+
+.caption {
+  font-family: var(--font-caption);
+  font-style: {{ brand.typography.caption.style }};
+  font-size: {{ brand.typography.caption.size_pt }}pt;
+  color: var(--color-ink-secondary);
+}
+
+img.slot {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+hr.accent {
+  border: none;
+  border-top: var(--rule-thickness) solid var(--color-accent);
+  width: 4em;
+  margin: 0.4em 0;
+}
+
+/* Spread layout primitives — components compose these */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; }
+.grid-2-7-5 { display: grid; grid-template-columns: 7fr 5fr; gap: 8mm; }
+.grid-2-5-7 { display: grid; grid-template-columns: 5fr 7fr; gap: 8mm; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6mm; }
+.grid-3x2 { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 4mm; }
+</style>
+</head>
+<body>
+{% block content %}{% endblock %}
+</body>
+</html>
