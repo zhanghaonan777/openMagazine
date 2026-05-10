@@ -9,13 +9,13 @@ files and PDF size out-of-band.
 
 ## Inputs
 
-- `output/<slug>/upscale.json` — must list exactly 4 image paths.
+- `output/<slug>/upscale_result.json` — must list exactly 4 image paths.
 - `output/<slug>/images/page-0{1..4}.png` — must all exist.
 
 Validate before proceeding:
 - All 4 PNGs resolve and are ≥ 5 MB (already enforced at upscale-director,
   but recheck here as a defensive guard).
-- `upscale.json` validates against
+- `upscale_result.json` validates against
   `schemas/artifacts/upscale_result.schema.json`.
 
 ## Read first (sub-skills)
@@ -45,7 +45,7 @@ Layer 3:
    The composer reads `images/page-0{1..4}.png` in order and writes
    `magazine.pdf` to the issue dir.
 
-2. **Write the artifact** — `output/<slug>/compose.json`, matching
+2. **Write the artifact** — `output/<slug>/compose_result.json`, matching
    `schemas/artifacts/compose_result.schema.json`:
 
    ~~~json
@@ -62,7 +62,7 @@ Layer 3:
 
 ## Output artifact
 
-`output/<slug>/compose.json` (above) plus `output/<slug>/magazine.pdf`.
+`output/<slug>/compose_result.json` (above) plus `output/<slug>/magazine.pdf`.
 
 ## Checkpoint behavior
 
@@ -71,8 +71,9 @@ publish-director time, alongside the contact sheet and verify report.
 
 ## Success criteria
 
-- `magazine.pdf` exists and is between 5 MB and 30 MB.
-- `compose.json` validates against schema with `page_count == 4` and
+- `magazine.pdf` exists and is 50-250 MB (4 × 4K full-bleed PNG embedded;
+  ReportLab inflates beyond raw image size).
+- `compose_result.json` validates against schema with `page_count == 4` and
   `image_count == 4`.
 
 ## Failure modes
@@ -80,10 +81,10 @@ publish-director time, alongside the contact sheet and verify report.
 - **Missing image at a `page-NN.png` path** → STOP. The upscale stage
   failed silently; bounce back to upscale-director and regenerate that
   single page (delete and rerun with `skip_existing=True`).
-- **PDF size > 30 MB** → likely a PNG was produced at print-resolution
-  with no compression. Re-run the composer with `spread_mode="split"`
-  unchanged; if still >30 MB, downsample the offending PNG to 4K (4096px
+- **PDF size > 250 MB** → unusually large; likely a PNG was produced at
+  oversized resolution. Re-run the composer with `spread_mode="split"`
+  unchanged; if still >250 MB, downsample the offending PNG to 4K (4096px
   long edge) and recompose.
-- **PDF size < 5 MB** → likely a near-empty PNG slipped through. Inspect
-  each `images/page-NN.png` for blank / corrupt content; regenerate the
-  bad page.
+- **PDF size < 50 MB** → likely a near-empty PNG slipped through, or one
+  or more pages are far below 4K. Inspect each `images/page-NN.png` for
+  blank / corrupt / low-res content; regenerate the bad page.

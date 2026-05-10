@@ -21,7 +21,8 @@ in the pipeline (4 × $0.24 = $0.96).
 
 Validate before proceeding:
 - 4 cell PNGs exist, each ≥ 30 KB.
-- protagonist-1.jpg exists and is ≥ 200 KB.
+- protagonist-1.jpg exists with long edge ≥ 1024 px (per
+  `tools/validation/reference_photo_check.py`); byte-size is not a criterion.
 - `cost-budget-enforcer` (`skills/meta/cost-budget-enforcer.md`) sees
   $0.96 of remaining budget for this issue.
 
@@ -204,7 +205,7 @@ cumulative exceeds the proposal's `cost_estimate_usd` by more than 10%.
 ### 4. Write the artifact
 
 Schema: `schemas/artifacts/upscale_result.schema.json`. Path:
-`output/<slug>/upscale.json`.
+`output/<slug>/upscale_result.json`.
 
 ~~~json
 {
@@ -222,7 +223,7 @@ Schema: `schemas/artifacts/upscale_result.schema.json`. Path:
 
 ## Output artifact
 
-`output/<slug>/upscale.json` (above) plus 4 PNGs at
+`output/<slug>/upscale_result.json` (above) plus 4 PNGs at
 `output/<slug>/images/page-0{1..4}.png`.
 
 ## Checkpoint behavior
@@ -235,7 +236,7 @@ drift at the storyboard checkpoint already.)
 
 - 4 PNGs at `images/page-0{1..4}.png`, each 5–30 MB.
 - Each is 2:3 portrait at ≥ 2048 × 3072 (validated downstream by `Verify4K`).
-- `upscale.json` validates against schema; `vertex_calls_made == 4` and
+- `upscale_result.json` validates against schema; `vertex_calls_made == 4` and
   `total_cost_usd <= 1.05` (10% headroom over $0.96).
 
 ## Failure modes

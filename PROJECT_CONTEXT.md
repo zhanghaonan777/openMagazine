@@ -51,7 +51,7 @@ research → proposal → storyboard → ⏸ gate → upscale → compose → pu
                           │                     │           │          │
                           ▼                     ▼           ▼          ▼
               storyboard.png       images/page-NN.png   magazine.pdf   publish_report.json
-              storyboard.json      4k.json              compose.json   contact_sheet.jpg
+              storyboard.json      upscale_result.json  compose_result.json   contact_sheet.jpg
               cells/cell-NN.png
 ```
 

@@ -28,6 +28,12 @@ class ToolRegistry:
     def all_tools(self) -> Iterable[BaseTool]:
         return iter(self._tools)
 
+    def discover(self) -> "ToolRegistry":
+        """Convenience method — see module-level discover()."""
+        # Late binding: at call time the module function exists.
+        from tools.tool_registry import discover as _module_discover
+        return _module_discover()
+
 
 # Module-level singleton (most callers use this)
 registry = ToolRegistry()

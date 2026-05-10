@@ -45,6 +45,13 @@ per-cell `{{SCENE_NN}}` / `{{ACTION_VERB_NN}}` from `research_brief.json` and
 `proposal.page_plan[*]` verbatim — **never paraphrase** between stages.
 
 ~~~text
+OUTPUT IMAGE FORMAT (HARD CONSTRAINT):
+- The OUTPUT IMAGE itself must be 2:3 PORTRAIT orientation (e.g., 1024×1536), NOT square.
+- Inside that portrait canvas: a 2×2 grid of 4 cells, each cell also 2:3 PORTRAIT (e.g., ~512×768).
+- Page numbers (01/02/03/04) drawn inside each cell at the top.
+- White ~24px gutters between cells and around the grid.
+- DO NOT produce a square overall image. DO NOT produce landscape cells.
+
 Generate a single image: a 2×2 grid storyboard for a 4-page photo magazine.
 
 Layout: 2 columns × 2 rows. Thin white gutters between cells. Each cell is

@@ -9,8 +9,8 @@ yaml (only if the run was free-form), and write the closing
 
 ## Inputs
 
-- `output/<slug>/compose.json` (and transitively all prior artifacts:
-  research_brief, proposal, storyboard, upscale).
+- `output/<slug>/compose_result.json` (and transitively all prior artifacts:
+  research_brief, proposal, storyboard, upscale_result).
 - `output/<slug>/magazine.pdf`.
 - `output/<slug>/images/page-0{1..4}.png`.
 

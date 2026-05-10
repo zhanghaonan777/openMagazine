@@ -46,6 +46,14 @@ def split_storyboard(
 
     img = Image.open(storyboard_path)
     W, H = img.size
+    outer_ratio = W / H
+    if abs(outer_ratio - 2 / 3) > 0.10:
+        print(
+            f"[pillow_split] WARNING: storyboard outer aspect {outer_ratio:.3f} "
+            f"deviates from 2:3 (0.667). Cells will inherit the wrong aspect. "
+            f"Storyboard prompt likely missed the OUTPUT IMAGE FORMAT constraint.",
+            file=sys.stderr,
+        )
     g = max(8, W // 200) if gutter == "auto" else int(gutter)
     cell_w = (W - (cols + 1) * g) // cols
     cell_h = (H - (rows + 1) * g) // rows

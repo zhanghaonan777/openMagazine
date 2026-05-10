@@ -18,8 +18,10 @@ Two mutually exclusive input modes:
   earlier run.
 
 Validate before proceeding:
-- The protagonist photo path resolves to a readable file ≥ 200 KB and a
-  recognizable JPEG/PNG header.
+- The protagonist photo path resolves to a readable JPEG/PNG with a
+  recognizable header and long edge ≥ 1024 px (per
+  `tools/validation/reference_photo_check.py`). File-size in bytes is not a
+  validation criterion — a well-compressed 192 KB JPEG at 1200×1600 is fine.
 - The user has named (or implied) a magazine theme that maps to a
   `library/themes/*.yaml`; if not, ask once.
 

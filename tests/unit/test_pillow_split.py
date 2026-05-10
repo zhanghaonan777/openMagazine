@@ -112,6 +112,18 @@ def test_split_top_crop_zero_default_unchanged(tmp_path):
     assert (cw, ch) == (100, 200), "default behavior should not crop"
 
 
+def test_split_warns_on_wrong_outer_aspect(tmp_path, capsys):
+    """Storyboard not in 2:3 portrait should emit an aspect warning."""
+    from PIL import Image
+    sb = tmp_path / "square_sb.png"
+    Image.new("RGB", (1200, 1200), color="white").save(sb)  # square
+    out_dir = tmp_path / "cells"
+    from tools.image.pillow_split import split_storyboard
+    split_storyboard(sb, out_dir, rows=2, cols=2, gutter=10)
+    captured = capsys.readouterr()
+    assert "deviates from 2:3" in captured.err
+
+
 def test_split_top_crop_excessive_raises(tmp_path):
     """top_crop_px >= cell_h would crop the entire cell — should raise."""
     import pytest

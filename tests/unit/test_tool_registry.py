@@ -66,6 +66,13 @@ def test_descriptor_shape():
     assert d["status"] == "active"
 
 
+def test_registry_discover_method_works():
+    """registry.discover() should work (in addition to module-level discover())."""
+    from tools.tool_registry import registry as global_registry
+    result = global_registry.discover()
+    assert result is global_registry  # discover() returns the singleton
+
+
 def test_agent_skills_instances_isolated():
     """Mutating one instance's agent_skills must not affect another instance or the class."""
     a = FakeImageTool()

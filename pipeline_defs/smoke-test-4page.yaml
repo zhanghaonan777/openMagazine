@@ -74,7 +74,7 @@ stages:
     checkpoint: "off"
     reviewer: "enabled"
     success_criteria:
-      - magazine.pdf at output/<slug>/, page count == 4, ≥ 50 MB total
+      - magazine.pdf at output/<slug>/, page count == 4, 50-250 MB total
   - name: publish
     skill: pipelines/smoke-test-4page/publish-director
     produces:
