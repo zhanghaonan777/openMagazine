@@ -66,6 +66,13 @@ def scene_for(short_slot_id, spread_idx):
     return ""
 
 from lib.prompt_persistence import save_prompt
+from lib.regions_loader import regions_for_image_prompt, RegionsNotFoundError
+
+# Build spread_idx → spread_type once
+spread_type_by_idx = {
+    int(sp["idx"]): sp["type"]
+    for sp in layers["layout"]["spread_plan"]
+}
 
 tool = VertexGeminiImage()
 jobs = []
@@ -73,9 +80,15 @@ for s in layers["layout"]["image_slots"]:
     short = s["id"]                                           # e.g. "feature_hero"
     full = f"spread-{s['spread_idx']:02d}.{short}"            # e.g. "spread-03.feature_hero"
     scene = scene_for(short, s["spread_idx"])
+    spread_type = spread_type_by_idx[s["spread_idx"]]
+    try:
+        regions_context = regions_for_image_prompt(spread_type, short)
+    except (RegionsNotFoundError, ValueError):
+        regions_context = None  # legacy CSS spread or slot not in regions yaml
     prompt = build_upscale_prompt(
         role=s["role"], spec=spec, layers=layers,
         slot_id=full, scene=scene, aspect=s["aspect"],
+        regions_context=regions_context,
     )
     # Persist the rendered prompt before the paid Vertex call so each
     # spread-NN/<slot>.png has a recoverable .prompt.txt sibling.

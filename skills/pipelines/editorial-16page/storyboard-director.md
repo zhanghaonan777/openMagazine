@@ -68,10 +68,29 @@ for sc in article["spread_copy"]:
     for slot, scene in (sc.get("image_slot_overrides") or {}).items():
         scenes_by_slot[f"spread-{sc['idx']:02d}.{slot}"] = scene
 
+# Load per-spread regions yamls (gracefully skip spreads without yamls
+# during migration). Build the spread_type → regions map and the
+# spread_idx → spread_type map for the prompt builder.
+from lib.regions_loader import load_regions, RegionsNotFoundError
+
+regions_by_spread_type: dict[str, list[dict]] = {}
+spread_type_by_idx: dict[int, str] = {}
+for sp in layers["layout"]["spread_plan"]:
+    spread_type_by_idx[int(sp["idx"])] = sp["type"]
+    if sp["type"] in regions_by_spread_type:
+        continue
+    try:
+        regions_doc = load_regions(sp["type"])
+        regions_by_spread_type[sp["type"]] = regions_doc["regions"]
+    except RegionsNotFoundError:
+        pass  # legacy CSS spread; no regions block
+
 prompt = build_storyboard_prompt_v2(
     spec, layers,
     plan=plan,
     scenes_by_slot=scenes_by_slot,
+    regions_by_spread_type=regions_by_spread_type,
+    spread_type_by_idx=spread_type_by_idx,
 )
 
 # Persist the rendered prompt + a run manifest BEFORE the codex call so
