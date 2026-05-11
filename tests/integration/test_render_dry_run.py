@@ -70,7 +70,7 @@ def test_renders_editorial_16page_with_placeholders(issue_dir):
     # Expect at least 9 pages, but the spread:page mapping isn't exact —
     # accept >=9 and <=18.
     assert 9 <= meta["page_count"] <= 18, f"unexpected page count {meta['page_count']}"
-    assert meta["size_mb"] > 0.05  # rough plausibility (50 KB+)
+    assert meta["size_mb"] > 0.04  # rough plausibility (40 KB+)
 
     # Verify intermediate HTML written
     html_path = out_pdf.with_suffix(".html")

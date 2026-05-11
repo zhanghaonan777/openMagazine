@@ -63,3 +63,8 @@ components:
     description: Cover sub-headline
     typography_slot: display
     accepts_props: [align]
+
+  TocList:
+    description: Table-of-contents list (page numbers + section titles)
+    typography_slot: body
+    accepts_props: [align]

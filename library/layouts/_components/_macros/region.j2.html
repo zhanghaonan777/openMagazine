@@ -22,7 +22,11 @@
       {%- set text = (sc[region.text_field] or {}).get(lang, sc[region.text_field]) if sc[region.text_field] is mapping else sc[region.text_field] %}
       {{- render_text_component(region.component, text, region.component_props|default({})) }}
     {%- elif region.role == 'text_decorative' %}
-      {{- render_text_component(region.component, '', region.component_props|default({})) }}
+      {%- if region.component == 'TocList' %}
+        {{- render_toc_list(sc.table_of_contents or [], region.component_props|default({}), lang) }}
+      {%- else %}
+        {{- render_text_component(region.component, '', region.component_props|default({})) }}
+      {%- endif %}
     {%- elif region.role == 'accent' %}
       {{- render_accent(region.component, region.component_props|default({})) }}
     {%- elif region.role == 'negative_space' %}
@@ -82,6 +86,18 @@
   {%- else %}
     <span>{{ text }}</span>
   {%- endif %}
+{% endmacro %}
+
+{% macro render_toc_list(toc_items, props, language) %}
+  <ul class="toc-list" style="list-style: none; margin: 0; padding: 0;
+                              {% if props.align %}text-align: {{ props.align }};{% endif %}">
+    {%- for entry in toc_items %}
+      <li class="toc-item" style="display: flex; justify-content: space-between; padding: 1mm 0;">
+        <span class="toc-title">{{ entry[language] if entry is mapping and language in entry else entry }}</span>
+        <span class="toc-page">{{ entry.page if entry is mapping else '' }}</span>
+      </li>
+    {%- endfor %}
+  </ul>
 {% endmacro %}
 
 {% macro render_accent(component, props) %}

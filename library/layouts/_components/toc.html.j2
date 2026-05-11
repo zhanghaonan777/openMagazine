@@ -1,22 +1,14 @@
-<section class="spread toc" data-spread-idx="{{ sc.idx }}">
-  <div class="grid-2" style="min-height: 250mm; padding: 18mm 16mm;">
-    <div class="left">
-      <div class="kicker">{{ article.cover_kicker[language] }}</div>
-      <hr class="accent">
-      <h2 class="title title-l" style="margin-top: 6mm;">CONTENTS</h2>
-      <p class="lead" style="margin-top: 8mm; font-style: normal;">{{ article.issue_label[language] }}</p>
-    </div>
-    <div class="right" style="padding-top: 8mm;">
-      {% for entry in sc.table_of_contents %}
-      <div style="display: grid; grid-template-columns: auto 1fr auto; gap: 4mm;
-                  align-items: baseline; padding: 3mm 0;
-                  border-bottom: 0.5pt solid var(--color-ink-secondary);">
-        <span class="kicker" style="color: var(--color-accent);">{{ '%02d' % entry.page }}</span>
-        <span style="font-family: var(--font-display); font-size: 14pt; font-weight: 700;">
-          {{ entry[language] }}
-        </span>
-      </div>
-      {% endfor %}
-    </div>
+{%- from '_components/_macros/region.j2.html' import render_region %}
+
+{%- macro slot_path(slot_id) -%}
+  {{ images_root }}/spread-{{ '%02d'|format(spread_idx) }}/{{ slot_id }}.png
+{%- endmacro %}
+
+<section class="spread toc" data-spread-idx="{{ spread_idx }}">
+  <div class="spread-bounds"
+       style="position: relative; height: var(--content-h, 250mm); overflow: hidden;">
+    {%- for region in regions %}
+      {{ render_region(region, sc, slot_path, language) }}
+    {%- endfor %}
   </div>
 </section>
