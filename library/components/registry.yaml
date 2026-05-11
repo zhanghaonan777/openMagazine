@@ -1,0 +1,65 @@
+schema_version: 1
+
+components:
+  Kicker:
+    description: Small uppercase label, mono font (e.g. "Chapter 01")
+    typography_slot: kicker
+    typical_size: "8-10pt"
+    accepts_props: []
+
+  Title:
+    description: Large display headline
+    typography_slot: display
+    typical_size: "32-48pt"
+    accepts_props: [align]
+
+  Lead:
+    description: Italic intro paragraph that hooks the reader
+    typography_slot: body
+    typical_size: "11-13pt italic"
+    accepts_props: []
+
+  Body:
+    description: Long-form running text
+    typography_slot: body
+    accepts_props: [hyphenate, align, columns]
+
+  BodyWithDropCap:
+    description: Body with raised-initial drop cap on first paragraph
+    typography_slot: body
+    accepts_props: [drop_cap, drop_cap_lines, hyphenate, align]
+
+  PullQuote:
+    description: Large inset quote
+    typography_slot: pull_quote
+    accepts_props: [align]
+
+  Caption:
+    description: Small italic image caption
+    typography_slot: caption
+    accepts_props: []
+
+  CaptionedThumbnail:
+    description: Image + caption pair
+    typography_slot: caption
+    accepts_props: [aspect]
+
+  AccentRule:
+    description: Horizontal hairline in accent color
+    typography_slot: ~
+    accepts_props: [thickness, width_pct]
+
+  Folio:
+    description: Page number + optional footer text
+    typography_slot: page_number
+    accepts_props: [position]
+
+  Masthead:
+    description: Brand masthead (e.g. "MEOW LIFE")
+    typography_slot: display
+    accepts_props: []
+
+  CoverLine:
+    description: Cover sub-headline
+    typography_slot: display
+    accepts_props: [align]

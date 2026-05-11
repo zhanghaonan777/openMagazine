@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Component registry",
+  "type": "object",
+  "required": ["schema_version", "components"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "components": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Z][a-zA-Z]+$": {
+          "type": "object",
+          "required": ["description"],
+          "properties": {
+            "description": {"type": "string"},
+            "typography_slot": {"type": ["string", "null"]},
+            "typical_size": {"type": "string"},
+            "accepts_props": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
