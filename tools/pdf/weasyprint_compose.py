@@ -41,6 +41,7 @@ if sys.platform == "darwin":
 import pathlib
 from typing import Any
 
+from lib.regions_loader import load_regions, RegionsNotFoundError
 from tools.base_tool import BaseTool
 
 
@@ -125,6 +126,27 @@ class WeasyprintCompose(BaseTool):
             lstrip_blocks=True,
         )
         tmpl = env.get_template(layout_j2.name)
+
+        # --- inject regions_by_spread_type into context (Pattern B) ---
+        # Walk article.spread_copy (or layout.spread_plan if article absent) to
+        # collect unique spread types, then load each type's regions yaml.
+        # Feature-spread has one; other components fall back to [] gracefully.
+        if "regions_by_spread_type" not in context:
+            _regions_by_type: dict[str, list[dict]] = {}
+            _spread_copy = (
+                context.get("article", {}).get("spread_copy", [])
+                or context.get("layout", {}).get("spread_plan", [])
+            )
+            for _sp in _spread_copy:
+                _st = _sp.get("type") if isinstance(_sp, dict) else None
+                if not _st or _st in _regions_by_type:
+                    continue
+                try:
+                    _regions_by_type[_st] = load_regions(_st)["regions"]
+                except RegionsNotFoundError:
+                    _regions_by_type[_st] = []
+            context = {**context, "regions_by_spread_type": _regions_by_type}
+
         html = tmpl.render(**context)
 
         out_path = pathlib.Path(out_path)

@@ -2,6 +2,8 @@
 {% block content %}
 {# images_root passed in context, e.g. "output/<slug>/images" #}
 {% for sc in article.spread_copy %}
+  {% set spread_idx = sc.idx %}
+  {% set regions = regions_by_spread_type.get(sc.type, []) %}
   {% if sc.type == 'cover' %}
     {% include "_components/cover.html.j2" %}
   {% elif sc.type == 'toc' %}

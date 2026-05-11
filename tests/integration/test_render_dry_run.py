@@ -13,6 +13,8 @@ from PIL import Image
 from tools.pdf.weasyprint_compose import WeasyprintCompose
 
 
+
+
 SKILL_ROOT = Path(__file__).resolve().parents[2]
 WEASYPRINT_AVAILABLE, WEASYPRINT_REASON = WeasyprintCompose.dependency_status()
 requires_weasyprint = pytest.mark.skipif(
@@ -78,3 +80,38 @@ def test_renders_editorial_16page_with_placeholders(issue_dir):
     assert "DEPARTURE" in html_text or "EARTHRISE" in html_text
     # Brand masthead should appear
     assert "MEOW LIFE" in html_text
+
+
+@requires_weasyprint
+def test_feature_spread_renders_via_regions(issue_dir):
+    """Regions-driven feature-spread emits region divs (not legacy
+    .grid-2-7-5 markup)."""
+    layout = yaml.safe_load((SKILL_ROOT / "library/layouts/editorial-16page.yaml").read_text())
+    brand = yaml.safe_load((SKILL_ROOT / "library/brands/meow-life.yaml").read_text())
+    article = yaml.safe_load((SKILL_ROOT / "library/articles/cosmos-luna-may-2026.yaml").read_text())
+
+    images_dir = issue_dir / "images"
+    _make_placeholder_pngs(images_dir, layout)
+
+    tool = WeasyprintCompose()
+    layout_j2 = SKILL_ROOT / "library/layouts/editorial-16page.html.j2"
+    out_pdf = issue_dir / "magazine.pdf"
+    tool.render_template(
+        layout_j2=layout_j2,
+        context={
+            "layout": layout, "brand": brand, "article": article,
+            "spec": {"slug": "test"},
+            "language": brand.get("default_language", "en"),
+            "issue_dir": str(issue_dir), "images_root": str(images_dir),
+        },
+        out_path=out_pdf,
+        save_html=True,
+    )
+    html = out_pdf.with_suffix(".html").read_text(encoding="utf-8")
+    # Region divs are present (region id=hero_image → class="region region-hero_image")
+    assert 'class="region region-hero_image"' in html or 'region region-hero_image' in html
+    # Sanity: data-role attribute is present (uniquely identifies regions-driven render)
+    assert 'data-role="image"' in html
+    assert 'data-role="image_grid"' in html  # 3 captioned strips
+    # 3 feature-spread instances × 1 hero_image each = at least 3
+    assert html.count('data-role="image"') >= 3
