@@ -1,0 +1,38 @@
+schema_version: 1
+spread_type: back-cover
+pages_per_instance: 1
+
+regions:
+  - id: back_coda
+    rect_norm: [0.0, 0.0, 1.0, 1.0]
+    role: image
+    image_slot: back_coda
+    aspect: "2:3"
+    image_prompt_hint: |
+      Full-bleed quiet coda image. Keep bottom 30% calm for the optional
+      closing quote overlay.
+
+  - id: gradient_overlay
+    rect_norm: [0.0, 0.0, 1.0, 1.0]
+    role: accent
+    component: VerticalGradient
+    component_props:
+      direction: bottom
+      strength: 0.55
+    z_index: 5
+
+  - id: closing_quote
+    rect_norm: [0.10, 0.70, 0.90, 0.85]
+    role: text
+    component: PullQuote
+    text_field: quote
+    component_props: {align: center}
+    z_index: 10
+
+  - id: closing_attribution
+    rect_norm: [0.10, 0.87, 0.90, 0.92]
+    role: text
+    component: Caption
+    text_field: quote_attribution
+    component_props: {align: center}
+    z_index: 10
