@@ -1,0 +1,95 @@
+{# Render a single region as an absolutely-positioned div inside
+   `.spread-bounds`. Dispatches by role to specific component renderers. #}
+
+{% macro render_region(region, sc, slot_path, language, language_default='en') %}
+  {%- set lang = language or language_default %}
+  {%- set x1, y1, x2, y2 = region.rect_norm %}
+  <div class="region region-{{ region.id }}{% if region.component %} region-{{ region.component|lower }}{% endif %}"
+       data-component="{{ region.component|default('') }}"
+       data-role="{{ region.role }}"
+       style="position: absolute;
+              left:   {{ '%.2f'|format(x1 * 100) }}%;
+              top:    {{ '%.2f'|format(y1 * 100) }}%;
+              width:  {{ '%.2f'|format((x2 - x1) * 100) }}%;
+              height: {{ '%.2f'|format((y2 - y1) * 100) }}%;
+              z-index: {{ region.z_index|default(0) }};
+              overflow: hidden;">
+    {%- if region.role == 'image' %}
+      {{- render_image(region, slot_path) }}
+    {%- elif region.role == 'image_grid' %}
+      {{- render_image_grid(region, slot_path) }}
+    {%- elif region.role == 'text' %}
+      {%- set text = (sc[region.text_field] or {}).get(lang, sc[region.text_field]) if sc[region.text_field] is mapping else sc[region.text_field] %}
+      {{- render_text_component(region.component, text, region.component_props|default({})) }}
+    {%- elif region.role == 'text_decorative' %}
+      {{- render_text_component(region.component, '', region.component_props|default({})) }}
+    {%- elif region.role == 'accent' %}
+      {{- render_accent(region.component, region.component_props|default({})) }}
+    {%- elif region.role == 'negative_space' %}
+      {# intentionally empty #}
+    {%- endif %}
+  </div>
+{% endmacro %}
+
+{% macro render_image(region, slot_path) %}
+  <img src="{{ slot_path(region.image_slot) }}"
+       alt="{{ region.image_slot }}"
+       style="width: 100%; height: 100%; object-fit: cover; display: block;">
+{% endmacro %}
+
+{% macro render_image_grid(region, slot_path) %}
+  {%- set cols = region.grid_cols|default(region.image_slots|length) %}
+  <div style="display: grid;
+              grid-template-columns: repeat({{ cols }}, 1fr);
+              gap: 4mm;
+              width: 100%; height: 100%;">
+    {%- for s in region.image_slots %}
+      <img src="{{ slot_path(s) }}"
+           alt="{{ s }}"
+           style="width: 100%; height: 100%; object-fit: cover; display: block;">
+    {%- endfor %}
+  </div>
+{% endmacro %}
+
+{% macro render_text_component(component, text, props) %}
+  {%- if component == 'Kicker' %}
+    <span class="kicker">{{ text }}</span>
+  {%- elif component == 'Title' %}
+    <h2 class="title" style="margin: 0;">{{ text }}</h2>
+  {%- elif component == 'Lead' %}
+    <p class="lead" style="margin: 0; font-style: italic;">{{ text }}</p>
+  {%- elif component == 'Body' %}
+    <div class="body{% if props.hyphenate %} body-hyphenate{% endif %}"
+         style="{% if props.align %}text-align: {{ props.align }};{% endif %}">
+      {%- for para in text.split('\n\n') %}<p>{{ para }}</p>{%- endfor %}
+    </div>
+  {%- elif component == 'BodyWithDropCap' %}
+    <div class="body drop-cap{% if props.hyphenate %} body-hyphenate{% endif %}"
+         style="{% if props.align %}text-align: {{ props.align }};{% endif %}">
+      {%- for para in text.split('\n\n') %}<p>{{ para }}</p>{%- endfor %}
+    </div>
+  {%- elif component == 'PullQuote' %}
+    <blockquote class="pull-quote" style="margin: 0;">{{ text }}</blockquote>
+  {%- elif component == 'Caption' %}
+    <figcaption class="caption">{{ text }}</figcaption>
+  {%- elif component == 'Folio' %}
+    <span class="folio">{{ text }}</span>
+  {%- elif component == 'Masthead' %}
+    <div class="title title-xl"
+         style="font-family: var(--font-display); letter-spacing: 0.04em;">{{ text }}</div>
+  {%- elif component == 'CoverLine' %}
+    <div class="kicker" style="color: inherit;">{{ text }}</div>
+  {%- else %}
+    <span>{{ text }}</span>
+  {%- endif %}
+{% endmacro %}
+
+{% macro render_accent(component, props) %}
+  {%- if component == 'AccentRule' %}
+    <hr class="accent"
+        style="margin: 0;
+               border: 0;
+               border-top: {{ props.thickness|default('1.5pt') }} solid var(--color-accent);
+               width: {{ props.width_pct|default(100) }}%;">
+  {%- endif %}
+{% endmacro %}
