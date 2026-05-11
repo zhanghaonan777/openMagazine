@@ -1,0 +1,38 @@
+schema_version: 1
+spread_type: pull-quote
+pages_per_instance: 2
+
+regions:
+  - id: env_image
+    rect_norm: [0.0, 0.0, 1.0, 1.0]
+    role: image
+    image_slot: pullquote_environment
+    aspect: "16:10"
+    image_prompt_hint: |
+      Full-bleed environmental landscape. Center 50% bottom-third must be
+      visually calm — a large quote will overlay there.
+
+  - id: gradient_overlay
+    rect_norm: [0.0, 0.0, 1.0, 1.0]
+    role: accent
+    component: VerticalGradient
+    component_props:
+      direction: bottom
+      strength: 0.5
+    z_index: 5
+
+  - id: quote
+    rect_norm: [0.10, 0.55, 0.90, 0.78]
+    role: text
+    component: PullQuote
+    text_field: quote
+    component_props: {align: center}
+    z_index: 10
+
+  - id: quote_attribution
+    rect_norm: [0.10, 0.80, 0.90, 0.85]
+    role: text
+    component: Caption
+    text_field: quote_attribution
+    component_props: {align: center}
+    z_index: 10

@@ -107,5 +107,16 @@
                border: 0;
                border-top: {{ props.thickness|default('1.5pt') }} solid var(--color-accent);
                width: {{ props.width_pct|default(100) }}%;">
+  {%- elif component == 'VerticalGradient' %}
+    {%- set direction = props.direction|default('bottom') %}
+    {%- set strength = props.strength|default(0.5) %}
+    {%- if direction == 'bottom' %}
+      {%- set gradient = 'linear-gradient(180deg, rgba(0,0,0,0.0) 50%, rgba(0,0,0,' ~ strength ~ ') 100%)' %}
+    {%- elif direction == 'top' %}
+      {%- set gradient = 'linear-gradient(180deg, rgba(0,0,0,' ~ strength ~ ') 0%, rgba(0,0,0,0.0) 50%)' %}
+    {%- else %}
+      {%- set gradient = 'linear-gradient(180deg, rgba(0,0,0,' ~ strength ~ ') 0%, rgba(0,0,0,0.0) 50%, rgba(0,0,0,' ~ strength ~ ') 100%)' %}
+    {%- endif %}
+    <div style="width: 100%; height: 100%; background: {{ gradient }};"></div>
   {%- endif %}
 {% endmacro %}
