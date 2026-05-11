@@ -150,3 +150,41 @@ def test_build_upscale_prompt_without_regions_context_unchanged(spec, layers):
     )
     assert p_old == p_new
     assert "sibling regions" not in p_old.lower()
+
+
+def test_build_storyboard_v2_with_regions_by_spread(spec, layers):
+    plan = {
+        "outer_aspect": "2:3",
+        "outer_size_px": [1024, 1536],
+        "grid": {"rows": 1, "cols": 2},
+        "cells": [
+            {"slot_id": "spread-03.feature_hero", "row": 0, "col": 0,
+             "rowspan": 1, "colspan": 1, "aspect": "3:4",
+             "bbox_px": [0, 0, 512, 1536], "page_label": "01"},
+            {"slot_id": "spread-09.back_coda", "row": 0, "col": 1,
+             "rowspan": 1, "colspan": 1, "aspect": "2:3",
+             "bbox_px": [512, 0, 512, 1536], "page_label": "02"},
+        ],
+    }
+    regions_by_spread_type = {
+        "feature-spread": [
+            {"id": "hero_image", "rect_norm": [0, 0, 0.5, 1], "role": "image",
+             "image_slot": "feature_hero", "aspect": "3:4"},
+            {"id": "title", "rect_norm": [0.55, 0.15, 0.95, 0.3], "role": "text",
+             "component": "Title", "text_field": "title"},
+        ],
+    }
+    spread_type_by_idx = {3: "feature-spread", 9: "back-cover"}
+    p = build_storyboard_prompt_v2(
+        spec, layers,
+        plan=plan,
+        scenes_by_slot={"spread-03.feature_hero": "hero", "spread-09.back_coda": "coda"},
+        regions_by_spread_type=regions_by_spread_type,
+        spread_type_by_idx=spread_type_by_idx,
+    )
+    assert "spread-03.feature_hero" in p
+    # The block names the spread + type
+    assert "spread 3" in p.lower() or "feature-spread" in p.lower()
+    # back-cover has no regions yaml in this test → no layout block for spread 9
+    assert "spread-09.back_coda" in p
+    assert "{{" not in p

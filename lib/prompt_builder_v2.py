@@ -97,14 +97,18 @@ def build_storyboard_prompt_v2(
     *,
     plan: dict,
     scenes_by_slot: dict[str, str],
+    regions_by_spread_type: dict[str, list[dict]] | None = None,
+    spread_type_by_idx: dict[int, str] | None = None,
 ) -> str:
     template = _read_template("storyboard_v2.prompt.md")
     pmap = build_placeholder_map(spec, layers)
 
-    # Build a lookup from slot_id (full or short form) → role from layout's image_slots.
     role_lookup = _build_role_lookup(layers)
+    spread_type_by_idx = spread_type_by_idx or {}
+    regions_by_spread_type = regions_by_spread_type or {}
 
     cell_lines = []
+    layouts_seen: dict[int, str] = {}
     for cell in plan["cells"]:
         slot_id = cell["slot_id"]
         scene = scenes_by_slot.get(slot_id, "")
@@ -114,6 +118,12 @@ def build_storyboard_prompt_v2(
             f"({cell['aspect']} {role}) - {scene}"
         ).rstrip(" -")
         cell_lines.append(line)
+        # Track unique spread indices for layout block
+        try:
+            spread_idx = int(slot_id.split(".")[0].replace("spread-", ""))
+            layouts_seen.setdefault(spread_idx, spread_type_by_idx.get(spread_idx, ""))
+        except (ValueError, IndexError):
+            pass
 
     pmap["{{OUTER_W}}"] = str(plan["outer_size_px"][0])
     pmap["{{OUTER_H}}"] = str(plan["outer_size_px"][1])
@@ -121,8 +131,37 @@ def build_storyboard_prompt_v2(
     pmap["{{GRID_COLS}}"] = str(plan.get("grid", {}).get("cols", "?"))
     pmap["{{CELL_COUNT}}"] = str(len(plan["cells"]))
     pmap["{{CELL_LIST}}"] = "\n".join(cell_lines)
+    pmap["{{SPREAD_LAYOUTS_BLOCK}}"] = _build_spread_layouts_block(
+        layouts_seen, regions_by_spread_type
+    )
 
-    return _apply(template, pmap)
+    rendered = _apply(template, pmap)
+    # If template doesn't use {{SPREAD_LAYOUTS_BLOCK}}, append at the end
+    if pmap["{{SPREAD_LAYOUTS_BLOCK}}"] and "{{SPREAD_LAYOUTS_BLOCK}}" not in template:
+        rendered = rendered.rstrip() + "\n\n" + pmap["{{SPREAD_LAYOUTS_BLOCK}}"]
+    return rendered
+
+
+def _build_spread_layouts_block(
+    layouts_seen: dict[int, str],
+    regions_by_spread_type: dict[str, list[dict]],
+) -> str:
+    """Render a 'Spread N (type) region layout:' block per unique spread."""
+    parts = []
+    for spread_idx, spread_type in sorted(layouts_seen.items()):
+        if not spread_type or spread_type not in regions_by_spread_type:
+            continue
+        parts.append(f"Spread {spread_idx} ({spread_type}) region layout:")
+        for r in regions_by_spread_type[spread_type]:
+            x1, y1, x2, y2 = r["rect_norm"]
+            hint = (r.get("image_prompt_hint") or "").strip()
+            parts.append(
+                f"- '{r['id']}' (role={r['role']}, rect "
+                f"({x1:.2f}, {y1:.2f}, {x2:.2f}, {y2:.2f}))"
+                + (f": {hint}" if hint else "")
+            )
+        parts.append("")
+    return "\n".join(parts).rstrip()
 
 
 def _short_id(slot_id: str) -> str:
