@@ -14,6 +14,7 @@ import yaml
 from jsonschema import validate
 
 from tools.validation.article_validate import validate_article
+from tools.validation.regions_validate import validate_regions
 
 
 SKILL_ROOT = Path(__file__).resolve().parents[2]
@@ -78,3 +79,21 @@ def test_editorial_16page_director_files_exist():
         if not path.is_file():
             missing.append(skill_ref)
     assert missing == [], f"missing director skill files: {missing}"
+
+
+def _regions_yamls():
+    return sorted(
+        (SKILL_ROOT / "library" / "layouts" / "_components")
+        .glob("*.regions.yaml")
+    )
+
+
+@pytest.mark.parametrize(
+    "regions_path", _regions_yamls(), ids=lambda p: p.name
+)
+def test_regions_yaml_validates(regions_path):
+    errors = validate_regions(regions_path)
+    assert errors == [], (
+        f"{regions_path.name}: {len(errors)} error(s)\n  "
+        + "\n  ".join(errors)
+    )
