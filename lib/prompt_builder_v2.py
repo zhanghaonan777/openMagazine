@@ -37,6 +37,35 @@ def _apply(template: str, mapping: dict[str, str]) -> str:
     return out
 
 
+def _render_regions_block(ctx: dict) -> str:
+    own = ctx["own_region"]
+    own_id = own["id"]
+    own_rect = own["rect_norm"]
+    own_hint = own.get("image_prompt_hint", "")
+
+    lines = [
+        f"This image fills region '{own_id}' at rect "
+        f"({own_rect[0]:.2f}, {own_rect[1]:.2f}, {own_rect[2]:.2f}, {own_rect[3]:.2f}). "
+        f"{own_hint.strip()}",
+        "",
+        "The same spread contains the following sibling regions that will "
+        "receive HTML/PDF overlays after generation. DO NOT paint readable "
+        "text or layout chrome into these areas; keep them calm and low-detail:",
+        "",
+    ]
+    for r in ctx.get("sibling_regions", []):
+        rid = r["id"]
+        rect = r["rect_norm"]
+        role = r["role"]
+        hint = r.get("image_prompt_hint", "").strip()
+        lines.append(
+            f"- region '{rid}' (role={role}, rect "
+            f"({rect[0]:.2f}, {rect[1]:.2f}, {rect[2]:.2f}, {rect[3]:.2f}))"
+            + (f": {hint}" if hint else "")
+        )
+    return "\n".join(lines)
+
+
 def build_upscale_prompt(
     *,
     role: str,
@@ -45,6 +74,7 @@ def build_upscale_prompt(
     slot_id: str,
     scene: str,
     aspect: str,
+    regions_context: dict | None = None,
 ) -> str:
     if role not in ROLE_TEMPLATES:
         raise ValueError(f"unknown role {role!r}; expected one of {list(ROLE_TEMPLATES)}")
@@ -53,7 +83,12 @@ def build_upscale_prompt(
     pmap["{{SCENE}}"] = scene
     pmap["{{ASPECT}}"] = aspect
     pmap["{{SLOT_ID}}"] = slot_id
-    return _apply(template, pmap)
+    rendered = _apply(template, pmap)
+
+    if regions_context:
+        rendered = _render_regions_block(regions_context) + "\n\n" + rendered
+
+    return rendered
 
 
 def build_storyboard_prompt_v2(

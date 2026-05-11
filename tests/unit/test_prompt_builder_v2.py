@@ -87,3 +87,66 @@ def test_build_storyboard_v2(spec, layers):
     assert "1024" in p and "1536" in p
     # No unfilled placeholders
     assert "{{" not in p
+
+
+def test_build_upscale_prompt_with_regions_context(spec, layers):
+    regions_context = {
+        "own_region": {
+            "id": "hero_image",
+            "rect_norm": [0.0, 0.0, 0.5, 1.0],
+            "role": "image",
+            "image_slot": "feature_hero",
+            "image_prompt_hint": "subject lives here, sharp focus",
+        },
+        "sibling_regions": [
+            {
+                "id": "title",
+                "rect_norm": [0.55, 0.15, 0.95, 0.30],
+                "role": "text",
+                "component": "Title",
+                "image_prompt_hint": "uniform low-detail background",
+            },
+            {
+                "id": "captioned_strip",
+                "rect_norm": [0.55, 0.86, 0.95, 0.98],
+                "role": "image_grid",
+                "image_prompt_hint": "calm strip",
+            },
+        ],
+    }
+    p = build_upscale_prompt(
+        role="portrait", spec=spec, layers=layers,
+        slot_id="spread-03.feature_hero",
+        scene="character at boulder, hand on rock",
+        aspect="3:4",
+        regions_context=regions_context,
+    )
+    # Own region declared
+    assert "hero_image" in p
+    assert "subject lives here" in p
+    # Sibling regions declared and explicitly off-limits
+    assert "title" in p
+    assert "captioned_strip" in p
+    assert "uniform low-detail background" in p
+    # No unfilled placeholders
+    assert "{{" not in p
+
+
+def test_build_upscale_prompt_without_regions_context_unchanged(spec, layers):
+    """Backward compatibility: omit regions_context → prompt body matches
+    the existing shape (no regions section)."""
+    p_old = build_upscale_prompt(
+        role="portrait", spec=spec, layers=layers,
+        slot_id="spread-03.feature_hero",
+        scene="character at boulder",
+        aspect="3:4",
+    )
+    p_new = build_upscale_prompt(
+        role="portrait", spec=spec, layers=layers,
+        slot_id="spread-03.feature_hero",
+        scene="character at boulder",
+        aspect="3:4",
+        regions_context=None,
+    )
+    assert p_old == p_new
+    assert "sibling regions" not in p_old.lower()
