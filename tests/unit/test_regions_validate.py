@@ -89,3 +89,20 @@ def test_duplicate_region_id_rejected(tmp_path):
     })
     errors = validate_regions(p)
     assert any("duplicate" in e.lower() for e in errors)
+
+
+def test_overlap_allowed_when_z_index_differs(tmp_path):
+    """A text region overlaid on a full-bleed image (different z_index) is
+    intentional CSS layering, not a layout error."""
+    p = _write_yaml(tmp_path, {
+        "schema_version": 1,
+        "spread_type": "cover",
+        "regions": [
+            {"id": "hero", "rect_norm": [0.0, 0.0, 1.0, 1.0],
+             "role": "image", "image_slot": "cover_hero", "aspect": "3:4"},
+            {"id": "masthead", "rect_norm": [0.05, 0.04, 0.95, 0.12],
+             "role": "text", "component": "Masthead", "text_field": "x",
+             "z_index": 10},
+        ],
+    })
+    assert validate_regions(p) == []

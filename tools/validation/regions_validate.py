@@ -75,18 +75,24 @@ def validate_regions(path: pathlib.Path) -> list[str]:
             errors.append(f"duplicate region id: {rid!r}")
         seen.add(rid)
 
-    # 4. Overlap check (above OVERLAP_THRESHOLD of smaller area, ignoring
-    # accent regions which intentionally sit on top of text)
+    # 4. Overlap check (above OVERLAP_THRESHOLD of smaller area). Skip:
+    #   - any region with role 'accent' (intentionally sits on top)
+    #   - pairs where one region has a higher z_index than the other
+    #     (intentional CSS layering, e.g., text overlaid on a full-bleed
+    #     hero image)
     non_accent = [r for r in regions if r["role"] != "accent"]
     for i, a in enumerate(non_accent):
         for b in non_accent[i + 1:]:
+            # Skip if regions are on different z-layers (intentional overlay)
+            if (a.get("z_index", 0) or 0) != (b.get("z_index", 0) or 0):
+                continue
             overlap = _rect_overlap_area(a["rect_norm"], b["rect_norm"])
             smaller = min(_rect_area(a["rect_norm"]), _rect_area(b["rect_norm"]))
             if smaller > 0 and overlap / smaller > OVERLAP_THRESHOLD:
                 errors.append(
                     f"regions {a['id']!r} and {b['id']!r} overlap "
-                    f"({overlap / smaller:.0%} of smaller); set z_index "
-                    f"explicitly or move one"
+                    f"({overlap / smaller:.0%} of smaller); set different "
+                    f"z_index values or move one"
                 )
 
     return errors
