@@ -17,7 +17,7 @@
     {%- if region.role == 'image' %}
       {{- render_image(region, slot_path) }}
     {%- elif region.role == 'image_grid' %}
-      {{- render_image_grid(region, slot_path) }}
+      {{- render_image_grid(region, sc, slot_path, lang) }}
     {%- elif region.role == 'text' %}
       {%- set text = (sc[region.text_field] or {}).get(lang, sc[region.text_field]) if sc[region.text_field] is mapping else sc[region.text_field] %}
       {{- render_text_component(region.component, text, region.component_props|default({})) }}
@@ -41,16 +41,25 @@
        style="width: 100%; height: 100%; object-fit: cover; display: block;">
 {% endmacro %}
 
-{% macro render_image_grid(region, slot_path) %}
+{% macro render_image_grid(region, sc, slot_path, language) %}
   {%- set cols = region.grid_cols|default(region.image_slots|length) %}
   <div style="display: grid;
               grid-template-columns: repeat({{ cols }}, 1fr);
               gap: 4mm;
               width: 100%; height: 100%;">
     {%- for s in region.image_slots %}
-      <img src="{{ slot_path(s) }}"
-           alt="{{ s }}"
-           style="width: 100%; height: 100%; object-fit: cover; display: block;">
+      {%- set caption = None %}
+      {%- if sc.captions and loop.index0 < (sc.captions|length) %}
+        {%- set caption = sc.captions[loop.index0] %}
+      {%- endif %}
+      <figure style="display: flex; flex-direction: column; gap: 2mm; margin: 0;">
+        <img src="{{ slot_path(s) }}"
+             alt="{{ s }}"
+             style="width: 100%; height: 100%; object-fit: cover; display: block;">
+        {%- if caption %}
+          <figcaption class="caption">{{ caption[language] if caption is mapping else caption }}</figcaption>
+        {%- endif %}
+      </figure>
     {%- endfor %}
   </div>
 {% endmacro %}

@@ -1,0 +1,32 @@
+schema_version: 1
+spread_type: portrait-wall
+pages_per_instance: 2
+
+regions:
+  - id: title
+    rect_norm: [0.05, 0.05, 0.95, 0.09]
+    role: text
+    component: Kicker
+    text_field: title
+    component_props: {align: left}
+
+  - id: accent_rule
+    rect_norm: [0.05, 0.10, 0.30, 0.105]
+    role: accent
+    component: AccentRule
+
+  - id: portrait_grid
+    rect_norm: [0.05, 0.13, 0.95, 0.95]
+    role: image_grid
+    image_slots:
+      - portrait_wall.1
+      - portrait_wall.2
+      - portrait_wall.3
+      - portrait_wall.4
+      - portrait_wall.5
+      - portrait_wall.6
+    grid_cols: 3
+    image_prompt_hint: |
+      Six 1:1 square portraits arranged in 3×2. Each portrait must have
+      consistent framing — subject centered, similar tightness, matched
+      lighting direction.

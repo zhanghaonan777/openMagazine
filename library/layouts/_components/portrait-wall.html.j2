@@ -1,21 +1,14 @@
-{% set spread_idx = sc.idx %}
-{% set base = images_root ~ '/spread-' ~ '{:02d}'.format(spread_idx) %}
+{%- from '_components/_macros/region.j2.html' import render_region %}
+
+{%- macro slot_path(slot_id) -%}
+  {{ images_root }}/spread-{{ '%02d'|format(spread_idx) }}/{{ slot_id }}.png
+{%- endmacro %}
 
 <section class="spread portrait-wall" data-spread-idx="{{ spread_idx }}">
-  <div style="padding: 18mm 16mm; min-height: 250mm; display: flex; flex-direction: column;">
-    <div class="kicker" style="margin-bottom: 4mm;">{{ sc.title[language] }}</div>
-    <hr class="accent">
-    <div class="grid-3x2" style="flex: 1; gap: 6mm; margin-top: 8mm;">
-      {% for cap in sc.captions %}
-      {% set n = loop.index %}
-      <figure style="display: flex; flex-direction: column; gap: 2mm; margin: 0;">
-        <div style="position: relative; width: 100%; padding-top: 100%; overflow: hidden;">
-          <img class="slot" src="{{ base }}/portrait_wall.{{ n }}.png"
-               style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
-        </div>
-        <figcaption class="caption">{{ cap[language] }}</figcaption>
-      </figure>
-      {% endfor %}
-    </div>
+  <div class="spread-bounds"
+       style="position: relative; height: var(--content-h, 250mm); overflow: hidden;">
+    {%- for region in regions %}
+      {{ render_region(region, sc, slot_path, language) }}
+    {%- endfor %}
   </div>
 </section>
