@@ -1,46 +1,23 @@
-{% set spread_idx = sc.idx %}
-{% set hero = images_root ~ '/spread-' ~ '{:02d}'.format(spread_idx) ~ '/feature_hero.png' %}
-{% set cap1 = images_root ~ '/spread-' ~ '{:02d}'.format(spread_idx) ~ '/feature_captioned.1.png' %}
-{% set cap2 = images_root ~ '/spread-' ~ '{:02d}'.format(spread_idx) ~ '/feature_captioned.2.png' %}
-{% set cap3 = images_root ~ '/spread-' ~ '{:02d}'.format(spread_idx) ~ '/feature_captioned.3.png' %}
+{%- from '_components/_macros/region.j2.html' import render_region %}
+
+{# Expected context:
+   - sc                  : article.spread_copy entry for this spread
+   - spread_idx          : 1-indexed spread number
+   - regions             : list of region dicts from feature-spread.regions.yaml
+                           (injected by WeasyprintCompose, see R2-T4)
+   - images_root         : str — where output/<slug>/images/ lives
+   - language            : 'en' | 'zh'
+#}
+
+{%- macro slot_path(slot_id) -%}
+  {{ images_root }}/spread-{{ '%02d'|format(spread_idx) }}/{{ slot_id }}.png
+{%- endmacro %}
 
 <section class="spread feature-spread" data-spread-idx="{{ spread_idx }}">
-  <div class="grid-2-7-5" style="padding-top: 0; min-height: 250mm;">
-    <div class="left">
-      <figure style="position: relative; width: 100%; padding-top: 133.33%; overflow: hidden; margin: 0;">
-        <img class="slot" src="{{ hero }}" alt="feature hero"
-             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
-      </figure>
-    </div>
-    <div class="right" style="padding: 18mm 16mm 18mm 8mm; display: flex; flex-direction: column; gap: 4mm;">
-      <div class="kicker">{{ sc.kicker[language] }}</div>
-      <hr class="accent">
-      <h2 class="title title-l">{{ sc.title[language] }}</h2>
-      <p class="lead">{{ sc.lead[language] }}</p>
-      <div class="body drop-cap" style="font-size: {{ brand.typography.body.size_pt }}pt;
-                                         line-height: {{ brand.typography.body.leading }};
-                                         column-count: 1;">
-        {% for para in sc.body[language].strip().split('\n\n') %}
-        <p>{{ para | trim }}</p>
-        {% endfor %}
-      </div>
-      <div class="grid-3" style="margin-top: 6mm;">
-        <figure style="position: relative; width: 100%; padding-top: 66.67%; overflow: hidden; margin: 0;">
-          <img class="slot" src="{{ cap1 }}"
-               style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
-          <figcaption class="caption" style="position: absolute; bottom: -4mm; left: 0; right: 0; transform: translateY(100%);">{{ sc.image_slot_overrides['feature_captioned.1'] | default('') | truncate(60) }}</figcaption>
-        </figure>
-        <figure style="position: relative; width: 100%; padding-top: 66.67%; overflow: hidden; margin: 0;">
-          <img class="slot" src="{{ cap2 }}"
-               style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
-          <figcaption class="caption" style="position: absolute; bottom: -4mm; left: 0; right: 0; transform: translateY(100%);">{{ sc.image_slot_overrides['feature_captioned.2'] | default('') | truncate(60) }}</figcaption>
-        </figure>
-        <figure style="position: relative; width: 100%; padding-top: 66.67%; overflow: hidden; margin: 0;">
-          <img class="slot" src="{{ cap3 }}"
-               style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
-          <figcaption class="caption" style="position: absolute; bottom: -4mm; left: 0; right: 0; transform: translateY(100%);">{{ sc.image_slot_overrides['feature_captioned.3'] | default('') | truncate(60) }}</figcaption>
-        </figure>
-      </div>
-    </div>
+  <div class="spread-bounds"
+       style="position: relative; height: var(--content-h, 250mm); overflow: hidden;">
+    {%- for region in regions %}
+      {{ render_region(region, sc, slot_path, language) }}
+    {%- endfor %}
   </div>
 </section>

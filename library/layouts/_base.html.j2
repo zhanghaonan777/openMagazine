@@ -50,6 +50,9 @@
   --color-quote-fg:       {{ brand.visual_tokens.color_quote_fg }};
   --rule-thickness:       {{ brand.visual_tokens.rule_thickness_pt }}pt;
   --baseline-mm:          {{ brand.print_specs.baseline_grid_mm }}mm;
+  --content-h:            calc(297mm
+                               - {{ brand.print_specs.margin_top_mm }}mm
+                               - {{ brand.print_specs.margin_bottom_mm }}mm);
 
   --font-display:         '{{ brand.typography.display.family }}', serif;
   --font-body:            '{{ brand.typography.body.family }}', serif;
