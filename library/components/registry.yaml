@@ -73,3 +73,8 @@ components:
     description: Decorative top/bottom darkening gradient overlay
     typography_slot: ~
     accepts_props: [direction, strength]
+
+  CreditsBlock:
+    description: Multi-line credits stack (photographer / art_direction / printing / copyright / contact)
+    typography_slot: body
+    accepts_props: [align]

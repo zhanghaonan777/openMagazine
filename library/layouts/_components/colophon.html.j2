@@ -1,21 +1,14 @@
-{% set credits = sc.credits[language] if sc.credits[language] is mapping else sc.credits %}
-<section class="spread colophon" data-spread-idx="{{ sc.idx }}">
-  <div class="grid-2" style="min-height: 250mm; padding: 18mm 16mm; gap: 16mm;">
-    <div class="left">
-      <div class="kicker">COLOPHON</div>
-      <hr class="accent">
-      <h2 class="title title-m" style="margin-top: 6mm;">{{ article.masthead_override or brand.masthead }}</h2>
-      <p class="lead" style="margin-top: 4mm; font-style: normal;">{{ article.issue_label[language] }}</p>
-    </div>
-    <div class="right" style="padding-top: 4mm; display: flex; flex-direction: column; gap: 5mm; font-size: 9.5pt;">
-      {% for k, v in credits.items() %}
-      <div>
-        <div class="kicker" style="color: var(--color-ink-secondary); margin-bottom: 1mm;">
-          {{ k | replace('_', ' ') }}
-        </div>
-        <div>{{ v }}</div>
-      </div>
-      {% endfor %}
-    </div>
+{%- from '_components/_macros/region.j2.html' import render_region %}
+
+{%- macro slot_path(slot_id) -%}
+  {{ images_root }}/spread-{{ '%02d'|format(spread_idx) }}/{{ slot_id }}.png
+{%- endmacro %}
+
+<section class="spread colophon" data-spread-idx="{{ spread_idx }}">
+  <div class="spread-bounds"
+       style="position: relative; height: var(--content-h, 250mm); overflow: hidden;">
+    {%- for region in regions %}
+      {{ render_region(region, sc, slot_path, language) }}
+    {%- endfor %}
   </div>
 </section>

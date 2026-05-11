@@ -24,6 +24,8 @@
     {%- elif region.role == 'text_decorative' %}
       {%- if region.component == 'TocList' %}
         {{- render_toc_list(sc.table_of_contents or [], region.component_props|default({}), lang) }}
+      {%- elif region.component == 'CreditsBlock' %}
+        {{- render_credits_block(sc.credits or {}, region.component_props|default({}), lang) }}
       {%- else %}
         {{- render_text_component(region.component, '', region.component_props|default({})) }}
       {%- endif %}
@@ -107,6 +109,25 @@
       </li>
     {%- endfor %}
   </ul>
+{% endmacro %}
+
+{% macro render_credits_block(credits, props, language) %}
+  <dl class="credits-block"
+      style="margin: 0;
+             {% if props.align %}text-align: {{ props.align }};{% endif %}
+             display: grid; grid-template-columns: max-content 1fr;
+             gap: 1mm 4mm;">
+    {%- for key, value in credits.items() %}
+      <dt class="credits-label"
+          style="text-transform: uppercase;
+                 letter-spacing: 0.06em;
+                 font-size: 0.85em;
+                 opacity: 0.7;">{{ key.replace('_', ' ') }}</dt>
+      <dd class="credits-value" style="margin: 0;">
+        {{- value[language] if value is mapping and language in value else value }}
+      </dd>
+    {%- endfor %}
+  </dl>
 {% endmacro %}
 
 {% macro render_accent(component, props) %}
