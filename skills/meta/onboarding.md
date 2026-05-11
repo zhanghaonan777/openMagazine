@@ -16,14 +16,14 @@ Triggered when user input is vague (e.g., "what can you do?", "make me something
 
 3. **Probe Vertex AI**:
    ~~~bash
-   python -c "from tools.image.vertex_gemini_image import VertexGeminiImage; VertexGeminiImage().probe()"
+   uv run python -c "from tools.image.vertex_gemini_image import VertexGeminiImage; VertexGeminiImage().probe()"
    ~~~
 
-4. **Brief intro (1-2 sentences)**: "I can make 16- or 4-page A4 photo magazines about a single subject (pet/person/place/product/concept). Pipeline: research → proposal → storyboard → upscale → compose → publish."
+4. **Brief intro (1-2 sentences)**: "I can make cheap 4-page validation magazines or full v0.3 editorial A4 issues about a single subject (pet/person/place/product/concept). Editorial pipeline: research → proposal → articulate → storyboard → upscale → compose → publish."
 
 5. **Show 3 starter prompts**:
-   - "Make a 16-page magazine of my <pet> in <style> style" (free-form input)
-   - "Run with `library/issue-specs/cosmos-luna-01.yaml`" (spec input)
+   - "Make an editorial magazine of my <pet> in <style> style" (free-form input)
+   - "Run with `library/issue-specs/cosmos-luna-may-2026.yaml`" (v0.3 spec input)
    - "Test with `pipeline_defs/smoke-test-4page.yaml`" (smoke test)
 
 6. **Wait for user choice.** Do NOT proceed to any pipeline stage until the user gives an actionable instruction.

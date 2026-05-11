@@ -1,4 +1,4 @@
-"""Validate an issue-spec.yaml + its 5 layer references.
+"""Validate an issue-spec.yaml + its layer references.
 
 Usage:
     python tools/validation/spec_validate.py library/issue-specs/cosmos-luna-01.yaml
@@ -9,11 +9,11 @@ Exit codes:
     2  spec file not found / not parseable
 
 Validation checks:
-    - spec.schema_version == 1
+    - spec.schema_version == 1 or 2
     - All required spec top-level fields present
     - 5 layer references each resolve to existing yaml files
       (style is exempt — Tier 2 scaffold-style fallback is allowed)
-    - Each layer yaml has schema_version == 1 + required fields
+    - Each layer yaml has the expected schema_version + required fields
     - themes/<name>.yaml.page_plan_hints length == layouts/<layout>.yaml.page_count
     - layouts/<layout>.yaml.storyboard_grid rows*cols == page_count
     - subjects/<name>.yaml.reference_image points to an existing file
@@ -50,7 +50,6 @@ SPEC_REQUIRED_FIELDS_V2 = {
     "theme",
     "layout",
     "brand",
-    "article",
 }
 
 LAYER_DIRS = {
@@ -87,6 +86,18 @@ LAYER_REQUIRED_FIELDS = {
                "storyboard_grid", "typography_mode"},
     "brand": {"schema_version", "name", "masthead"},
     # style: validated by templates/styles/README.md schema; we don't re-check here
+}
+
+LAYER_REQUIRED_FIELDS_V2 = {
+    "subject": {"schema_version", "name", "species", "reference_image", "traits"},
+    "theme": {"schema_version", "name", "theme_world", "default_cover_line",
+              "page_plan_hints"},
+    "layout": {"schema_version", "name", "typography_mode", "format",
+               "spread_plan", "image_slots", "text_slots_required"},
+    "brand": {"schema_version", "name", "masthead", "default_language",
+              "typography", "print_specs", "visual_tokens"},
+    "article": {"schema_version", "slug", "display_title", "issue_label",
+                "cover_line", "cover_kicker", "spread_copy"},
 }
 
 
@@ -241,10 +252,15 @@ def _validate_spec_v1(spec: dict[str, Any], spec_path: pathlib.Path) -> list[str
 
 
 def _validate_spec_v2(spec: dict[str, Any], spec_path: pathlib.Path) -> list[str]:
-    """v2 spec validation (6 layers, including article + cross-validates article↔layout)."""
+    """v2 spec validation.
+
+    v2 has five required references plus an optional article reference. Draft
+    specs may omit `article` during research; once present, it is resolved and
+    cross-validated against the layout.
+    """
     errors: list[str] = []
 
-    # 1. spec required fields (v2 adds 'article')
+    # 1. spec required fields
     errors += _check_required(spec, SPEC_REQUIRED_FIELDS_V2, "spec")
     if errors:
         return errors
@@ -257,6 +273,8 @@ def _validate_spec_v2(spec: dict[str, Any], spec_path: pathlib.Path) -> list[str
     layer_paths: dict[str, pathlib.Path] = {}
     for layer_field, dir_name in LAYER_DIRS_V2.items():
         ref_name = spec.get(layer_field)
+        if layer_field == "article" and not ref_name:
+            continue
         if not isinstance(ref_name, str) or not ref_name:
             errors.append(f"spec.{layer_field} must be a non-empty string")
             continue
@@ -282,7 +300,7 @@ def _validate_spec_v2(spec: dict[str, Any], spec_path: pathlib.Path) -> list[str
         except Exception as e:
             errors.append(f"failed to load {layer_yaml_path}: {e}")
 
-    # 3. Each layer yaml has expected schema_version
+    # 3. Each layer yaml has expected schema_version + required fields
     for layer_field, expected_v in LAYER_EXPECTED_VERSION_V2.items():
         if layer_field not in layer_yamls:
             continue
@@ -292,13 +310,29 @@ def _validate_spec_v2(spec: dict[str, Any], spec_path: pathlib.Path) -> list[str
                 f"{layer_field} yaml ({spec[layer_field]}): schema_version must be "
                 f"{expected_v}, got {actual!r}"
             )
+        errors += _check_required(
+            layer_yamls[layer_field],
+            LAYER_REQUIRED_FIELDS_V2[layer_field],
+            f"{layer_field} yaml ({spec.get(layer_field)})",
+        )
 
-    # 4. Cross-validate article ↔ layout when both resolved
+    # 4. subject: reference_image exists (resolve relative to subjects/<name>.yaml)
+    subject = layer_yamls.get("subject", {})
+    if "reference_image" in subject:
+        ref_str = subject["reference_image"]
+        ref_path = (LIBRARY_DIR / "subjects" / ref_str).resolve()
+        if not ref_path.is_file():
+            errors.append(
+                f"subject {spec['subject']}: reference_image {ref_str!r} → "
+                f"{ref_path} not found"
+            )
+
+    # 5. Cross-validate article ↔ layout when both resolved
     if "article" in layer_paths and "layout" in layer_paths:
         from tools.validation.article_validate import validate_article  # noqa: E402
         errors += validate_article(layer_paths["article"], layer_paths["layout"])
 
-    # 5. overrides — soft type-check
+    # 6. overrides — soft type-check
     overrides = spec.get("overrides", {})
     if overrides is not None and not isinstance(overrides, dict):
         errors.append("spec.overrides must be a mapping (or omitted/empty)")

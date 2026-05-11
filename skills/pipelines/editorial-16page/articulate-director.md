@@ -42,7 +42,7 @@ to read/edit the drafted copy before any image-gen spending begins.
    `library/articles/<slug>.yaml`. Validate via:
 
    ~~~bash
-   python tools/validation/article_validate.py \
+   uv run python -m tools.validation.article_validate \
      library/articles/<slug>.yaml \
      --layout editorial-16page
    ~~~

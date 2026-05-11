@@ -32,8 +32,11 @@ Each `spread_copy` entry MUST match the corresponding `layout.spread_plan[idx]` 
 
 ## Auto-draft
 
-If the spec references an `article` that doesn't exist on disk, the `articulate-director` skill drafts a complete article during Stage 3 (articulate) and persists it to `library/articles/<slug>.yaml`. The user reviews and edits the file before storyboard generation.
+If the spec references an `article` that doesn't exist on disk, or omits
+`article` during research, the `articulate-director` skill drafts a complete
+article and persists it to `library/articles/<slug>.yaml`. The user reviews
+and edits the file before storyboard generation.
 
 ## Validation
 
-Run `python tools/validation/article_validate.py library/articles/<slug>.yaml --layout editorial-16page` to verify schema + cross-references.
+Run `uv run python -m tools.validation.article_validate library/articles/<slug>.yaml --layout editorial-16page` to verify schema + cross-references.

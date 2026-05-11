@@ -42,6 +42,28 @@ def test_shipped_naipi_burberry_spec_validates(tmp_path):
     assert fs_errors == [], f"unexpected non-fs errors: {fs_errors}"
 
 
+def test_shipped_v2_cosmos_luna_spec_validates():
+    spec_path = LIBRARY / "issue-specs" / "cosmos-luna-may-2026.yaml"
+    errors = validate_spec(spec_path)
+    hard_errors = [e for e in errors if not e.startswith("NOTE:")]
+    assert hard_errors == [], f"unexpected errors: {hard_errors}"
+
+
+def test_v2_spec_may_defer_article_until_articulate(tmp_path):
+    spec = {
+        "schema_version": 2,
+        "slug": "draft",
+        "subject": "luna",
+        "style": "national-geographic",
+        "theme": "cosmos",
+        "layout": "editorial-16page",
+        "brand": "meow-life",
+    }
+    errors = validate_spec(_write_spec(tmp_path, spec))
+    hard_errors = [e for e in errors if not e.startswith("NOTE:")]
+    assert hard_errors == [], f"unexpected errors: {hard_errors}"
+
+
 def test_missing_required_field(tmp_path):
     bad = {"schema_version": 1, "slug": "x", "subject": "luna",
            "style": "matisse-fauve", "theme": "cosmos", "layout": "plain-16"}

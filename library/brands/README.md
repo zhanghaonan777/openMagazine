@@ -1,8 +1,8 @@
 # Brands Library
 
-Each `<name>.yaml` is one **publication brand** — the masthead text,
-website URL, and editorial persona. Used to fill `{{MAGAZINE_NAME}}`
-and (via persona) inform cover-line tone.
+Each `<name>.yaml` is one **publication brand**. v1 brands provide masthead
+and persona for image-prompt typography; v2 editorial brands also provide
+typography packs, print specs, and visual tokens for WeasyPrint.
 
 Shipped seeds:
 
@@ -15,4 +15,4 @@ Adding a new brand: copy a seed, edit `masthead` + `display_name` +
 `persona`. URL is optional and unused in current full-bleed typography
 mode (was a footer-bar artifact).
 
-See `templates/SCHEMA.md` for the schema.
+See `library/SCHEMA.md` for the schema.

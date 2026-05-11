@@ -44,6 +44,18 @@ from typing import Any
 from tools.base_tool import BaseTool
 
 
+def _load_html_class():
+    try:
+        from weasyprint import HTML
+    except Exception as exc:  # pragma: no cover - exercised by dependency probes
+        raise RuntimeError(
+            "WeasyPrint is installed but its native libraries are not available. "
+            "Install the platform packages for Pango/Cairo/GDK-PixBuf, then rerun. "
+            f"Original error: {exc}"
+        ) from exc
+    return HTML
+
+
 class WeasyprintCompose(BaseTool):
     capability = "pdf_compose"
     provider = "weasyprint"
@@ -51,10 +63,23 @@ class WeasyprintCompose(BaseTool):
     agent_skills = ["weasyprint-cookbook"]
     status = "active"
 
+    @staticmethod
+    def dependency_status() -> tuple[bool, str]:
+        """Return whether WeasyPrint can import with native dependencies."""
+        try:
+            _load_html_class()
+        except RuntimeError as exc:
+            return False, str(exc)
+        return True, "available"
+
+    @staticmethod
+    def is_available() -> bool:
+        return WeasyprintCompose.dependency_status()[0]
+
     def render_html_string(self, html: str, out_path: pathlib.Path,
                            *, base_url: pathlib.Path | None = None) -> dict:
         """Render an HTML string to PDF at out_path. Returns metadata."""
-        from weasyprint import HTML
+        HTML = _load_html_class()
 
         out_path = pathlib.Path(out_path)
         out_path.parent.mkdir(parents=True, exist_ok=True)

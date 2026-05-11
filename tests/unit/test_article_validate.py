@@ -103,3 +103,14 @@ def test_type_mismatch(valid_article, layout_editorial_16page, tmp_path):
     valid_article.write_text(yaml.safe_dump(a))
     errors = validate_article(valid_article, layout_editorial_16page)
     assert any("type mismatch" in e or "wrong-type" in e for e in errors)
+
+
+def test_missing_image_slot_override_is_flagged(valid_article, layout_editorial_16page):
+    layout = yaml.safe_load(layout_editorial_16page.read_text())
+    layout["image_slots"] = [
+        {"id": "feature_hero", "spread_idx": 3, "role": "portrait"},
+    ]
+    layout_editorial_16page.write_text(yaml.safe_dump(layout))
+
+    errors = validate_article(valid_article, layout_editorial_16page)
+    assert any("feature_hero" in e for e in errors)

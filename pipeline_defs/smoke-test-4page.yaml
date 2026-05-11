@@ -1,9 +1,9 @@
 name: smoke-test-4page
 version: "1.0"
-description: 4-page photo magazine smoke test (~$0.96 + 1 codex storyboard).
+description: 4-page photo magazine smoke test (~$1.00 including storyboard).
 category: smoke-test
 stability: production
-budget_default_usd: 0.96
+budget_default_usd: 1.10
 max_wall_time_minutes: 15
 
 reference_input:

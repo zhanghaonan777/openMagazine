@@ -16,9 +16,13 @@ Use this skill to run the openMagazine project as a Codex skill.
 
 ## Required Workflow
 
-All production must go through a declared pipeline. For the MVP, the primary pipeline is:
+All production must go through a declared pipeline. Choose the smallest pipeline
+that matches the request:
 
-- `pipeline_defs/smoke-test-4page.yaml`
+| Pipeline | Use when |
+|---|---|
+| `pipeline_defs/smoke-test-4page.yaml` | Cheap 4-page validation, one 4K image per page, ReportLab PDF. |
+| `pipeline_defs/editorial-16page.yaml` | v0.3 editorial issues with article copy, 21 image slots, real PDF text, and WeasyPrint. |
 
 For each stage:
 
@@ -29,3 +33,10 @@ For each stage:
 5. Respect checkpoints, reviewer guidance, schemas, and budget communication in `AGENT_GUIDE.md`.
 
 Do not bypass the pipeline with ad-hoc asset generation or direct API scripts.
+
+## Runtime Gate
+
+Stage 3 storyboard generation requires the native `image_gen.imagegen` tool.
+Run preflight before attempting production. If the runtime does not expose that
+tool, stop and ask the user to rerun from Codex CLI or use the predecessor
+`only_image_magazine_gen` skill.

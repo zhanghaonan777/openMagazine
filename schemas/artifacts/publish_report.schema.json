@@ -5,10 +5,14 @@
   "required": ["pdf_path", "contact_sheet_path", "total_cost_usd", "wall_time_min", "spec_slug"],
   "properties": {
     "pdf_path": {"type": "string"},
+    "html_path": {"type": "string"},
     "contact_sheet_path": {"type": "string"},
+    "page_count": {"type": "integer"},
+    "image_count": {"type": "integer"},
     "total_cost_usd": {"type": "number"},
     "wall_time_min": {"type": "number"},
     "auto_persisted_spec_path": {"type": ["string", "null"]},
-    "spec_slug": {"type": "string"}
+    "spec_slug": {"type": "string"},
+    "schema_version": {"type": "integer"}
   }
 }

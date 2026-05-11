@@ -15,7 +15,9 @@ If you're happy with `plain-4` / `plain-16` (one 4K image per page, typography p
 
 ### spec yaml
 
-Schema v2 adds one required field: `article`.
+Schema v2 adds an editorial `article` reference for final production. Draft
+specs may omit it during research; the `articulate` stage then creates the
+article yaml and the agent persists the reference before storyboard.
 
 ```diff
 -schema_version: 1
@@ -27,18 +29,18 @@ Schema v2 adds one required field: `article`.
 -layout: plain-16
 +layout: editorial-16page
  brand: meow-life
-+article: cosmos-luna-may-2026  # NEW required field
++article: cosmos-luna-may-2026  # editorial article reference
  overrides: {}
 ```
 
-`article` references `library/articles/<slug>.yaml`. The articulate stage drafts it if missing.
+`article` references `library/articles/<slug>.yaml`. The articulate stage drafts it if the spec does not already resolve to an existing article.
 
 ### brand yaml
 
 Run the auto-migration script:
 
 ```bash
-python tools/meta/migrate_brand_v1_to_v2.py \
+uv run python -m tools.meta.migrate_brand_v1_to_v2 \
   library/brands/<name>.yaml \
   --preset editorial-classic
 ```
@@ -59,7 +61,7 @@ If you need a custom v2 layout:
 
 ### article yaml (NEW)
 
-A v2 spec must reference an article. Two options:
+An editorial production run should end with a spec that references an article. Two options:
 
 - **Write by hand** — see `library/articles/cosmos-luna-may-2026.yaml` as template.
 - **Let the agent draft it** — set `article: <slug>` in spec; the `articulate` stage drafts copy from research_brief + layout's `text_slots_required`. User reviews + edits at the articulate checkpoint before storyboard.

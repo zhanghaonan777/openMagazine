@@ -100,6 +100,15 @@ def split_by_plan(
     from PIL import Image
 
     img = Image.open(storyboard_path)
+    W, H = img.size
+    outer_ratio = W / H
+    if abs(outer_ratio - 2 / 3) > 0.10:
+        print(
+            f"[pillow_split.split_by_plan] WARNING: storyboard outer aspect "
+            f"{outer_ratio:.3f} deviates from 2:3 (0.667). Planned cells "
+            f"will inherit the wrong aspect.",
+            file=sys.stderr,
+        )
     out_dir = pathlib.Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 

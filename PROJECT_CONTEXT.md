@@ -41,7 +41,9 @@ Layer 3 (.agents/skills/)
 | Artifact schemas | `schemas/artifacts/<artifact>.schema.json` |
 | Generated artifacts | `output/<slug>/` (gitignored) |
 
-## Data flow (6 stages, MVP smoke-test-4page pipeline)
+## Data flow
+
+Simple path (`schema_version: 1`, `smoke-test-4page`):
 
 ```
 spec.yaml or free-form
@@ -55,12 +57,29 @@ research → proposal → storyboard → ⏸ gate → upscale → compose → pu
               cells/cell-NN.png
 ```
 
+Editorial path (`schema_version: 2`, `editorial-16page`):
+
+```
+spec.yaml or free-form
+    │
+    ▼
+research → proposal → articulate → ⏸ gate → storyboard → ⏸ gate → upscale → compose → publish
+                             │                       │                    │          │
+                             ▼                       ▼                    ▼          ▼
+                 library/articles/<slug>.yaml   storyboard.png   images/spread-NN/<slot>.png
+                 article.json                   storyboard.json  upscale_result.json
+                                                cells/spread-NN/<slot>.png
+                                                                  magazine.html
+                                                                  magazine.pdf
+                                                                  publish_report.json
+```
+
 Each stage produces one schema-valid sidecar JSON. The reviewer skill validates between stages.
 
 ## Conventions
 
 - Filesystem state. No `state.json`. `output/<slug>/` is the source of truth.
-- yaml schema_version always = 1.
-- All commands assume venv is activated (or `python` on PATH resolves to env with deps).
-- 3 concurrent Vertex calls maximum (4+ → 503 storms — empirical).
-- Storyboard cells require `--top-crop-px N` to remove page-number labels (default N=60 for 1024×1536 storyboard).
+- v1 and v2 schemas coexist. v2 applies to editorial specs, brands, and layouts; article yaml remains `schema_version: 1`.
+- Prefer `uv run python -m ...` or an activated venv.
+- 3 concurrent Vertex calls maximum. `lib.config_loader.get_parallelism()` clamps higher config or env values back to 3.
+- Simple storyboard cells may require top-cropping to remove page-number labels; editorial storyboard splitting uses the planned 21 image-slot bboxes.

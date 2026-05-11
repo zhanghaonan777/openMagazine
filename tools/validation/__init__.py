@@ -1,5 +1,6 @@
-"""validation capability family."""
-from tools.validation import verify_4k  # noqa: F401
-from tools.validation import spec_validate  # noqa: F401
-from tools.validation import reference_photo_check  # noqa: F401
-from tools.validation import article_validate  # noqa: F401
+"""validation capability family.
+
+Tool modules register when imported by `tools.tool_registry.discover()`.
+Keep this package import side-effect free so `python -m tools.validation.*`
+does not pre-import the target module.
+"""

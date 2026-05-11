@@ -14,6 +14,10 @@ from tools.pdf.weasyprint_compose import WeasyprintCompose
 
 
 SKILL_ROOT = Path(__file__).resolve().parents[2]
+WEASYPRINT_AVAILABLE, WEASYPRINT_REASON = WeasyprintCompose.dependency_status()
+requires_weasyprint = pytest.mark.skipif(
+    not WEASYPRINT_AVAILABLE, reason=WEASYPRINT_REASON
+)
 
 
 def _make_placeholder_pngs(images_dir: Path, layout: dict):
@@ -32,6 +36,7 @@ def issue_dir(tmp_path):
     return d
 
 
+@requires_weasyprint
 def test_renders_editorial_16page_with_placeholders(issue_dir):
     layout = yaml.safe_load((SKILL_ROOT / "library/layouts/editorial-16page.yaml").read_text())
     brand = yaml.safe_load((SKILL_ROOT / "library/brands/meow-life.yaml").read_text())

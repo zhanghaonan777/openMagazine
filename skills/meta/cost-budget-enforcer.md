@@ -17,7 +17,7 @@ Maintain `output/<slug>/costs.json`:
 ~~~json
 {
   "spec_slug": "naipi-burberry-4page-01",
-  "budget_usd": 0.96,
+  "budget_usd": 1.10,
   "calls": [
     {"stage": "storyboard", "tool": "CodexImageGen", "provider": "codex", "cost_usd": 0.04, "ts": "2026-05-10T15:00Z"},
     {"stage": "upscale", "tool": "VertexGeminiImage", "provider": "vertex", "cost_usd": 0.24, "ts": "..."}
@@ -34,8 +34,8 @@ Pulled from each tool's `cost_per_call_usd` BaseTool attribute. Use the tool's v
 
 ## Smoke test budget
 
-- 4-page run: storyboard ($0.04) + 4 upscales × $0.24 = $1.00. Default budget $1.20.
-- 16-page run: storyboard ($0.04) + 16 upscales × $0.24 = $3.88. Default budget $3.84 (per `config.yaml`).
+- 4-page run: storyboard ($0.04) + 4 upscales × $0.24 = $1.00. Default budget $1.10.
+- editorial-16page run: storyboard ($0.04) + 21 upscales × $0.24 = $5.08. Default budget $5.50.
 
 ## See also
 

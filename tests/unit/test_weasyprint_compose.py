@@ -6,6 +6,13 @@ import pytest
 from tools.pdf.weasyprint_compose import WeasyprintCompose
 
 
+WEASYPRINT_AVAILABLE, WEASYPRINT_REASON = WeasyprintCompose.dependency_status()
+requires_weasyprint = pytest.mark.skipif(
+    not WEASYPRINT_AVAILABLE, reason=WEASYPRINT_REASON
+)
+
+
+@requires_weasyprint
 def test_renders_minimal_html(tmp_path):
     """Render a trivial HTML to PDF; verify file exists and >0 bytes."""
     tool = WeasyprintCompose()
@@ -16,6 +23,7 @@ def test_renders_minimal_html(tmp_path):
     assert out.stat().st_size > 100
 
 
+@requires_weasyprint
 def test_render_returns_metadata(tmp_path):
     tool = WeasyprintCompose()
     html = "<html><body><div style='page-break-after: always'>1</div><div>2</div></body></html>"

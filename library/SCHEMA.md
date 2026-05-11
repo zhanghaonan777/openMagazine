@@ -1,15 +1,17 @@
 # Library Schema
 
-Simple mode accepts two input sources:
+openMagazine accepts two input sources:
 
 - **Free-form** — user one-liner + photo. Agent infers traits, looks up styles
   via Author Obligation 2 (Tier 1/2/3), gives sensible defaults for theme /
   layout / brand.
-- **Spec yaml** — user writes `library/issue-specs/<name>.yaml` referencing
-  6 layers (subject / style / theme / layout / brand + spec-level overrides).
-  Agent reads the spec, resolves layers, fills the placeholder map.
+- **Spec yaml** — user writes `library/issue-specs/<name>.yaml`. v1 specs
+  reference subject / style / theme / layout / brand. v2 editorial specs use
+  those same references plus an optional `article` reference.
 
-Both sources feed the same Phase 1+ pipeline (storyboard → split → gate → 4K → PDF).
+Both sources feed a declared pipeline. v1 simple specs use storyboard → split
+→ gate → 4K → PDF; v2 editorial specs add an articulate stage before
+storyboard and compose with real PDF text.
 
 Free-form runs **auto-persist** their resolved configuration as a new
 `library/issue-specs/<slug>.yaml` after the storyboard gate, so subsequent
@@ -17,7 +19,7 @@ runs of the same issue can use spec input directly.
 
 ---
 
-## 6 layers (5 explicit + styles)
+## Layers
 
 ```
 styles/             风格库 (top-level; covered by styles/README.md)
@@ -26,12 +28,13 @@ library/
 ├── themes/         主题世界 — theme_world + lighting_principles + page_plan_hints
 ├── layouts/        版面参数 — page_count + aspect + storyboard_grid + typography_mode
 ├── brands/         杂志品牌 — masthead + url + persona
-└── issue-specs/    一站式 spec — 引用上面 5 层 + spec-level overrides
+├── articles/       v0.3 editorial copy — spread_copy + image_slot_overrides
+└── issue-specs/    一站式 spec — 引用上面层 + spec-level overrides
 ```
 
 The styles layer is **orthogonal**: it carries `style_anchor` text injected
 verbatim into all prompts. Styles are looked up by trigger keyword (Author
-Obligation 2). The other 4 layers + spec compose deterministically.
+Obligation 2). The other layers + spec compose deterministically.
 
 ---
 
@@ -135,6 +138,26 @@ Required: `schema_version`, `name`, `page_count`, `aspect`, `storyboard_grid`,
 - `page_count=8`  → `2x4` or `4x2`
 - `page_count=4`  → `2x2`
 
+v2 editorial layouts use a different shape:
+
+```yaml
+schema_version: 2
+name: editorial-16page
+typography_mode: editorial-spread
+format:
+  page_count: 16
+  spreads: 9
+spread_plan:
+  - {idx: 1, type: cover, pages: [1]}
+image_slots:
+  - {id: cover_hero, role: cover_hero, aspect: "3:4", min_long_edge_px: 3500, spread_idx: 1}
+text_slots_required:
+  feature-spread: [title, kicker, lead, body]
+```
+
+Required for v2: `schema_version`, `name`, `typography_mode`, `format`,
+`spread_plan`, `image_slots`, `text_slots_required`.
+
 ---
 
 ## brands/<name>.yaml
@@ -154,6 +177,33 @@ persona: |
 ```
 
 Required: `schema_version`, `name`, `masthead`.
+
+v2 editorial brands additionally require `default_language`, `typography`,
+`print_specs`, and `visual_tokens`. Use
+`tools/meta/migrate_brand_v1_to_v2.py` with a preset to upgrade a v1 brand.
+
+---
+
+## articles/<name>.yaml (v0.3 editorial)
+
+```yaml
+schema_version: 1
+slug: cosmos-luna-may-2026
+display_title: {en: "Luna Walks the Moon"}
+issue_label: {en: "ISSUE 03 / MAY 2026"}
+cover_line: {en: "A small astronaut on the lunar regolith"}
+cover_kicker: {en: "FEATURE STORY"}
+spread_copy:
+  - idx: 1
+    type: cover
+    image_slot_overrides:
+      cover_hero: "Luna in EVA suit standing on lunar regolith"
+```
+
+Required: `schema_version`, `slug`, `display_title`, `issue_label`,
+`cover_line`, `cover_kicker`, `spread_copy`. For v2 editorial production,
+`article_validate` also checks that each layout image slot has a matching
+`image_slot_overrides` entry on the corresponding spread.
 
 ---
 
@@ -184,6 +234,25 @@ Required: `schema_version`, `slug`, `subject`, `style`, `theme`, `layout`,
 library directory; `style` may also be a name not yet in `styles/`,
 in which case it triggers the scaffold-style meta-protocol (Tier 2).
 
+v2 editorial issue specs use the same required fields with `schema_version: 2`
+and usually add `article`:
+
+```yaml
+schema_version: 2
+slug: cosmos-luna-may-2026
+subject: luna
+style: national-geographic
+theme: cosmos
+layout: editorial-16page
+brand: meow-life
+article: cosmos-luna-may-2026
+overrides: {}
+```
+
+`article` is optional during early research so the articulate stage can draft
+it, but final production should reference a persisted
+`library/articles/<slug>.yaml`.
+
 ---
 
 ## Placeholder map — value resolution order
@@ -212,16 +281,16 @@ Per-page placeholders (filled by agent during Phase 3+4):
 
 ## Auto-persist after free-form input
 
-After a successful free-form run reaches the storyboard gate (Phase 2.5),
-the agent writes the resolved values back as a new spec yaml:
+After a successful free-form run has enough resolved configuration, the agent
+writes the values back as a new spec yaml:
 
 ```
 library/issue-specs/<slug>.yaml
 ```
 
 This captures the inferred traits, looked-up style, agent-given theme/layout/
-brand, and any user-provided overrides. The yaml lands automatically — user
-can re-run with `"用 <slug> spec 跑"` to reproduce.
+brand, optional article slug, and any user-provided overrides. The yaml lands
+automatically — user can re-run with `"用 <slug> spec 跑"` to reproduce.
 
 If the free-form run inferred a subject not in `library/subjects/`, the
 agent ALSO auto-persists `library/subjects/<auto-name>.yaml` so future
@@ -233,17 +302,19 @@ specs can reference it by name.
 
 `tools/validation/spec_validate.py` checks:
 
-1. spec.yaml schema_version == 1
-2. All 5 layer references exist as files (style is exempt — Tier 2 fallback)
-3. Each layer yaml's schema_version == 1 and required fields present
-4. `themes/<name>.yaml.page_plan_hints` length == `layouts/<layout>.yaml.page_count`
-5. `layouts/<layout>.yaml.storyboard_grid` rows*cols == page_count
-6. `subjects/<name>.yaml.reference_image` resolves to an existing file (long edge ≥ 1024 if PIL is available)
+1. spec.yaml `schema_version` is 1 or 2.
+2. All required layer references exist as files (style is exempt — Tier 2 fallback).
+3. Each layer yaml has the expected `schema_version` and required fields.
+4. v1: `page_plan_hints` length matches layout page count.
+5. v1: `storyboard_grid` rows*cols equals page count.
+6. v1/v2: `subjects/<name>.yaml.reference_image` resolves to an existing file.
+7. v2 with `article`: article copy is consistent with layout spread/text/image slots.
 
 Run:
 
 ```bash
-python tools/validation/spec_validate.py library/issue-specs/cosmos-luna-01.yaml
+uv run python -m tools.validation.spec_validate library/issue-specs/cosmos-luna-01.yaml
+uv run python -m tools.validation.spec_validate library/issue-specs/cosmos-luna-may-2026.yaml
 ```
 
 Exit 0 if valid; non-zero with diagnostics if not.

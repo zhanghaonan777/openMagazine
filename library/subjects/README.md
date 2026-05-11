@@ -8,7 +8,7 @@ When a free-form input run produces a new subject (e.g., agent inferred
 traits from a photo), the agent auto-persists a new yaml here so the
 next run can reference by name.
 
-See `templates/SCHEMA.md` for the schema.
+See `library/SCHEMA.md` for the schema.
 
 ## Shipped seeds
 

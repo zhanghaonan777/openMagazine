@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+import importlib
 from typing import Iterable
 
 from tools.base_tool import BaseTool
@@ -44,10 +45,21 @@ def discover() -> ToolRegistry:
 
     Called by AGENT_GUIDE preflight: `from tools.tool_registry import discover, registry; discover()`.
     """
-    # Each tool module's __init__.py registers its tool(s) on import.
-    # We import each capability-family package; their __init__.py does the work.
-    import tools.image  # noqa: F401
-    import tools.pdf  # noqa: F401
-    import tools.validation  # noqa: F401
-    import tools.meta  # noqa: F401
+    modules = [
+        "tools.image.codex_image_gen",
+        "tools.image.vertex_gemini_image",
+        "tools.image.image_selector",
+        "tools.image.pillow_split",
+        "tools.pdf.reportlab_compose",
+        "tools.pdf.weasyprint_compose",
+        "tools.pdf.pdf_selector",
+        "tools.validation.verify_4k",
+        "tools.validation.spec_validate",
+        "tools.validation.reference_photo_check",
+        "tools.validation.article_validate",
+        "tools.meta.scaffold_style",
+        "tools.meta.migrate_brand_v1_to_v2",
+    ]
+    for module in modules:
+        importlib.import_module(module)
     return registry

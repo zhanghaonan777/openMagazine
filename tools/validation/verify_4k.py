@@ -1,4 +1,4 @@
-"""verify_4k — validate <issue>/images/page-*.png file size + aspect.
+"""verify_4k — validate generated PNG file size + aspect.
 
 Replaces helpers/vertex_image.py:verify from predecessor.
 """
@@ -23,8 +23,12 @@ def _classify_aspect(w: int, h: int) -> str:
     ratio = w / h
     if abs(ratio - 2 / 3) < 0.05:
         return "2:3 portrait"
+    if abs(ratio - 3 / 4) < 0.05:
+        return "3:4 portrait"
     if abs(ratio - 3 / 2) < 0.05:
         return "3:2 landscape"
+    if abs(ratio - 16 / 10) < 0.05:
+        return "16:10 landscape"
     if abs(ratio - 1.0) < 0.05:
         return "1:1 square"
     return f"non-standard ({ratio:.3f})"
@@ -41,6 +45,8 @@ def verify(issue_dir: pathlib.Path) -> int:
     images_dir = issue_dir / "images"
     if images_dir.is_dir():
         files.extend(sorted(images_dir.glob("page-*.png")))
+        if not files:
+            files.extend(sorted(images_dir.glob("spread-*/*.png")))
 
     if not files:
         print(f"no images found under {issue_dir}/images/", file=sys.stderr)

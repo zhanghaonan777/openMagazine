@@ -1,6 +1,8 @@
 # openMagazine — Agent Guide
 
-> **v0.1 MVP status:** Some files this guide references (`skills/`, `pipeline_defs/`, `CODEX.md`, `CLAUDE.md`, `.agents/skills/`) land in later MVP tasks. If you hit a missing path, see [`README.md`](README.md) for current status before improvising.
+> **v0.3 status:** Two production paths coexist. `smoke-test-4page` keeps the
+> legacy simple image-per-page path; `editorial-16page` adds article copy,
+> multi-image spreads, and WeasyPrint composition.
 
 ## First Interaction
 
@@ -12,7 +14,7 @@ Every magazine production request MUST go through a pipeline declared in `pipeli
 
 1. **Identify the pipeline.** Match user's request to one of the pipelines. If unclear, ask.
 2. **Read the pipeline manifest.** `pipeline_defs/<name>.yaml` — know the stages, tools, checkpoints, and cost budget.
-3. **Run preflight.** Discover available tools via `python -c "from tools.tool_registry import registry; registry.discover(); print(registry.capability_catalog())"`.
+3. **Run preflight.** Discover available tools via `uv run python -c "from tools.tool_registry import registry; registry.discover(); print(registry.capability_catalog())"`, then verify the runtime exposes `image_gen.imagegen` before Stage 3.
 4. **Execute stage by stage.** For each stage, read the stage director skill (`skills/pipelines/<pipeline>/<stage>-director.md`) BEFORE doing any work.
 5. **Read Layer 3 skills before calling tools.** Tools declare `agent_skills = [...]`; for each, read the corresponding `.agents/skills/<name>.md`.
 
@@ -24,10 +26,10 @@ DO NOT:
 
 ## Two input sources
 
-- **Free-form** — user one-liner + photo. Agent infers traits, looks up styles via Author Obligation 2, defaults theme/layout/brand. Auto-persists a spec yaml after Stage 3.
-- **Spec input** — user references `library/issue-specs/<slug>.yaml`. Agent reads the spec and resolves 5 layer references.
+- **Free-form** — user one-liner + photo. Agent infers traits, looks up styles, defaults theme/layout/brand, and persists a spec yaml.
+- **Spec input** — user references `library/issue-specs/<slug>.yaml`. Agent reads the spec and resolves v1's 5 references or v2's 5 required references plus optional `article`.
 
-Both feed the same 6-stage pipeline.
+Both feed a declared pipeline. v1 specs use the simple 6-stage path; v2 editorial specs use a 7-stage path with `articulate`.
 
 ## Decision Communication Contract
 
@@ -40,17 +42,18 @@ Before any paid generation call, announce:
 
 Wait for explicit user OK only when the stage's `checkpoint: required` (default: only Stage 3 storyboard).
 
-## Six stages of the magazine pipeline
+## Pipeline stages
 
-| # | Stage | Director skill | Default checkpoint |
+| # | Stage | Simple path | Editorial path | Default checkpoint |
 |---|---|---|---|
-| 1 | research | `skills/pipelines/<pipe>/research-director.md` | off |
-| 2 | proposal | `skills/pipelines/<pipe>/proposal-director.md` | off |
-| 3 | storyboard | `skills/pipelines/<pipe>/storyboard-director.md` | required |
-| 4 | upscale | `skills/pipelines/<pipe>/upscale-director.md` | off |
-| 5 | compose | `skills/pipelines/<pipe>/compose-director.md` | off |
-| 6 | publish | `skills/pipelines/<pipe>/publish-director.md` | off |
+| 1 | research | yes | yes | off |
+| 2 | proposal | yes | yes | off |
+| 3 | articulate | no | yes | required |
+| 4 | storyboard | yes | yes | required |
+| 5 | upscale | yes | yes | off |
+| 6 | compose | yes | yes | off |
+| 7 | publish | yes | yes | off |
 
 For runtime-specific concerns:
 - Codex CLI: see [`CODEX.md`](CODEX.md)
-- Claude Code: see [`CLAUDE.md`](CLAUDE.md) — Stage 3 unsupported; STOP and ask user to switch to codex CLI
+- Claude Code / Codex desktop without `image_gen.imagegen`: Stage 3 unsupported; STOP and ask user to switch to Codex CLI or use the predecessor skill.

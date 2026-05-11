@@ -20,7 +20,7 @@ def load_config() -> dict[str, Any]:
 
 
 def get_parallelism(default: int = 3) -> int:
-    """Stage-4 upscale parallelism. Hard cap of 3 unless override set.
+    """Stage-4 upscale parallelism, hard-capped at 3.
 
     Resolution order:
       1. env OPENMAGAZINE_PARALLELISM (or OPEN_ZAZHI_PARALLELISM legacy)
@@ -28,8 +28,8 @@ def get_parallelism(default: int = 3) -> int:
       3. default arg
 
     Vertex Gemini 3 Pro Image emits 503 UNAVAILABLE storms above ~3 concurrent
-    calls (empirical, predecessor's experience). Override above 3 only if you
-    know what you're doing.
+    calls (empirical, predecessor's experience). Environment overrides can
+    reduce parallelism, but values above 3 are clamped to 3.
     """
     env_val = (
         os.environ.get("OPENMAGAZINE_PARALLELISM")
@@ -37,12 +37,12 @@ def get_parallelism(default: int = 3) -> int:
     )
     if env_val:
         try:
-            return max(1, int(env_val))
+            return min(3, max(1, int(env_val)))
         except ValueError:
             pass
     cfg = load_config()
     n = cfg.get("defaults", {}).get("parallelism", default)
     try:
-        return max(1, int(n))
+        return min(3, max(1, int(n)))
     except (TypeError, ValueError):
         return default

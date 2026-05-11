@@ -36,18 +36,22 @@ make probe
 ### 1. Verify the dry-run renders (no Vertex spend)
 
 ```bash
-python -m pytest tests/integration/test_render_dry_run.py -v
+uv run python -m pytest tests/integration/test_render_dry_run.py -v
 ```
 
 This builds a placeholder-PNG version of the full 16-page PDF using
 WeasyPrint. If it fails, fix `_components/*.j2` or `_base.html.j2`
 before spending real money on Vertex calls.
 
-### 2. (One-time) Author the spec yaml
+### 2. Verify the shipped spec yaml
 
-If `library/issue-specs/cosmos-luna-may-2026.yaml` doesn't yet exist,
-either write it by hand referencing the 6 layers, or let the agent
-generate it from a free-form one-liner ("做一本太空号 of Luna").
+The repo ships `library/issue-specs/cosmos-luna-may-2026.yaml`. Validate it
+before the live run:
+
+```bash
+uv run python -m tools.validation.spec_validate \
+  library/issue-specs/cosmos-luna-may-2026.yaml
+```
 
 ### 3. In a fresh Codex CLI session, paste
 
@@ -69,7 +73,7 @@ review:
 Edit the yaml in place if needed. Re-run `article_validate`:
 
 ```bash
-python tools/validation/article_validate.py \
+uv run python -m tools.validation.article_validate \
   library/articles/cosmos-luna-may-2026.yaml \
   --layout editorial-16page
 ```

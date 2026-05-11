@@ -21,7 +21,7 @@ def test_get_parallelism_default_from_config():
 
 def test_get_parallelism_env_override(monkeypatch):
     monkeypatch.setenv("OPENMAGAZINE_PARALLELISM", "5")
-    assert get_parallelism() == 5
+    assert get_parallelism() == 3
 
 
 def test_get_parallelism_legacy_env(monkeypatch):
