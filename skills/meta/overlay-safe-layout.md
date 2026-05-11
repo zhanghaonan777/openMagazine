@@ -1,5 +1,13 @@
 # overlay-safe-layout
 
+> **Status as of v0.3.1:** This skill's concept (shared layout contract
+> between image gen and HTML overlay) has been promoted into a first-class
+> data layer. See [regions-as-shared-contract spec](../../docs/superpowers/specs/2026-05-11-regions-as-shared-contract-design.md)
+> and the per-spread `library/layouts/_components/<type>.regions.yaml`
+> files. This skill remains as the high-level rationale doc; the
+> `theme.page_overlay_contracts` field is deprecated in v2 paths and
+> kept only for legacy v1 (smoke-test-4page) compatibility.
+
 Design image prompts and HTML/PDF overlays from the same page-level layout
 contract so text, cards, rules, and decorative lines do not cover the subject.
 
