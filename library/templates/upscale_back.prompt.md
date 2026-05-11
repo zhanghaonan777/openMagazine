@@ -4,6 +4,11 @@ Scene: {{SCENE}} — a single small element of the subject in mostly empty space
 
 Composition: maintain framing from the FIRST reference image (the back-cover storyboard cell). Character identity from SUBSEQUENT reference images.
 
+Layout contract for later HTML/PDF overlays:
+{{OVERLAY_CONTRACT}}
+
+Honor the layout contract while generating the back cover. Keep protected subject zones clear; keep reserved overlay zones visually calm enough for final quote, folio, or colophon components.
+
 Lighting: soft, diffused, low-contrast. Late-day or pre-dawn quality.
 
 Camera: shot on Leica M11 with Summicron 50mm. Raw uncorrected.

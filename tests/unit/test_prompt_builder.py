@@ -1,7 +1,7 @@
 """Tests for prompt_builder + placeholder_resolver layout/theme placeholders."""
 import pytest
 
-from lib.placeholder_resolver import build_placeholder_map
+from lib.placeholder_resolver import build_placeholder_map, page_overlay_contract_text
 from lib.prompt_builder import (
     build_storyboard_prompt,
     build_cover_prompt,
@@ -80,6 +80,27 @@ def test_page_plan_block_renders_all_hints(spec, layers_4page):
         assert f"{i:02d}:" in block
 
 
+def test_page_contract_block_renders_overlay_contract(spec, layers_4page):
+    layers_4page["theme"]["page_overlay_contracts"] = [
+        {
+            "page": 3,
+            "subject_zone": "right-center",
+            "protected_zones": [
+                {"name": "face", "rect": [0.52, 0.14, 0.92, 0.58]},
+            ],
+            "reserved_overlay_zones": ["left-rail", "bottom-strip"],
+            "html_components": ["EvidenceRail", "BottomPinboard"],
+            "forbidden": ["cards-over-face", "cross-face-lines"],
+        }
+    ]
+    pmap = build_placeholder_map(spec, layers_4page)
+    block = pmap["{{PAGE_CONTRACT_BLOCK}}"]
+    assert "Page 03 overlay/layout contract" in block
+    assert "right-center" in block
+    assert "left-rail" in block
+    assert "cards-over-face" in block
+
+
 def test_storyboard_prompt_substitutes_grid(spec, layers_4page):
     prompt = build_storyboard_prompt(spec, layers_4page)
     assert "2×2 grid" in prompt
@@ -110,6 +131,29 @@ def test_inner_prompt_uses_scene(spec, layers_4page):
     prompt = build_inner_prompt(spec, layers_4page, scene="chasing toy across lunar floor")
     assert "chasing toy across lunar floor" in prompt
     assert "tabby cat" in prompt
+    assert "Layout contract for later HTML/PDF overlays" in prompt
+    assert "{{" not in prompt
+
+
+def test_inner_prompt_uses_page_overlay_contract(spec, layers_4page):
+    layers_4page["theme"]["page_overlay_contracts"] = [
+        {
+            "page": 2,
+            "subject_zone": "right-center",
+            "reserved_overlay_zones": ["left-rail", "bottom-strip"],
+            "forbidden": ["cross-face-lines"],
+        }
+    ]
+    prompt = build_inner_prompt(
+        spec,
+        layers_4page,
+        scene="inspects an envelope",
+        page_idx=2,
+    )
+    assert "Page 02 overlay/layout contract" in prompt
+    assert "right-center" in prompt
+    assert "left-rail" in prompt
+    assert "cross-face-lines" in prompt
     assert "{{" not in prompt
 
 
@@ -135,6 +179,12 @@ def test_page_plan_scene_for_strips_prefix(layers_4page):
 def test_page_plan_scene_for_out_of_range(layers_4page):
     assert page_plan_scene_for(layers_4page, 99) == ""
     assert page_plan_scene_for(layers_4page, 0) == ""
+
+
+def test_page_overlay_contract_text_default(layers_4page):
+    text = page_overlay_contract_text(layers_4page, 2)
+    assert "No explicit overlay contract" in text
+    assert "HTML/PDF overlays" in text
 
 
 def test_placeholder_map_typography_v1_brand_empty(spec, layers_4page):

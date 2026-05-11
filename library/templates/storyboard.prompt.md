@@ -20,10 +20,17 @@ Page plan (each scene must be visually distinct; mix wide / medium / close-up / 
 
 {{PAGE_PLAN_BLOCK}}
 
+Overlay/layout contracts (use these when composing each cell; these same
+contracts are reused by later 4K prompts and HTML/PDF overlays):
+
+{{PAGE_CONTRACT_BLOCK}}
+
 Constraints:
 - SAME character across all cells (face / markings / build / baseline expression all identical).
 - SAME color palette across all cells.
 - SAME lighting language across all cells.
 - Each cell is low-detail but composition and mood must read clearly.
+- Keep protected subject zones clear of later overlay areas.
+- Keep reserved overlay zones visually calm and free of faces, eyes, important props, or high-frequency detail.
 - No text inside cells except the page number.
 - No watermarks, no logos, no caption boxes.

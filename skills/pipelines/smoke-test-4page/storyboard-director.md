@@ -28,6 +28,8 @@ Layer 2 — project conventions:
 - `skills/core/codex-image-gen.md` — wrapper + capture protocol.
 - `skills/creative/prompt-style-guide.md` — verbatim trait/style rules.
 - `skills/creative/shot-scale-variety.md` — adjacency rule for the 4 cells.
+- `skills/meta/overlay-safe-layout.md` — page-level protected zones and
+  reserved overlay zones for later HTML/PDF components.
 
 Layer 3 — technology details:
 - `.agents/skills/codex-image-gen-plumbing.md` — full BEFORE/AFTER capture
@@ -61,6 +63,8 @@ Verify it before the call:
 - The grid declaration matches the layout (`storyboard_grid` from
   `library/layouts/<name>.yaml`).
 - The page plan section has one entry per page.
+- If `theme.page_overlay_contracts` exists, the overlay/layout contract block
+  appears and has one entry per overlay-heavy page.
 
 If you need to inspect or override the prompt manually, view the template at
 `library/templates/storyboard.prompt.md` directly. Do not paste a different
@@ -200,6 +204,8 @@ proceeding to upscale-director, follow `skills/meta/checkpoint-protocol.md`:
 - `storyboard.json` validates against schema.
 - Visual: 4 distinct cells, recognizable same character across all 4, no
   flat-centered cover.
+- Overlay-heavy cells reserve calm negative-space zones and keep faces/eyes
+  out of those later HTML/PDF overlay zones.
 
 ## Failure modes
 

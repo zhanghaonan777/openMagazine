@@ -34,6 +34,8 @@ Layer 2:
   rule (cover and back cover only).
 - `skills/creative/photoreal-anti-illustration.md` — negative-prompt
   vocabulary for blocking AI gloss / illustration drift.
+- `skills/meta/overlay-safe-layout.md` — inject per-page layout contracts so
+  4K images reserve safe zones for later HTML/PDF overlays.
 - `skills/meta/cost-budget-enforcer.md` — per-call cost announcement.
 
 Layer 3:
@@ -49,9 +51,9 @@ All 4K prompts are rendered from layout-driven templates. The 4 pages map to
 
 | Page index | Template | Builder function |
 |---|---|---|
-| 01 | `library/templates/upscale_cover.prompt.md` | `build_cover_prompt(spec, layers)` |
-| 02 — N-1 | `library/templates/upscale_inner.prompt.md` | `build_inner_prompt(spec, layers, scene=...)` |
-| N (last) | `library/templates/upscale_back.prompt.md` | `build_back_prompt(spec, layers, scene=...)` |
+| 01 | `library/templates/upscale_cover.prompt.md` | `build_cover_prompt(spec, layers, page_idx=1)` |
+| 02 — N-1 | `library/templates/upscale_inner.prompt.md` | `build_inner_prompt(spec, layers, scene=..., page_idx=i)` |
+| N (last) | `library/templates/upscale_back.prompt.md` | `build_back_prompt(spec, layers, scene=..., page_idx=i)` |
 
 Where N is the layout's `page_count`. For the 4-page smoke test, N=4 → page
 01 is cover, pages 02-03 are inner, page 04 is back. For a 9-page variant,
@@ -87,15 +89,20 @@ page_count = int(layers["layout"]["page_count"])
 prompts = {}
 for i in range(1, page_count + 1):
     if i == 1:
-        prompts[i] = build_cover_prompt(spec, layers)
+        prompts[i] = build_cover_prompt(spec, layers, page_idx=i)
     elif i == page_count:
-        prompts[i] = build_back_prompt(spec, layers, scene=page_plan_scene_for(layers, i))
+        prompts[i] = build_back_prompt(
+            spec, layers, scene=page_plan_scene_for(layers, i), page_idx=i,
+        )
     else:
-        prompts[i] = build_inner_prompt(spec, layers, scene=page_plan_scene_for(layers, i))
+        prompts[i] = build_inner_prompt(
+            spec, layers, scene=page_plan_scene_for(layers, i), page_idx=i,
+        )
 ~~~
 
 Verify each prompt has all placeholders filled (no `{{...}}` tokens remain)
-before the Vertex calls.
+before the Vertex calls. If `theme.page_overlay_contracts` exists, also verify
+the matching page contract appears in the prompt.
 
 ### 2. Run all 4 calls (concurrently)
 

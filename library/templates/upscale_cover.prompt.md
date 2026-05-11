@@ -4,6 +4,11 @@ Scene: cover hero composition. The subject occupies the upper two-thirds of the 
 
 Composition: maintain framing and lighting direction from the FIRST reference image (the storyboard cell). Character identity from SUBSEQUENT reference images (protagonist photos).
 
+Layout contract for later HTML/PDF overlays:
+{{OVERLAY_CONTRACT}}
+
+Honor the layout contract while generating the cover. Keep protected subject zones clear; keep any reserved overlay zones visually calm. If cover typography is rendered into the photograph, it must use the intended typography zone and must not cross the subject's face or eyes.
+
 Lighting: dramatic single key light, deep shadow side. No rim light.
 
 Camera: shot on Hasselblad H6D-100c with 80mm f/2.8 prime. Raw uncorrected, no color grading.

@@ -97,6 +97,18 @@ page_plan_hints:
   - "11: climax visual peak, full-frame Earth backdrop"
   - "13: ..."
   - "16: back-cover wide-fade silhouette"
+
+# Optional. Use when pages will receive HTML/PDF overlays after image
+# generation. These contracts are injected into storyboard and 4K prompts.
+page_overlay_contracts:
+  - page: 3
+    subject_zone: right-center
+    protected_zones:
+      - {name: face, rect: [0.52, 0.14, 0.92, 0.58]}
+    reserved_overlay_zones: [left-rail, bottom-strip]
+    negative_space: ["left 32%", "bottom 18%"]
+    html_components: [EvidenceRail, BottomPinboard, Folio]
+    forbidden: [cards-over-face, cross-face-lines]
 ```
 
 Required: `schema_version`, `name`, `theme_world`, `default_cover_line.en`,

@@ -27,6 +27,9 @@ Validate before proceeding:
   `storyboard_grid: "2x2"`, `top_crop_px_default: 60`.
 - `skills/creative/shot-scale-variety.md` — the "no two adjacent pages
   share the same shot scale" rule.
+- `skills/meta/overlay-safe-layout.md` — when HTML/PDF overlays are planned,
+  define protected subject zones and reserved overlay zones before paid image
+  generation.
 
 ## Procedure
 
@@ -51,6 +54,12 @@ Validate before proceeding:
    Apply shot-scale-variety: page 1 must be hero / dramatic, page 4 must
    be quiet / coda; pages 2 and 3 must each differ in shot scale from
    their neighbours.
+
+   If the issue will use HTML/PDF overlays, also author
+   `theme.page_overlay_contracts` (or an issue-local equivalent) before
+   storyboard. The contract should name `subject_zone`, `protected_zones`,
+   `reserved_overlay_zones`, `html_components`, and `forbidden` overlaps.
+   This contract is injected into both storyboard and 4K prompts.
 
 3. **Compute cost_estimate_usd** — fixed math for this pipeline:
    - 1 storyboard call via `image_gen.imagegen` ≈ $0.04
@@ -96,6 +105,8 @@ pipeline def is overridden to checkpoint here, follow
 - `proposal.json` validates against schema.
 - `page_plan.length == 4`.
 - All 4 entries have distinct `shot_scale` values from their neighbours.
+- If HTML/PDF overlays are planned, every overlay-heavy page has a
+  `page_overlay_contracts` entry before paid generation.
 - `cost_estimate_usd ≤ 1.10` (cost-budget-enforcer hard ceiling for this
   pipeline).
 

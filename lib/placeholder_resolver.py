@@ -46,9 +46,12 @@ def build_placeholder_map(spec: dict, layers: dict) -> dict[str, str]:
     rows, cols = _parse_grid(storyboard_grid)
     page_count = layout.get("page_count", rows * cols)
 
-    # Theme-derived: page plan block
+    # Theme-derived: page plan block + optional overlay layout contracts
     hints = theme.get("page_plan_hints") or []
     page_plan_block = _render_page_plan_block(hints)
+    page_contract_block = _render_page_contract_block(
+        theme.get("page_overlay_contracts") or []
+    )
 
     pmap = {
         "{{TRAITS}}": subject.get("traits", ""),
@@ -64,6 +67,7 @@ def build_placeholder_map(spec: dict, layers: dict) -> dict[str, str]:
         "{{PAGE_COUNT}}": str(page_count),
         "{{PAGE_NUMBER_RANGE}}": f"01-{int(page_count):02d}",
         "{{PAGE_PLAN_BLOCK}}": page_plan_block,
+        "{{PAGE_CONTRACT_BLOCK}}": page_contract_block,
     }
 
     # v0.3 brand schema_version 2: typography pack + visual tokens.
@@ -112,3 +116,78 @@ def _render_page_plan_block(hints: list[str]) -> str:
     if not hints:
         return ""
     return "\n".join(str(h).rstrip() for h in hints)
+
+
+def _render_page_contract_block(contracts: list[dict]) -> str:
+    """Format page-level image/HTML overlay contracts for storyboard prompts."""
+    if not contracts:
+        return (
+            "No page-specific overlay contracts supplied. Preserve natural "
+            "negative space and keep important subject features away from "
+            "areas likely to receive later typography or HTML overlays."
+        )
+    return "\n\n".join(
+        _render_overlay_contract(c, fallback_page=i + 1)
+        for i, c in enumerate(contracts)
+    )
+
+
+def page_overlay_contract_text(layers: dict, page_idx: int) -> str:
+    """Return a per-page overlay contract for 4K prompts.
+
+    Contracts live at `theme.page_overlay_contracts` and are optional. The
+    text is intentionally plain prompt language so both image generation and
+    later HTML composition can share the same layout vocabulary.
+    """
+    if page_idx < 1:
+        return (
+            "No explicit overlay contract. Keep the subject's face, eyes, "
+            "primary object, and readable details clear of any natural "
+            "negative-space areas that may receive later HTML/PDF overlays. "
+            "Do not generate readable captions, UI boxes, or fake magazine "
+            "layout elements."
+        )
+    theme = layers.get("theme") or {}
+    contracts = theme.get("page_overlay_contracts") or []
+    for i, contract in enumerate(contracts):
+        if int(contract.get("page", i + 1)) == page_idx:
+            return _render_overlay_contract(contract, fallback_page=page_idx)
+    return (
+        f"Page {page_idx:02d}: No explicit overlay contract. Keep the subject's "
+        "face, eyes, primary object, and readable details clear of any natural "
+        "negative-space areas that may receive later HTML/PDF overlays. Do not "
+        "generate readable captions, UI boxes, or fake magazine layout elements."
+    )
+
+
+def _render_overlay_contract(contract: dict, *, fallback_page: int) -> str:
+    page = int(contract.get("page", fallback_page))
+    lines = [f"Page {page:02d} overlay/layout contract:"]
+    fields = [
+        ("subject_zone", "subject zone"),
+        ("protected_zones", "protected zones"),
+        ("reserved_overlay_zones", "reserved overlay zones"),
+        ("negative_space", "negative space to preserve"),
+        ("html_components", "later HTML components"),
+        ("forbidden", "forbidden overlaps"),
+        ("image_prompt_notes", "image prompt notes"),
+    ]
+    for key, label in fields:
+        if key in contract and contract[key] not in (None, "", []):
+            lines.append(f"- {label}: {_format_contract_value(contract[key])}")
+    lines.append(
+        "- hard rule: reserved overlay zones must stay visually calm; protected "
+        "zones must not be crossed by cards, lines, titles, or dense props."
+    )
+    return "\n".join(lines)
+
+
+def _format_contract_value(value) -> str:
+    if isinstance(value, list):
+        return "; ".join(_format_contract_value(v) for v in value)
+    if isinstance(value, dict):
+        parts = []
+        for k, v in value.items():
+            parts.append(f"{k}={_format_contract_value(v)}")
+        return "{" + ", ".join(parts) + "}"
+    return str(value)
