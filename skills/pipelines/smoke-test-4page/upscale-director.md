@@ -98,6 +98,14 @@ for i in range(1, page_count + 1):
         prompts[i] = build_inner_prompt(
             spec, layers, scene=page_plan_scene_for(layers, i), page_idx=i,
         )
+
+# Persist rendered prompts before paid Vertex calls so each page-NN.png
+# has a recoverable page-NN.prompt.txt sibling at output/<slug>/prompts/.
+from lib.prompt_persistence import save_prompt
+issue_dir = pathlib.Path(f"output/{spec['slug']}")
+for i, p in prompts.items():
+    save_prompt(issue_dir, kind="upscale", prompt_text=p,
+                slot_id=f"page-{i:02d}")
 ~~~
 
 Verify each prompt has all placeholders filled (no `{{...}}` tokens remain)

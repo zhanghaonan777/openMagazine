@@ -73,6 +73,27 @@ prompt = build_storyboard_prompt_v2(
     plan=plan,
     scenes_by_slot=scenes_by_slot,
 )
+
+# Persist the rendered prompt + a run manifest BEFORE the codex call so
+# the exact text + template version that produced storyboard.png are
+# recoverable from disk later.
+from lib.prompt_persistence import save_prompt, save_manifest
+issue_dir = pathlib.Path(f"output/{spec['slug']}")
+save_prompt(issue_dir, kind="storyboard", prompt_text=prompt)
+save_manifest(
+    issue_dir,
+    spec_slug=spec["slug"],
+    pipeline="editorial-16page",
+    templates_used={
+        "storyboard": "library/templates/storyboard_v2.prompt.md",
+        "upscale_portrait": "library/templates/upscale_portrait.prompt.md",
+        "upscale_scene": "library/templates/upscale_scene.prompt.md",
+        "upscale_environment": "library/templates/upscale_environment.prompt.md",
+        "upscale_detail": "library/templates/upscale_detail.prompt.md",
+        "upscale_cover_hero": "library/templates/upscale_cover_hero.prompt.md",
+        "upscale_back_coda": "library/templates/upscale_back_coda.prompt.md",
+    },
+)
 ~~~
 
 Verify the rendered prompt has no unfilled `{{...}}` tokens before the

@@ -65,6 +65,8 @@ def scene_for(short_slot_id, spread_idx):
             return (sc.get("image_slot_overrides") or {}).get(short_slot_id, "")
     return ""
 
+from lib.prompt_persistence import save_prompt
+
 tool = VertexGeminiImage()
 jobs = []
 for s in layers["layout"]["image_slots"]:
@@ -75,6 +77,10 @@ for s in layers["layout"]["image_slots"]:
         role=s["role"], spec=spec, layers=layers,
         slot_id=full, scene=scene, aspect=s["aspect"],
     )
+    # Persist the rendered prompt before the paid Vertex call so each
+    # spread-NN/<slot>.png has a recoverable .prompt.txt sibling.
+    save_prompt(issue_dir, kind="upscale", prompt_text=prompt, slot_id=full)
+
     cell = issue_dir / "cells" / f"spread-{s['spread_idx']:02d}" / f"{short}.png"
     refs = [cell]
     # Environment + detail roles don't need the protagonist photo

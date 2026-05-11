@@ -49,12 +49,30 @@ plan are pulled from the resolved layers — adding a 9-page (3×3) or 16-page
 ~~~python
 from lib.spec_loader import load_spec, resolve_layers
 from lib.prompt_builder import build_storyboard_prompt
+from lib.prompt_persistence import save_prompt, save_manifest
 import pathlib
 
 spec, _ = load_spec(pathlib.Path("library/issue-specs/<slug>.yaml"))
 layers = resolve_layers(spec)
 prompt = build_storyboard_prompt(spec, layers)
 print(prompt)
+
+# Persist the rendered prompt + a run manifest BEFORE the codex call so
+# the exact text + template version that produced storyboard.png are
+# recoverable from disk later.
+issue_dir = pathlib.Path(f"output/{spec['slug']}")
+save_prompt(issue_dir, kind="storyboard", prompt_text=prompt)
+save_manifest(
+    issue_dir,
+    spec_slug=spec["slug"],
+    pipeline="smoke-test-4page",
+    templates_used={
+        "storyboard": "library/templates/storyboard.prompt.md",
+        "upscale_cover": "library/templates/upscale_cover.prompt.md",
+        "upscale_inner": "library/templates/upscale_inner.prompt.md",
+        "upscale_back": "library/templates/upscale_back.prompt.md",
+    },
+)
 ~~~
 
 The rendered prompt is what gets passed to Codex's `image_gen.imagegen`.
