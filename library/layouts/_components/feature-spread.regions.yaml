@@ -1,0 +1,61 @@
+schema_version: 1
+spread_type: feature-spread
+pages_per_instance: 2
+
+regions:
+  - id: hero_image
+    rect_norm: [0.0, 0.0, 0.5, 1.0]
+    role: image
+    image_slot: feature_hero
+    aspect: "3:4"
+    image_prompt_hint: |
+      The protagonist subject lives in this region. Sharp focus, primary
+      lighting, full color, dominant composition element.
+
+  - id: kicker
+    rect_norm: [0.55, 0.08, 0.95, 0.12]
+    role: text
+    component: Kicker
+    text_field: kicker
+    image_prompt_hint: "calm zone for a small uppercase mono label"
+
+  - id: accent_rule_top
+    rect_norm: [0.55, 0.13, 0.70, 0.135]
+    role: accent
+    component: AccentRule
+    image_prompt_hint: "calm zone for a hairline horizontal rule"
+
+  - id: title
+    rect_norm: [0.55, 0.15, 0.95, 0.30]
+    role: text
+    component: Title
+    text_field: title
+    image_prompt_hint: |
+      Uniform low-detail background. A large display-serif title will be
+      overlaid here — keep this region visually quiet.
+
+  - id: lead
+    rect_norm: [0.55, 0.33, 0.95, 0.43]
+    role: text
+    component: Lead
+    text_field: lead
+
+  - id: body
+    rect_norm: [0.55, 0.46, 0.95, 0.83]
+    role: text
+    component: BodyWithDropCap
+    text_field: body
+    component_props:
+      drop_cap: true
+      hyphenate: true
+      align: justify
+    image_prompt_hint: "negative space, no important detail behind body text"
+
+  - id: captioned_strip
+    rect_norm: [0.55, 0.86, 0.95, 0.98]
+    role: image_grid
+    image_slots: [feature_captioned.1, feature_captioned.2, feature_captioned.3]
+    grid_cols: 3
+    image_prompt_hint: |
+      Three small 3:2 thumbnails will be placed here. Keep this strip
+      visually calm; no large foreground elements.
