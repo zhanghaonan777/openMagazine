@@ -23,7 +23,14 @@ Current branch: `feat/v0.3-editorial-engine`.
 | Pipeline | Status | Output | Compose Engine |
 |---|---|---|---|
 | `smoke-test-4page` | production MVP | 4-page photo magazine | ReportLab |
-| `editorial-16page` | experimental v0.3 | 16-page editorial magazine, 21 image slots | WeasyPrint |
+| `editorial-16page` | experimental v0.3.1 | 16-page editorial magazine, 21 image slots, regions-driven | WeasyPrint |
+
+**v0.3.1 update (2026-05-12):** the editorial path is now driven by a shared
+"regions" data layer — per-spread yamls declare every bounding box (image
+slots, text components, accent rules) and the same data is read by image
+generation prompts, WeasyPrint render, and article validation. See
+[`docs/superpowers/specs/2026-05-11-regions-as-shared-contract-design.md`](docs/superpowers/specs/2026-05-11-regions-as-shared-contract-design.md)
+for the rationale.
 
 The v0.3 editorial pipeline is implemented and has dry-run tests, but live
 image generation still requires a Codex CLI session with `image_gen.imagegen`
@@ -105,13 +112,27 @@ research -> proposal -> articulate -> storyboard -> upscale -> compose -> publis
 
 This path adds:
 
-- `library/articles/<slug>.yaml`
-- `library/layouts/editorial-16page.yaml`
-- `library/layouts/editorial-16page.html.j2`
-- `library/layouts/_components/*.j2`
-- `lib/storyboard_planner.py`
-- `lib/prompt_builder_v2.py`
-- `tools/pdf/weasyprint_compose.py`
+- `library/articles/<slug>.yaml` — per-issue editorial copy
+- `library/layouts/editorial-16page.yaml` + `.html.j2` — layout shell
+- `library/layouts/_components/*.j2` — 7 spread components (cover, toc,
+  feature-spread, pull-quote, portrait-wall, colophon, back-cover)
+- `library/layouts/_components/*.regions.yaml` — ★ regions data layer
+  (v0.3.1): per-spread bounding boxes that image gen + render + validation
+  all read
+- `library/layouts/_components/_macros/region.j2.html` — `render_region`
+  dispatch macros
+- `library/components/registry.yaml` — closed component vocabulary
+  (15 components: Kicker, Title, BodyWithDropCap, PullQuote, AccentRule, …)
+- `lib/storyboard_planner.py` — multi-aspect grid packer
+- `lib/prompt_builder_v2.py` — role-driven upscale prompts (accepts
+  `regions_context` to tell the model which rects to keep calm)
+- `lib/regions_loader.py` — load + walk regions yamls
+- `lib/prompt_persistence.py` — save every prompt + a run manifest to
+  `output/<slug>/prompts/` so issues are reproducible / auditable
+- `tools/pdf/weasyprint_compose.py` — WeasyPrint backend
+- `tools/pdf/pdf_selector.py` — routes by `layout.schema_version`
+- `tools/validation/regions_validate.py` — JSON-schema + overlap +
+  component-registry check for regions yamls
 
 ## Verify Locally
 
@@ -143,17 +164,33 @@ See:
 - [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) for the original architecture map.
 - [docs/v0.3-ARCHITECTURE.md](docs/v0.3-ARCHITECTURE.md) for the editorial
   layout engine.
+- [docs/regions-reference.md](docs/regions-reference.md) — every spread's
+  regions yaml + region field schema (v0.3.1).
+- [docs/component-registry-reference.md](docs/component-registry-reference.md)
+  — the 15 components a region can name (v0.3.1).
+- [docs/typography-pack-cookbook.md](docs/typography-pack-cookbook.md) for
+  authoring v2 brand typography packs.
 - [docs/SCHEMA_V2_MIGRATION.md](docs/SCHEMA_V2_MIGRATION.md) for v1 -> v2
   migration notes.
+- [docs/superpowers/specs/2026-05-11-regions-as-shared-contract-design.md](docs/superpowers/specs/2026-05-11-regions-as-shared-contract-design.md)
+  — the v0.3.1 regions design rationale.
 
-## Known v0.3 Gaps
+## Known Gaps (as of v0.3.1)
 
-- The repository currently ships a v0.3 article example, but still needs a
-  matching v2 issue spec for one-command editorial smoke runs.
-- Some artifact schemas are still v1-shaped and need v2-compatible fields.
-- `Verify4K` currently validates v1 `images/page-*.png` outputs and should be
-  extended for v0.3 nested `images/spread-NN/<slot>.png` outputs.
-- WeasyPrint requires native system libraries in addition to Python packages.
+- **Live smoke test pending.** The editorial pipeline is implementation-
+  complete with 137/137 tests green and dry-run integration passing, but
+  no end-to-end Codex CLI run has been performed yet. See
+  [docs/SMOKE_TEST_v0.3.md](docs/SMOKE_TEST_v0.3.md) for the runbook.
+- **TOC + colophon literal headings lost.** During the regions migration,
+  fixed strings like "CONTENTS" and "COLOPHON" became empty `text_decorative`
+  divs. Fix path: add a `component_props.literal_text` field.
+- **`Verify4K` still validates v1 paths.** It expects
+  `images/page-NN.png`; v0.3 uses nested `images/spread-NN/<slot>.png`.
+  Publish stage will fail until this is extended.
+- **Some artifact schemas still v1-shaped.** `upscale_result.schema.json`
+  and a few others assume the v1 flat path layout.
+- **WeasyPrint requires native system libraries** in addition to Python
+  packages (`brew install weasyprint` on macOS).
 
 ## License
 
