@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Per-issue design system",
+  "type": "object",
+  "required": [
+    "schema_version", "slug", "profile", "brand",
+    "typography_resolution", "brand_authenticity", "output_targets"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "slug": {"type": "string"},
+    "profile": {"type": "string"},
+    "brand": {"type": "string"},
+    "inheritance": {
+      "type": "object",
+      "properties": {
+        "base_brand_typography": {"type": "boolean", "default": true},
+        "base_brand_print_specs": {"type": "boolean", "default": true},
+        "base_brand_visual_tokens": {"type": "boolean", "default": true}
+      }
+    },
+    "typography_resolution": {
+      "type": "object",
+      "patternProperties": {
+        "^(display|body|meta|kicker|caption|pull_quote|page_number)$": {
+          "type": "object",
+          "required": ["desired_family", "fallback_chain"],
+          "properties": {
+            "desired_family": {"type": "string"},
+            "fallback_chain": {
+              "type": "array",
+              "minItems": 1,
+              "items": {"type": "string"}
+            },
+            "resolved_at_render": {"type": ["string", "null"]}
+          }
+        }
+      }
+    },
+    "text_safe_contracts": {
+      "type": "object",
+      "properties": {
+        "default_rule": {"type": "string"},
+        "per_spread_overrides": {"type": "object"}
+      }
+    },
+    "brand_authenticity": {
+      "type": "object",
+      "properties": {
+        "do_not_generate": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "do_not_approximate": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "asset_provenance_required": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "asset_provenance_optional": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "layout_quality": {
+      "type": "object",
+      "properties": {
+        "min_gap_px": {"type": "integer", "minimum": 0},
+        "max_text_image_overlap_px": {"type": "integer", "minimum": 0},
+        "max_text_text_overlap_px": {"type": "integer", "minimum": 0},
+        "fail_on": {"enum": ["error", "warn", "never"]}
+      }
+    },
+    "output_targets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["format", "realizer"],
+        "properties": {
+          "format": {
+            "enum": [
+              "a4-magazine", "photobook-plain",
+              "deck-pptx", "deck-html", "video-mp4"
+            ]
+          },
+          "realizer": {
+            "enum": [
+              "weasyprint", "reportlab",
+              "presentations", "html-deck", "video"
+            ]
+          },
+          "page_size": {"type": "string"},
+          "slide_size": {"type": "string"},
+          "page_count": {"type": "integer"}
+        }
+      }
+    },
+    "contact_sheet_rubric": {
+      "type": "object",
+      "properties": {
+        "distinct_layouts_required": {"type": "integer"},
+        "template_collapse_threshold": {"type": "integer"}
+      }
+    }
+  }
+}
