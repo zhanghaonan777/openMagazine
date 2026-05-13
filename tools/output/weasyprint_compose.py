@@ -38,9 +38,11 @@ if sys.platform == "darwin":
                     pass
 
 # --- normal imports ---
+import json
 import pathlib
 from typing import Any
 
+from lib.font_resolver import resolve_typography_pack
 from lib.regions_loader import load_regions, RegionsNotFoundError
 from tools.base_tool import BaseTool
 
@@ -153,6 +155,18 @@ class WeasyprintCompose(BaseTool):
         if save_html:
             html_path = out_path.with_suffix(".html")
             html_path.write_text(html, encoding="utf-8")
+
+        # --- font resolution log (informational; never blocks render) ---
+        try:
+            _design_system = context.get("design_system") or {}
+            _font_log = resolve_typography_pack(_design_system)
+            _log_path = out_path.parent / "font-resolution.json"
+            _log_path.write_text(
+                json.dumps(_font_log, indent=2, ensure_ascii=False),
+                encoding="utf-8",
+            )
+        except Exception as _exc:  # pragma: no cover
+            print(f"[weasyprint] font resolution skipped: {_exc}", file=sys.stderr)
 
         return self.render_html_string(html, out_path, base_url=project_root)
 
