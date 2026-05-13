@@ -1,19 +1,19 @@
-"""pdf_selector — route pdf_compose calls by layout schema_version.
+"""pdf_selector — v0.3.1 backward-compat shim. Use tools.output.output_selector."""
+import warnings
 
-v1 layouts (plain-4 / plain-16, full-bleed image-only) → ReportlabCompose.
-v2 layouts (editorial-16page, multi-image spreads with text) → WeasyprintCompose.
+warnings.warn(
+    "tools.pdf.pdf_selector is deprecated; use tools.output.output_selector",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-Director skills declare 'dispatch pdf_compose' and let the selector pick the
-backend based on the resolved layout, instead of hard-coding either engine.
-"""
-from __future__ import annotations
-
+from tools.output.reportlab_compose import ReportlabCompose
+from tools.output.weasyprint_compose import WeasyprintCompose
 from tools.base_tool import BaseTool
-from tools.pdf.reportlab_compose import ReportlabCompose
-from tools.pdf.weasyprint_compose import WeasyprintCompose
 
 
 class PdfSelector(BaseTool):
+    """Backward-compat shim for v0.3.1 PdfSelector. Delegates to output backends."""
     capability = "pdf_compose"
     provider = "selector"
     status = "active"
@@ -35,9 +35,3 @@ class PdfSelector(BaseTool):
 
     def run(self, *, layout: dict, **kwargs):
         return self.choose_backend(layout=layout).run(**kwargs)
-
-
-# Auto-register
-from tools.tool_registry import registry  # noqa: E402
-
-registry.register(PdfSelector())
