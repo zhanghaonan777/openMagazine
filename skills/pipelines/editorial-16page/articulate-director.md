@@ -54,6 +54,37 @@ to read/edit the drafted copy before any image-gen spending begins.
    projection of the yaml (used by downstream stages for stage chaining
    without re-loading the yaml).
 
+## Design System Resolution
+
+After the article is validated (step 3 above), the articulate director
+also resolves and persists a per-issue design-system yaml. This ensures
+downstream compose realizers have a fully-specified design contract
+before any image-gen budget is spent.
+
+```python
+# v0.3.2: also resolve and persist the per-issue design-system
+from lib.design_system_loader import resolve_design_system
+from tools.validation.design_system_validate import validate_design_system
+import yaml, pathlib
+
+design_system = resolve_design_system(spec, layers, profile_name="consumer-retail")
+ds_path = pathlib.Path("library/design-systems") / f"{spec['slug']}.yaml"
+ds_path.parent.mkdir(parents=True, exist_ok=True)
+ds_path.write_text(yaml.safe_dump(design_system, sort_keys=False, allow_unicode=True))
+
+errors = validate_design_system(ds_path)
+assert errors == [], f"design-system validation failed: {errors}"
+
+print(f"Resolved design-system → {ds_path}")
+print(f"  profile: {design_system['profile']}")
+print(f"  output_targets: {[t['format'] for t in design_system['output_targets']]}")
+```
+
+The resolved yaml is placed at `library/design-systems/<slug>.yaml`. The
+user may edit it at the checkpoint; subsequent stages (storyboard, compose)
+read this yaml to drive typography fallback chains, brand authenticity gates,
+and output-realizer selection.
+
 ## Output artifact
 
 `output/<slug>/article.json` plus the persisted
