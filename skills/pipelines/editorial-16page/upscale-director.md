@@ -92,7 +92,20 @@ for s in layers["layout"]["image_slots"]:
     )
     # Persist the rendered prompt before the paid Vertex call so each
     # spread-NN/<slot>.png has a recoverable .prompt.txt sibling.
-    save_prompt(issue_dir, kind="upscale", prompt_text=prompt, slot_id=full)
+    # Build the spec block (v0.3.2)
+    imagegen_spec = {
+        "intended_output": str(out_path),
+        "reference_image": str(refs[0]) if refs else "",
+        "size": "3500x4666",  # 4K-ish 3:4 for portrait
+        "quality": "high",
+        "format": "png",
+        "background": "auto",
+        "moderation": "auto",
+    }
+    save_prompt(
+        issue_dir, kind="upscale", prompt_text=prompt, slot_id=full,
+        spec=imagegen_spec,
+    )
 
     cell = issue_dir / "cells" / f"spread-{s['spread_idx']:02d}" / f"{short}.png"
     refs = [cell]

@@ -98,7 +98,16 @@ prompt = build_storyboard_prompt_v2(
 # recoverable from disk later.
 from lib.prompt_persistence import save_prompt, save_manifest
 issue_dir = pathlib.Path(f"output/{spec['slug']}")
-save_prompt(issue_dir, kind="storyboard", prompt_text=prompt)
+imagegen_spec = {
+    "intended_output": str(issue_dir / "storyboard.png"),
+    "reference_image": "",
+    "size": "1024x1536",
+    "quality": "medium",
+    "format": "png",
+    "background": "auto",
+    "moderation": "auto",
+}
+save_prompt(issue_dir, kind="storyboard", prompt_text=prompt, spec=imagegen_spec)
 save_manifest(
     issue_dir,
     spec_slug=spec["slug"],
