@@ -2,6 +2,7 @@
 import pytest
 
 from lib.prompt_builder_v2 import (
+    _render_brand_authenticity_negatives,
     build_storyboard_prompt_v2,
     build_upscale_prompt,
     ROLE_TEMPLATES,
@@ -188,3 +189,76 @@ def test_build_storyboard_v2_with_regions_by_spread(spec, layers):
     # back-cover has no regions yaml in this test → no layout block for spread 9
     assert "spread-09.back_coda" in p
     assert "{{" not in p
+
+
+def test_build_upscale_prompt_embeds_brand_authenticity(spec, layers):
+    """Upscale + storyboard prompts append brand_authenticity negatives when
+    design_system is present in layers."""
+    layers_with_ds = {
+        **layers,
+        "design_system": {
+            "brand_authenticity": {
+                "do_not_generate": ["logo", "mascot"],
+                "do_not_approximate": ["MEOW LIFE wordmark"],
+            }
+        },
+    }
+
+    # --- upscale ---
+    p = build_upscale_prompt(
+        role="portrait", spec=spec, layers=layers_with_ds,
+        slot_id="spread-03.feature_hero",
+        scene="character at boulder",
+        aspect="3:4",
+    )
+    assert "Brand authenticity (additional negative prompt):" in p
+    assert "no logo" in p
+    assert "no mascot" in p
+    assert "no MEOW LIFE wordmark" in p
+
+    # --- storyboard ---
+    plan = {
+        "outer_aspect": "2:3",
+        "outer_size_px": [1024, 1536],
+        "grid": {"rows": 1, "cols": 1},
+        "cells": [
+            {"slot_id": "spread-01.cover_hero", "row": 0, "col": 0,
+             "rowspan": 1, "colspan": 1, "aspect": "3:4",
+             "bbox_px": [0, 0, 1024, 1536], "page_label": "01"},
+        ],
+    }
+    sb = build_storyboard_prompt_v2(
+        spec, layers_with_ds,
+        plan=plan,
+        scenes_by_slot={"spread-01.cover_hero": "hero on lunar surface"},
+    )
+    assert "Brand authenticity (additional negative prompt):" in sb
+    assert "no logo" in sb
+    assert "no MEOW LIFE wordmark" in sb
+
+    # --- no design_system → no negatives block ---
+    p_plain = build_upscale_prompt(
+        role="portrait", spec=spec, layers=layers,
+        slot_id="spread-03.feature_hero",
+        scene="character at boulder",
+        aspect="3:4",
+    )
+    assert "Brand authenticity" not in p_plain
+
+
+def test_render_brand_authenticity_negatives_empty_when_no_design_system(layers):
+    """Helper returns empty string when layers has no design_system key."""
+    assert _render_brand_authenticity_negatives(layers) == ""
+
+
+def test_render_brand_authenticity_negatives_empty_when_no_entries():
+    """Helper returns empty string when brand_authenticity lists are empty."""
+    layers_empty = {
+        "design_system": {
+            "brand_authenticity": {
+                "do_not_generate": [],
+                "do_not_approximate": [],
+            }
+        }
+    }
+    assert _render_brand_authenticity_negatives(layers_empty) == ""

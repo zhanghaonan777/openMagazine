@@ -66,6 +66,24 @@ def _render_regions_block(ctx: dict) -> str:
     return "\n".join(lines)
 
 
+def _render_brand_authenticity_negatives(layers: dict) -> str:
+    """Return a negative-prompt paragraph derived from design_system.brand_authenticity.
+
+    Joins do_not_generate + do_not_approximate entries with a "no " prefix.
+    Returns an empty string when no design_system or no relevant entries exist.
+    """
+    design_system = layers.get("design_system") or {}
+    ba = design_system.get("brand_authenticity") or {}
+    entries: list[str] = []
+    for key in ("do_not_generate", "do_not_approximate"):
+        for item in ba.get(key) or []:
+            entries.append(f"no {item}")
+    if not entries:
+        return ""
+    negatives = ", ".join(entries)
+    return f"\n\nBrand authenticity (additional negative prompt):\n{negatives}"
+
+
 def build_upscale_prompt(
     *,
     role: str,
@@ -88,6 +106,7 @@ def build_upscale_prompt(
     if regions_context:
         rendered = _render_regions_block(regions_context) + "\n\n" + rendered
 
+    rendered = rendered + _render_brand_authenticity_negatives(layers)
     return rendered
 
 
@@ -139,6 +158,7 @@ def build_storyboard_prompt_v2(
     # If template doesn't use {{SPREAD_LAYOUTS_BLOCK}}, append at the end
     if pmap["{{SPREAD_LAYOUTS_BLOCK}}"] and "{{SPREAD_LAYOUTS_BLOCK}}" not in template:
         rendered = rendered.rstrip() + "\n\n" + pmap["{{SPREAD_LAYOUTS_BLOCK}}"]
+    rendered = rendered + _render_brand_authenticity_negatives(layers)
     return rendered
 
 
