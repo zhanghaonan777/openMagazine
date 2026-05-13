@@ -1,0 +1,68 @@
+schema_version: 1
+name: consumer-retail
+display_name:
+  en: "Consumer / Retail / Editorial"
+  zh: "消费品 / 零售 / 编辑型"
+
+# 1:1 link to Codex Presentations skill profile name
+presentations_profile: consumer-retail
+
+hard_gates:
+  - rule: image_led_subject_gate
+    description: |
+      Use sourced imagery with provenance, user-provided assets, or
+      imagegen — never Python drawings or programmatic vector
+      illustrations for the primary subject.
+    applies_when: "subject is visually inspectable (animal, person, product, place, food, lifestyle scene)"
+
+  - rule: brand_authenticity_gate
+    description: |
+      Do not generate / approximate logos / mascots / app icons /
+      signature marks. Use verified assets or omit. When an official
+      asset cannot be verified, rely on color, typography, layout,
+      and product language as brand cues.
+    forbidden_generations:
+      - logo
+      - mascot
+      - app_icon
+      - signature_mark
+      - product_ui_screenshot
+
+  - rule: editorial_copy_gate
+    description: |
+      Client-facing copy must sound usable by staff or customers, not
+      like an internal strategy note. Avoid corporate scorecards, faux
+      KPIs, and boardroom language unless explicitly requested.
+
+required_proof_objects:
+  - image_hero_or_look_page
+  - product_or_look_rationale
+  - audience_journey
+  - editorial_hierarchy
+
+visual_preferences:
+  paper_color: warm_neutral_or_deep_ink
+  display_face: refined_serif_or_didone
+  body_face: utilitarian_sans_or_humanist_serif
+  meta_face: monospace
+  layout: open_composition
+  rules: hairline
+  data_labels: direct
+
+banned_motifs:
+  - corporate_scorecard
+  - faux_kpi_grid
+  - generic_saas_dashboard
+  - consulting_card_grid
+  - stock_photo_business_meeting
+
+spread_types_required:
+  - cover
+  - feature-spread
+
+spread_types_optional:
+  - toc
+  - pull-quote
+  - portrait-wall
+  - colophon
+  - back-cover
