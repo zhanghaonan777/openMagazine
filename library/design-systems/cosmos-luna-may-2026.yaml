@@ -1,0 +1,70 @@
+schema_version: 1
+slug: cosmos-luna-may-2026
+profile: consumer-retail
+brand: meow-life
+
+inheritance:
+  base_brand_typography: true
+  base_brand_print_specs: true
+  base_brand_visual_tokens: true
+
+typography_resolution:
+  display:
+    desired_family: "Playfair Display"
+    fallback_chain:
+      - "Source Serif 4"
+      - "Georgia"
+      - "Times New Roman"
+    resolved_at_render: ~
+  body:
+    desired_family: "Source Serif 4"
+    fallback_chain:
+      - "Georgia"
+      - "Times New Roman"
+    resolved_at_render: ~
+  meta:
+    desired_family: "IBM Plex Mono"
+    fallback_chain:
+      - "Menlo"
+      - "Courier"
+    resolved_at_render: ~
+
+text_safe_contracts:
+  default_rule: |
+    When text overlays or sits inside a generated visual field, keep
+    clean negative space inside each text-safe rectangle.
+  per_spread_overrides: {}
+
+brand_authenticity:
+  do_not_generate:
+    - logo
+    - mascot
+    - app_icon
+  do_not_approximate:
+    - "MEOW LIFE wordmark"
+    - "Luna's specific face proportions"
+  asset_provenance_required:
+    - cover_hero
+    - feature_hero
+  asset_provenance_optional:
+    - feature_captioned
+
+layout_quality:
+  min_gap_px: 16
+  max_text_image_overlap_px: 25
+  max_text_text_overlap_px: 10
+  fail_on: error
+
+output_targets:
+  - format: a4-magazine
+    realizer: weasyprint
+    page_size: A4
+    bleed_mm: 3
+  - format: deck-pptx
+    realizer: presentations
+    slide_size: 1280x720
+    page_count: 9
+
+contact_sheet_rubric:
+  distinct_layouts_required: 7
+  template_collapse_threshold: 3
