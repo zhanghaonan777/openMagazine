@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Codex imagegen prompt spec block",
+  "description": "Validates the JSON spec block embedded in *.prompt.txt files. The Markdown prose section is not schema-validated.",
+  "type": "object",
+  "required": ["intended_output", "size", "format"],
+  "properties": {
+    "intended_output": {
+      "type": "string",
+      "description": "Absolute path where Codex imagegen should write the PNG."
+    },
+    "reference_image": {
+      "type": "string",
+      "description": "Optional reference image path; empty string if none."
+    },
+    "size": {
+      "type": "string",
+      "pattern": "^[0-9]+x[0-9]+$",
+      "description": "Pixel dimensions WIDTHxHEIGHT."
+    },
+    "quality": {
+      "enum": ["low", "medium", "high", "auto"],
+      "default": "medium"
+    },
+    "format": {"enum": ["png", "webp", "jpeg"]},
+    "background": {"type": "string", "default": "auto"},
+    "moderation": {"type": "string", "default": "auto"}
+  }
+}
