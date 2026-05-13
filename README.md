@@ -23,7 +23,15 @@ Current branch: `feat/v0.3-editorial-engine`.
 | Pipeline | Status | Output | Compose Engine |
 |---|---|---|---|
 | `smoke-test-4page` | production MVP | 4-page photo magazine | ReportLab |
-| `editorial-16page` | experimental v0.3.1 | 16-page editorial magazine, 21 image slots, regions-driven | WeasyPrint |
+| `editorial-16page` | experimental v0.3.2 | 16-page editorial magazine + 9-slide PPTX deck, regions-driven, multi-realizer | WeasyPrint + Presentations |
+
+**v0.3.2 update (2026-05-13):** Output now multi-realizer. Same upstream
+pipeline can produce both A4 magazine PDF (WeasyPrint) and 9-slide deck
+PPTX (Codex Presentations skill) from one spec. Design decisions
+(typography fallback chains, text-safe contracts, brand authenticity
+gates) are lifted into `library/profiles/` + `library/design-systems/`
+shared data layers. See
+[`docs/superpowers/specs/2026-05-13-design-contracts-multi-realizer-design.md`](docs/superpowers/specs/2026-05-13-design-contracts-multi-realizer-design.md).
 
 **v0.3.1 update (2026-05-12):** the editorial path is now driven by a shared
 "regions" data layer — per-spread yamls declare every bounding box (image
