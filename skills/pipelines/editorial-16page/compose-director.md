@@ -35,15 +35,15 @@ Layer 3:
 
 ## Procedure
 
-Use the `PdfSelector` so the same call works for both v1 (ReportLab)
-and v2 (WeasyPrint) layouts. For editorial-16page, this dispatches to
+Use `OutputSelector` with the multi-realizer loop so one spec can produce
+multiple output targets (e.g. A4 magazine PDF + PPTX deck) from the same
+pipeline. For editorial-16page, the default target dispatches to
 `WeasyprintCompose` because `layout.schema_version == 2`.
 
 ~~~python
 import pathlib, yaml, json
-
 from lib.spec_loader import load_spec, resolve_layers
-from tools.pdf.pdf_selector import PdfSelector
+from tools.output.output_selector import OutputSelector
 
 spec, _ = load_spec(pathlib.Path("library/issue-specs/<slug>.yaml"))
 layers = resolve_layers(spec)
@@ -51,23 +51,24 @@ article = yaml.safe_load(
     open(f"library/articles/{spec['article']}.yaml", "r", encoding="utf-8")
 )
 issue_dir = pathlib.Path(f"output/{spec['slug']}")
+design_system = layers.get("design_system") or {}
 
-selector = PdfSelector()
-backend = selector.choose_backend(layout=layers["layout"])  # → WeasyprintCompose
-result = backend.run(
-    issue_dir=issue_dir,
-    layout=layers["layout"],
-    brand=layers["brand"],
-    article=article,
-    spec=spec,
-)
-# result = {"pdf_path": "...", "html_path": "...", "page_count": 16, "size_mb": 42.1}
+selector = OutputSelector()
+results = []
+for target in design_system.get("output_targets", [{"format": "a4-magazine", "realizer": "weasyprint"}]):
+    backend = selector.choose_backend(target=target)
+    result = backend.run(
+        issue_dir=issue_dir,
+        layout=layers["layout"],
+        brand=layers["brand"],
+        article=article,
+        spec=spec,
+        design_system=design_system,
+    )
+    results.append({"target": target, "result": result})
 
 (issue_dir / "compose_result.json").write_text(json.dumps({
-    "pdf_path": result["pdf_path"],
-    "html_path": result["html_path"],
-    "page_count": result["page_count"],
-    "size_mb": result["size_mb"],
+    "outputs": results,
     "spec_slug": spec["slug"],
 }, indent=2))
 ~~~
