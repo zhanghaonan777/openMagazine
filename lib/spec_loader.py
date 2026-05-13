@@ -34,4 +34,12 @@ def resolve_layers(spec: dict) -> dict:
     else:
         result["style"] = None  # Tier 2 fallback at runtime
 
+    # v0.3.2: load design-system if it exists
+    try:
+        from lib.design_system_loader import load_design_system, DesignSystemNotFoundError
+        design_system = load_design_system(spec["slug"])
+    except (DesignSystemNotFoundError, KeyError):
+        design_system = None
+    result["design_system"] = design_system
+
     return result
