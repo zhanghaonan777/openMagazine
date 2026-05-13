@@ -113,3 +113,38 @@ time alongside the contact sheet and verify report.
 - **PDF size < 30 MB** → likely blank or near-blank pages. Inspect each
   `images/spread-NN/<slot>.png` and `magazine.html` to find the broken
   spread. Don't auto-recompose without isolating the failure.
+
+## Multi-Realizer Orchestration (v0.3.2)
+
+`design_system.output_targets` may list multiple realizers. The PDF
+realizer runs first (above); for each non-PDF realizer, invoke the
+appropriate director skill:
+
+~~~python
+for target in design_system.get("output_targets", []):
+    if target["realizer"] == "presentations":
+        # → see compose-director-deck.md
+        # Agent should now read that file and follow it for this target.
+        pass
+    elif target["realizer"] in ("weasyprint", "reportlab"):
+        # Already handled above
+        continue
+    else:
+        print(f"WARNING: unknown realizer {target['realizer']!r}; skipping")
+~~~
+
+Each realizer appends its result to `compose_result.json.outputs`.
+Final structure:
+
+~~~json
+{
+  "outputs": [
+    {"format": "a4-magazine", "realizer": "weasyprint",
+     "path": "output/<slug>/magazine.pdf", "page_count": 16, "size_mb": 42.1},
+    {"format": "deck-pptx", "realizer": "presentations",
+     "path": "output/<slug>/deck/<slug>.pptx", "slide_count": 9,
+     "thread_id": "..."}
+  ],
+  "spec_slug": "<slug>"
+}
+~~~
