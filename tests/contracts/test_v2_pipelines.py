@@ -97,3 +97,38 @@ def test_regions_yaml_validates(regions_path):
         f"{regions_path.name}: {len(errors)} error(s)\n  "
         + "\n  ".join(errors)
     )
+
+
+from tools.validation.design_system_validate import validate_design_system
+
+
+def _profile_yamls():
+    return sorted((SKILL_ROOT / "library" / "profiles").glob("*.yaml"))
+
+
+def _design_system_yamls():
+    return sorted((SKILL_ROOT / "library" / "design-systems").glob("*.yaml"))
+
+
+@pytest.mark.parametrize(
+    "profile_path", _profile_yamls(), ids=lambda p: p.name
+)
+def test_profile_yaml_validates(profile_path):
+    """Every library/profiles/*.yaml must validate against profile.schema.json."""
+    import json
+    from jsonschema import validate
+    schema = json.loads((SKILL_ROOT / "schemas/profile.schema.json").read_text())
+    data = yaml.safe_load(profile_path.read_text())
+    validate(instance=data, schema=schema)
+
+
+@pytest.mark.parametrize(
+    "ds_path", _design_system_yamls(), ids=lambda p: p.name
+)
+def test_design_system_yaml_validates(ds_path):
+    """Every library/design-systems/*.yaml must validate."""
+    errors = validate_design_system(ds_path)
+    assert errors == [], (
+        f"{ds_path.name}: {len(errors)} error(s)\n  "
+        + "\n  ".join(errors)
+    )
