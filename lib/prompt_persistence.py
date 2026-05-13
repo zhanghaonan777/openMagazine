@@ -33,6 +33,7 @@ def save_prompt(
     kind: str,
     prompt_text: str,
     slot_id: str | None = None,
+    spec: dict | None = None,  # NEW v0.3.2
 ) -> pathlib.Path:
     """Persist a rendered prompt under ``<issue_dir>/prompts/``.
 
@@ -43,6 +44,23 @@ def save_prompt(
       slot_id: required when ``kind="upscale"``. Dotted ids like
         ``"spread-03.feature_hero"`` split on the FIRST dot so each spread
         gets its own subdirectory.
+      spec: optional imagegen JSON spec dict (v0.3.2+). When provided, the
+        file format becomes a dual-section document:
+
+          # Codex Imagegen Prompt
+
+          Use the Codex imagegen tool with this prompt.
+          Do not call external image APIs from scripts.
+
+          ```json
+          <JSON serialization of spec>
+          ```
+
+          ## Prompt
+
+          <prompt_text>
+
+        Without ``spec``, falls back to prose-only v0.3.1 behavior.
 
     Returns: the path written.
     """
@@ -64,7 +82,23 @@ def save_prompt(
         )
 
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(prompt_text, encoding="utf-8")
+
+    if spec:
+        body = (
+            "# Codex Imagegen Prompt\n\n"
+            "Use the Codex imagegen tool with this prompt. "
+            "Do not call external image APIs from scripts.\n\n"
+            "```json\n"
+            + json.dumps(spec, indent=2, ensure_ascii=False)
+            + "\n```\n\n"
+            "## Prompt\n\n"
+            + prompt_text
+            + "\n"
+        )
+    else:
+        body = prompt_text
+
+    out.write_text(body, encoding="utf-8")
     return out
 
 

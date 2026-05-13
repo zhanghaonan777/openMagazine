@@ -88,3 +88,34 @@ def test_save_prompt_utf8(tmp_path):
     text = "你好,这是一个测试 prompt 包含中文 ✨"
     path = save_prompt(tmp_path, kind="storyboard", prompt_text=text)
     assert path.read_text(encoding="utf-8") == text
+
+
+def test_save_prompt_with_spec_writes_dual_section(tmp_path):
+    path = save_prompt(
+        tmp_path, kind="upscale",
+        prompt_text="Subject: cat. Scene: lunar.",
+        slot_id="spread-03.feature_hero",
+        spec={
+            "intended_output": "/abs/path/to.png",
+            "size": "3500x4666",
+            "quality": "high",
+            "format": "png",
+        },
+    )
+    content = path.read_text(encoding="utf-8")
+    assert "# Codex Imagegen Prompt" in content
+    assert "```json" in content
+    assert "intended_output" in content
+    assert "## Prompt" in content
+    assert "Subject: cat" in content
+
+
+def test_save_prompt_without_spec_keeps_prose_format(tmp_path):
+    """Backward compatibility: no spec → just prose."""
+    path = save_prompt(
+        tmp_path, kind="storyboard",
+        prompt_text="hello storyboard",
+    )
+    content = path.read_text(encoding="utf-8")
+    assert content == "hello storyboard"
+    assert "```json" not in content
