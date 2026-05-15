@@ -26,6 +26,7 @@ required_skills:
   - meta/checkpoint-protocol
   - meta/cost-budget-enforcer
   - meta/article-writer
+  - meta/comeback-scorer
 
 stages:
   - name: research
@@ -89,6 +90,17 @@ stages:
     reviewer: "enabled"
     success_criteria:
       - magazine.pdf at output/<slug>/, page count == 16, 30-150 MB total
+
+  - name: score
+    skill: meta/comeback-scorer
+    produces:
+      - qa/scorecard.json
+    checkpoint: "off"
+    reviewer: "enabled"
+    success_criteria:
+      - schema-valid qa/scorecard.json (schemas/artifacts/scorecard.schema.json)
+      - gate_result.pass == true (else iterate weakest spreads from scorecard.iteration_targets and rerun upstream stages)
+      - no anti_patterns_detected entry with severity == "block"
 
   - name: publish
     skill: pipelines/editorial-16page/publish-director

@@ -1,0 +1,211 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Comeback scorecard",
+  "description": "Post-render quality scoring borrowed from Codex Presentations skill Phase 5 (Comeback Rubric). 10 dimensions, each 0-5. Gates publish: by default the issue must total >= 40/45 (no reference supplied) or >= 44/50 (reference supplied), and no single dimension may score below 4. Profile gates and blocking anti-patterns sit ABOVE the numeric rubric. Lives at output/<slug>/qa/scorecard.json.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "spec_slug",
+    "scored_at",
+    "reference_supplied",
+    "dimensions",
+    "totals",
+    "gate_result"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": 1},
+    "spec_slug": {"type": "string"},
+    "scored_at": {
+      "type": "string",
+      "description": "ISO-8601 timestamp."
+    },
+    "scored_by": {
+      "type": "string",
+      "description": "Who or what produced this score (agent / human / hybrid). Free text."
+    },
+    "reference_supplied": {"type": "boolean"},
+    "reference_path": {"type": ["string", "null"]},
+    "dimensions": {
+      "type": "object",
+      "required": [
+        "story",
+        "specificity",
+        "rhythm",
+        "whitespace",
+        "image_clarity",
+        "typography",
+        "restraint",
+        "precision",
+        "coherence"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "story": {
+          "$ref": "#/definitions/dimension",
+          "description": "Titles are claims; spread sequence has a real arc."
+        },
+        "specificity": {
+          "$ref": "#/definitions/dimension",
+          "description": "Deck would fail the noun-swap test. Replace subject and it stops working."
+        },
+        "rhythm": {
+          "$ref": "#/definitions/dimension",
+          "description": "Contact sheet has varied macro layouts; no 3 consecutive spreads share the same shape."
+        },
+        "whitespace": {
+          "$ref": "#/definitions/dimension",
+          "description": "Spreads breathe without feeling empty. Boxed prose has visible top/bottom padding."
+        },
+        "image_clarity": {
+          "$ref": "#/definitions/dimension",
+          "description": "Image-led equivalent of Presentations' chart_clarity. Each image proves one thing; crops are intentional; subjects are sharp; provenance verified for identity assets."
+        },
+        "typography": {
+          "$ref": "#/definitions/dimension",
+          "description": "Type feels intentional, not default. Fallback chain is used deliberately."
+        },
+        "restraint": {
+          "$ref": "#/definitions/dimension",
+          "description": "No filler boxes, badges, decorative clutter; no rounded cards as default."
+        },
+        "precision": {
+          "$ref": "#/definitions/dimension",
+          "description": "Metrics, dates, source notes, captions are exact. No invented facts."
+        },
+        "coherence": {
+          "$ref": "#/definitions/dimension",
+          "description": "One visual system across all 9 spreads. Margins / kicker / accent rule / page numbers consistent."
+        },
+        "reference_delta": {
+          "$ref": "#/definitions/optional_dimension",
+          "description": "Visibly better than the supplied reference. Score 'n/a' or omit when no reference."
+        }
+      }
+    },
+    "totals": {
+      "type": "object",
+      "required": ["raw_total", "max_total", "dimensions_scored"],
+      "additionalProperties": false,
+      "properties": {
+        "raw_total": {"type": "integer", "minimum": 0, "maximum": 50},
+        "max_total": {"type": "integer", "enum": [45, 50]},
+        "dimensions_scored": {"type": "integer", "enum": [9, 10]}
+      }
+    },
+    "profile_gates": {
+      "type": "array",
+      "description": "Pass/fail above the numeric rubric. Inherited from library/profiles/<name>.yaml.hard_gates.",
+      "items": {
+        "type": "object",
+        "required": ["rule", "result"],
+        "additionalProperties": false,
+        "properties": {
+          "rule": {"type": "string"},
+          "result": {"enum": ["pass", "fail", "n/a"]},
+          "evidence": {"type": "string"}
+        }
+      }
+    },
+    "anti_patterns_detected": {
+      "type": "array",
+      "description": "Items from the blocking anti-patterns catalogue actually seen on this run. Severity 'block' fails the gate even if the numeric rubric passes.",
+      "items": {
+        "type": "object",
+        "required": ["pattern", "where", "severity"],
+        "additionalProperties": false,
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "description": "Catalogue key (e.g. 'title_states_topic_not_conclusion', 'rounded_cards_as_default')."
+          },
+          "where": {
+            "type": "string",
+            "description": "Spread idx or region id where the pattern was observed."
+          },
+          "severity": {"enum": ["block", "warn"]},
+          "note": {"type": "string"}
+        }
+      }
+    },
+    "iteration_targets": {
+      "type": "array",
+      "description": "Spreads flagged for re-do before delivery. Empty when scorecard passes. Drives the iteration rule from Presentations Phase 5: 'iterate the weakest 2-4 spreads first, then rerender'.",
+      "items": {
+        "type": "object",
+        "required": ["spread_idx", "reason"],
+        "additionalProperties": false,
+        "properties": {
+          "spread_idx": {"type": "integer"},
+          "reason": {"type": "string"},
+          "weakest_dimension": {"type": "string"}
+        }
+      }
+    },
+    "gate_result": {
+      "type": "object",
+      "required": [
+        "pass",
+        "min_dimension_score",
+        "any_dimension_below_4",
+        "any_profile_gate_failed",
+        "blocking_anti_patterns",
+        "thresholds_used"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "pass": {"type": "boolean"},
+        "min_dimension_score": {"type": "integer", "minimum": 0, "maximum": 5},
+        "any_dimension_below_4": {"type": "boolean"},
+        "any_profile_gate_failed": {"type": "boolean"},
+        "blocking_anti_patterns": {"type": "integer", "minimum": 0},
+        "thresholds_used": {
+          "type": "object",
+          "required": ["min_total", "min_per_dimension"],
+          "additionalProperties": false,
+          "properties": {
+            "min_total": {"type": "integer"},
+            "min_per_dimension": {"type": "integer"}
+          }
+        }
+      }
+    },
+    "narrative_summary": {
+      "type": "string",
+      "description": "Blunt 2-3 sentence summary of where this issue lands. Names remaining weak spots; no vague praise."
+    }
+  },
+  "definitions": {
+    "dimension": {
+      "type": "object",
+      "required": ["score", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "score": {"type": "integer", "minimum": 0, "maximum": 5},
+        "evidence": {
+          "type": "string",
+          "minLength": 10,
+          "description": "Concrete observation justifying this score. No vague praise like 'good story'."
+        },
+        "what_would_make_it_5": {
+          "type": "string",
+          "description": "Optional. Concrete change required to reach 5. Required in practice when score < 5."
+        }
+      }
+    },
+    "optional_dimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "score": {
+          "oneOf": [
+            {"type": "integer", "minimum": 0, "maximum": 5},
+            {"type": "string", "enum": ["n/a"]}
+          ]
+        },
+        "evidence": {"type": "string"},
+        "what_would_make_it_5": {"type": "string"}
+      }
+    }
+  }
+}

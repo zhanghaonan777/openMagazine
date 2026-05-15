@@ -41,25 +41,34 @@ registry = ToolRegistry()
 
 
 def discover() -> ToolRegistry:
-    """Auto-import every tool module so they self-register on import.
+    """Auto-import every tool module under tools/ so they self-register.
 
-    Called by AGENT_GUIDE preflight: `from tools.tool_registry import discover, registry; discover()`.
+    Walks the `tools` package recursively and imports each leaf module that
+    isn't infrastructure (`base_tool`, `tool_registry`, `__init__`). Replaces
+    the v0.1 hand-maintained module list which drifted as new families were
+    added (`tools/output/` in v0.3.2, `tools/validation/scorecard_validate.py`
+    in v0.3.2.1) and as `tools/pdf/{reportlab,weasyprint}_compose.py` moved
+    to `tools/output/`.
+
+    Called by AGENT_GUIDE preflight:
+    `from tools.tool_registry import discover, registry; discover()`.
     """
-    modules = [
-        "tools.image.codex_image_gen",
-        "tools.image.vertex_gemini_image",
-        "tools.image.image_selector",
-        "tools.image.pillow_split",
-        "tools.pdf.reportlab_compose",
-        "tools.pdf.weasyprint_compose",
-        "tools.pdf.pdf_selector",
-        "tools.validation.verify_4k",
-        "tools.validation.spec_validate",
-        "tools.validation.reference_photo_check",
-        "tools.validation.article_validate",
-        "tools.meta.scaffold_style",
-        "tools.meta.migrate_brand_v1_to_v2",
-    ]
-    for module in modules:
-        importlib.import_module(module)
+    import pathlib
+    import pkgutil
+
+    import tools as tools_pkg
+
+    tools_root = pathlib.Path(tools_pkg.__file__).parent
+    skip_leaves = {"base_tool", "tool_registry"}
+
+    for module_info in pkgutil.walk_packages(
+        path=[str(tools_root)],
+        prefix="tools.",
+    ):
+        if module_info.ispkg:
+            continue
+        leaf = module_info.name.rsplit(".", 1)[-1]
+        if leaf in skip_leaves:
+            continue
+        importlib.import_module(module_info.name)
     return registry
