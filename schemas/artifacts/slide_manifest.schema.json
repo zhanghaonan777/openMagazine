@@ -1,0 +1,315 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Slide manifest",
+  "description": "Per-target, fully-resolved render input. One manifest per output_target — produced by lib/slide_manifest_builder.py from regions + article + design_system + images, consumed by WeasyprintCompose (and future HtmlInteractiveCompose / PresentationsAdapter). Granularity is per-SPREAD (9 entries for editorial-16page): a feature-spread occupies one entry with regions spanning both pages in spread-local rect_norm. rect_norm is target-invariant; rect_px is precomputed at the chosen page_size. Text is locale-resolved (one language per manifest). Typography font_family chains are already resolved. Lives at output/<slug>/manifests/<target>.manifest.json.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "spec_slug",
+    "built_at",
+    "locale",
+    "output_target",
+    "design_tokens",
+    "slides"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": 1},
+    "spec_slug": {"type": "string"},
+    "built_at": {
+      "type": "string",
+      "description": "ISO-8601 timestamp of when the builder produced this manifest."
+    },
+    "builder_version": {
+      "type": "string",
+      "description": "Optional. Version of lib/slide_manifest_builder.py that produced this."
+    },
+    "locale": {
+      "type": "string",
+      "description": "Which language this manifest is rendered in. 'en' / 'zh' / etc."
+    },
+    "output_target": {"$ref": "#/definitions/output_target"},
+    "design_tokens": {"$ref": "#/definitions/design_tokens"},
+    "brand_authenticity": {
+      "type": "object",
+      "description": "Resolved from design-system.yaml. Realizers must surface these gates in their own QA passes.",
+      "additionalProperties": false,
+      "properties": {
+        "do_not_generate": {"type": "array", "items": {"type": "string"}},
+        "do_not_approximate": {"type": "array", "items": {"type": "string"}},
+        "asset_provenance_required": {"type": "array", "items": {"type": "string"}},
+        "asset_provenance_optional": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "text_safe_default_rule": {
+      "type": "string",
+      "description": "Resolved from design_system.text_safe_contracts.default_rule. Applies to any region with text_safe_required=true that has no per-region override."
+    },
+    "claim_spine_ref": {
+      "type": ["string", "null"],
+      "description": "Path to the claim_spine artifact this manifest was built against (relative to issue dir). Null when claim_spine is absent from article."
+    },
+    "slides": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/definitions/slide"}
+    }
+  },
+  "definitions": {
+    "output_target": {
+      "type": "object",
+      "required": ["format", "realizer", "page_size"],
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "type": "string",
+          "description": "Mirrors design_system.output_targets[i].format (e.g. 'a4-magazine', 'magazine-pptx')."
+        },
+        "realizer": {
+          "type": "string",
+          "enum": ["weasyprint", "reportlab", "presentations", "html-interactive"]
+        },
+        "page_size": {
+          "type": "object",
+          "required": ["width", "height", "unit"],
+          "additionalProperties": false,
+          "properties": {
+            "width": {"type": "number", "exclusiveMinimum": 0},
+            "height": {"type": "number", "exclusiveMinimum": 0},
+            "unit": {"type": "string", "enum": ["mm", "px"]}
+          }
+        },
+        "bleed": {
+          "type": "object",
+          "required": ["value", "unit"],
+          "additionalProperties": false,
+          "properties": {
+            "value": {"type": "number", "minimum": 0},
+            "unit": {"type": "string", "enum": ["mm", "px"]}
+          }
+        },
+        "dpi": {
+          "type": "number",
+          "default": 96,
+          "description": "Resolution used to convert between mm and px. Defaults to 96 for screen; print typically uses 300."
+        }
+      }
+    },
+    "design_tokens": {
+      "type": "object",
+      "required": ["typography", "color_palette"],
+      "additionalProperties": false,
+      "properties": {
+        "typography": {
+          "type": "object",
+          "required": ["display", "body"],
+          "additionalProperties": false,
+          "properties": {
+            "display": {"$ref": "#/definitions/typography_slot"},
+            "body": {"$ref": "#/definitions/typography_slot"},
+            "meta": {"$ref": "#/definitions/typography_slot"},
+            "caption": {"$ref": "#/definitions/typography_slot"},
+            "kicker": {"$ref": "#/definitions/typography_slot"},
+            "pull_quote": {"$ref": "#/definitions/typography_slot"},
+            "page_number": {"$ref": "#/definitions/typography_slot"},
+            "drop_cap": {"$ref": "#/definitions/typography_slot"}
+          }
+        },
+        "color_palette": {
+          "type": "object",
+          "required": ["paper", "ink"],
+          "additionalProperties": false,
+          "properties": {
+            "paper": {"$ref": "#/definitions/color"},
+            "ink": {"$ref": "#/definitions/color"},
+            "accent": {"$ref": "#/definitions/color"},
+            "muted": {"$ref": "#/definitions/color"}
+          }
+        },
+        "margins": {
+          "type": "object",
+          "required": ["top", "outer", "inner", "bottom", "unit"],
+          "additionalProperties": false,
+          "properties": {
+            "top": {"type": "number", "minimum": 0},
+            "outer": {"type": "number", "minimum": 0},
+            "inner": {"type": "number", "minimum": 0},
+            "bottom": {"type": "number", "minimum": 0},
+            "unit": {"type": "string", "enum": ["mm", "px"]}
+          }
+        },
+        "grid": {
+          "type": "object",
+          "description": "Optional baseline grid info.",
+          "additionalProperties": true
+        }
+      }
+    },
+    "typography_slot": {
+      "type": "object",
+      "required": ["family_chain"],
+      "additionalProperties": false,
+      "properties": {
+        "family_chain": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string"},
+          "description": "Fully resolved font fallback chain. First entry is desired_family; subsequent entries are fallbacks for when the desired font is unavailable at render time."
+        },
+        "size_pt": {"type": "number", "exclusiveMinimum": 0},
+        "weight": {"type": "integer", "minimum": 100, "maximum": 1000},
+        "style": {"type": "string", "enum": ["normal", "italic", "oblique"]},
+        "line_height": {"type": "number", "exclusiveMinimum": 0},
+        "letter_spacing": {"type": "number"},
+        "color": {"$ref": "#/definitions/color"},
+        "transform": {"type": "string", "enum": ["none", "uppercase", "lowercase", "capitalize"]}
+      }
+    },
+    "color": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$",
+      "description": "RGB or RGBA hex. CMYK conversion is the realizer's job."
+    },
+    "slide": {
+      "type": "object",
+      "required": ["slide_idx", "spread_idx", "spread_type", "pages_per_instance", "regions"],
+      "additionalProperties": false,
+      "properties": {
+        "slide_idx": {"type": "integer", "minimum": 1},
+        "spread_idx": {"type": "integer", "minimum": 1},
+        "spread_type": {
+          "type": "string",
+          "enum": [
+            "cover",
+            "toc",
+            "feature-spread",
+            "pull-quote",
+            "portrait-wall",
+            "colophon",
+            "back-cover"
+          ]
+        },
+        "pages_per_instance": {
+          "type": "integer",
+          "enum": [1, 2],
+          "description": "1 for cover / back-cover / single-page spreads; 2 for facing-page spreads. Determines aspect of this slide's canvas before regions are drawn."
+        },
+        "page_indices": {
+          "type": "array",
+          "items": {"type": "integer", "minimum": 1},
+          "description": "Page numbers within the magazine this slide occupies. E.g. [4, 5] for a spread on pages 4 and 5."
+        },
+        "regions": {
+          "type": "array",
+          "minItems": 0,
+          "items": {"$ref": "#/definitions/region"}
+        }
+      }
+    },
+    "region": {
+      "type": "object",
+      "required": ["id", "rect_norm", "role"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "rect_norm": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {"type": "number", "minimum": 0, "maximum": 1},
+          "description": "[x0, y0, x1, y1] in slide-local 0..1 coordinates where (0,0) is top-left of the spread canvas (full spread including both pages when pages_per_instance == 2)."
+        },
+        "rect_px": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {"type": "number", "minimum": 0},
+          "description": "[x0, y0, x1, y1] in px, precomputed for the chosen page_size. Cache only — realizers can recompute from rect_norm and the canvas if they need different DPI."
+        },
+        "role": {
+          "type": "string",
+          "enum": ["image", "text", "accent", "decorative", "container"]
+        },
+        "z_index": {"type": "integer", "default": 0},
+        "image": {"$ref": "#/definitions/image_block"},
+        "text": {
+          "type": "string",
+          "description": "Locale-resolved text content. Only meaningful when role=text."
+        },
+        "typography": {"$ref": "#/definitions/typography_slot"},
+        "component": {
+          "type": "string",
+          "description": "Component name from library/components/registry.yaml when role=text (Title / BodyWithDropCap / Kicker / PullQuote / etc.). Realizers may ignore this and just use typography + text; HTML interactive uses it for editable hooks."
+        },
+        "component_props": {
+          "type": "object",
+          "description": "Component-specific props from registry.yaml (drop_cap, hyphenate, align, columns, etc.).",
+          "additionalProperties": true
+        },
+        "accent": {"$ref": "#/definitions/accent_block"},
+        "text_safe_required": {"type": "boolean", "default": false},
+        "text_safe_rule": {
+          "type": "string",
+          "description": "Per-region override of design_tokens text_safe rule. When absent, inherit from top-level text_safe_default_rule."
+        },
+        "bind_field": {
+          "type": "string",
+          "description": "Optional. Path back to the field in article.yaml whose value this region renders (e.g. 'spread_copy[2].title.en' or 'cover_line.en'). Lets HTML interactive realizer round-trip edits back to source-of-truth."
+        },
+        "claim_role": {
+          "type": ["string", "null"],
+          "enum": [null, "kicker", "claim_title", "proof_object", "support_note"],
+          "description": "Which role this region plays in the claim_spine. Optional. Lets scorer / a11y / future tooling navigate claim structure from the manifest alone."
+        }
+      }
+    },
+    "image_block": {
+      "type": "object",
+      "required": ["source_path", "fit_mode"],
+      "additionalProperties": false,
+      "properties": {
+        "source_path": {
+          "type": "string",
+          "description": "Path relative to the issue dir (e.g. 'images/spread-03/feature_hero.png')."
+        },
+        "crop_rect_norm": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {"type": "number", "minimum": 0, "maximum": 1},
+          "default": [0, 0, 1, 1],
+          "description": "Rectangle in source image coordinates to use. Defaults to the whole image."
+        },
+        "fit_mode": {
+          "type": "string",
+          "enum": ["cover", "contain", "fill"],
+          "description": "How the cropped source fills the region's rect_norm. CSS object-fit semantics."
+        },
+        "natural_aspect": {
+          "type": "string",
+          "pattern": "^[0-9]+:[0-9]+$",
+          "description": "Aspect of the source image, e.g. '3:4'. Used by realizers to pick crops or fallbacks."
+        },
+        "alt_text": {"type": "string"},
+        "asset_provenance": {
+          "type": "string",
+          "description": "How this image was obtained (e.g. 'codex.image_gen 2026-05-13', 'user-provided', 'vertex-gemini-3-pro-image upscale')."
+        }
+      }
+    },
+    "accent_block": {
+      "type": "object",
+      "required": ["color"],
+      "additionalProperties": false,
+      "properties": {
+        "color": {"$ref": "#/definitions/color"},
+        "thickness_pt": {"type": "number", "exclusiveMinimum": 0, "default": 1},
+        "style": {
+          "type": "string",
+          "enum": ["hairline", "solid", "dashed", "dotted"],
+          "default": "hairline"
+        }
+      }
+    }
+  }
+}
