@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Claim spine",
+  "description": "Editorial narrative discipline borrowed from Codex Presentations skill Phase 1 (Narrative Spine). Encodes: every non-exempt spread carries a CLAIM (a conclusion, not a topic label), a proof object, and a support note. Lives as the `claim_spine` block in library/articles/<slug>.yaml. May also be persisted standalone at output/<slug>/claim_spine.json. Editorial copy (title/lead/body/captions) stays in spread_copy[]; this schema validates the narrative spine that should sharpen that copy.",
+  "type": "object",
+  "required": ["schema_version", "thesis", "audience", "one_line_arc", "spread_claims"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": 1},
+    "thesis": {
+      "type": "string",
+      "minLength": 20,
+      "description": "What this issue proves. One sentence. Source-backable when it makes factual claims."
+    },
+    "audience": {
+      "type": "string",
+      "minLength": 5,
+      "description": "Who this issue is for. Editorial register follows from this."
+    },
+    "one_line_arc": {
+      "type": "string",
+      "minLength": 10,
+      "description": "The cover-to-back-cover narrative shape."
+    },
+    "noun_swap_test_notes": {
+      "type": "string",
+      "description": "Author confirms titles fail the noun-swap test: if you swap the subject's name (Luna -> Naipi -> Anyone), titles should stop making sense. Cite which spreads were sharpened."
+    },
+    "spread_claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/definitions/spread_claim"}
+    }
+  },
+  "definitions": {
+    "spread_claim": {
+      "type": "object",
+      "required": ["spread_idx", "spread_type"],
+      "additionalProperties": false,
+      "properties": {
+        "spread_idx": {"type": "integer", "minimum": 1},
+        "spread_type": {
+          "type": "string",
+          "enum": [
+            "cover",
+            "toc",
+            "feature-spread",
+            "pull-quote",
+            "portrait-wall",
+            "colophon",
+            "back-cover"
+          ]
+        },
+        "exempt": {
+          "type": "boolean",
+          "default": false,
+          "description": "True only for spreads that legitimately lack a claim (toc, colophon). When true, claim_title/proof_object/kicker are not required and exempt_reason must be provided."
+        },
+        "exempt_reason": {"type": "string"},
+        "kicker": {
+          "type": "string",
+          "maxLength": 40,
+          "description": "1-3 words naming the role. e.g. 'Chapter 01', 'EXPANSION DRIVERS', 'CODA'. Stable when claim_title is rewritten."
+        },
+        "claim_title": {
+          "type": "string",
+          "minLength": 10,
+          "description": "A CONCLUSION, not a topic label. Bad: 'Departure'. Good: 'Four billion years of silence broke under a paw.' Must fail the noun-swap test."
+        },
+        "proof_object": {"$ref": "#/definitions/proof_object"},
+        "support_note": {
+          "type": "string",
+          "description": "Concise, factual, source-backed. The reader's 'why is this claim true' answer."
+        },
+        "omitted_alternatives": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Optional audit trail: candidate claim_titles considered and rejected, with reason."
+        }
+      },
+      "if": {
+        "properties": {"exempt": {"const": true}},
+        "required": ["exempt"]
+      },
+      "then": {
+        "required": ["exempt_reason"]
+      },
+      "else": {
+        "required": ["claim_title", "proof_object", "kicker"]
+      }
+    },
+    "proof_object": {
+      "type": "object",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "image_slot",
+            "image_grid",
+            "pull_quote_text",
+            "portrait_grid",
+            "text_block",
+            "table",
+            "diagram"
+          ],
+          "description": "What kind of dominant evidence carries the claim on this spread."
+        },
+        "ref": {
+          "type": "string",
+          "description": "Reference to the proof: image_slot id (e.g. 'feature_hero'), image_slot pattern (e.g. 'portrait_wall.[1-6]'), region id, or text field name."
+        },
+        "why_carries_claim": {
+          "type": "string",
+          "description": "One line on why this object proves the claim."
+        }
+      }
+    }
+  }
+}

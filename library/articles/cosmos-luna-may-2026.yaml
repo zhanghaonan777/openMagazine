@@ -15,6 +15,110 @@ cover_kicker:
   en: "FEATURE STORY"
   zh: "封面故事"
 
+# Claim spine — borrowed from Codex Presentations skill Phase 1.
+# See schemas/claim_spine.schema.json. The 'lead' lines in spread_copy[]
+# are already de-facto claims; the article's 'title' fields ('DEPARTURE',
+# 'LUNAR PLAIN', 'EARTHRISE') are topic labels. In v0.4 we plan to promote
+# claim_title into the title region and demote topic labels to a kicker
+# motif slot. For v0.3.2 we document the spine alongside existing copy.
+claim_spine:
+  schema_version: 1
+  thesis: "A small astronaut on the Moon, eleven days, finds that the planet she came from is louder than the silence she walked into."
+  audience: "MEOW LIFE readers — cat-magazine subscribers who treat each issue as a coffee-table object. Reads in 10 minutes, looks at the pictures for another 20."
+  one_line_arc: "Departure (silence) -> discovery (nothing IS something) -> Earthrise (the planet she had been ignoring) -> portrait wall (the postures she found) -> coda (look up)."
+  noun_swap_test_notes: |
+    Spreads 3, 4, 6 currently fail the noun-swap test in their `title` fields
+    ('DEPARTURE' / 'LUNAR PLAIN' / 'EARTHRISE' — true for any astronaut).
+    The claim_titles below are the conclusion versions that DO fail the test:
+    swap Luna -> a generic astronaut and 'broke under a paw' stops working.
+    Sharpened spreads: 1, 3, 4, 6, 7, 9.
+
+  spread_claims:
+    - spread_idx: 1
+      spread_type: cover
+      kicker: "FEATURE STORY"
+      claim_title: "A small astronaut on the lunar regolith, photographed for eleven days."
+      proof_object:
+        kind: image_slot
+        ref: cover_hero
+        why_carries_claim: "Single hero portrait carries the whole mission; the cover is image-led, copy is restrained."
+      support_note: "Issue 03, May 2026. Hero portrait is the only image on the cover."
+      omitted_alternatives:
+        - "'Luna walks the moon' (display_title) — fine as a book title, but too gentle to be a cover claim."
+
+    - spread_idx: 2
+      spread_type: toc
+      exempt: true
+      exempt_reason: "Table of contents — wayfinding, not a claim."
+
+    - spread_idx: 3
+      spread_type: feature-spread
+      kicker: "Chapter 01"
+      claim_title: "Four billion years of silence broke under a paw."
+      proof_object:
+        kind: image_slot
+        ref: feature_hero
+        why_carries_claim: "Hero portrait at module airlock IS the moment the silence breaks."
+      support_note: "Lunar regolith muffles sound entirely. The captioned strip below shows footprints that 'will outlast every photograph in this issue.'"
+      omitted_alternatives:
+        - "'DEPARTURE' (current title) — topic label, fails noun-swap test."
+        - "'First steps onto the lunar surface are quieter than anyone tells you.' — observational, not a claim about Luna specifically."
+
+    - spread_idx: 4
+      spread_type: feature-spread
+      kicker: "Chapter 02"
+      claim_title: "The Sea of Tranquility is misnamed, and Luna finds something to look at in every direction anyway."
+      proof_object:
+        kind: image_grid
+        ref: "feature_captioned.[1-3]"
+        why_carries_claim: "Three captioned scenes (wide / crater rim / walking-away) prove she found framing in nothing."
+      support_note: "Three-hundred-degree temperature swings, micro-meteorites, moonquakes — the data behind 'misnamed'."
+
+    - spread_idx: 5
+      spread_type: pull-quote
+      kicker: "ASIDE"
+      claim_title: "The most photographed astronaut is the one who never came back."
+      proof_object:
+        kind: pull_quote_text
+        ref: quote
+        why_carries_claim: "The quote IS the claim; the environmental image gives it the negative space to land."
+      support_note: "Field-notes attribution May 2026. Inverts the earlier line in spread 3 ('The most photographed astronauts are the ones who came back')."
+
+    - spread_idx: 6
+      spread_type: feature-spread
+      kicker: "Chapter 03"
+      claim_title: "She had been ready for the silence; she had not been ready for the colour of the planet she came from."
+      proof_object:
+        kind: image_slot
+        ref: feature_hero
+        why_carries_claim: "Three-quarter back portrait facing Earthrise — Luna's first turn toward home."
+      support_note: "Earth's tidal lock means 'Earthrise' is a misnomer too; the spread leans into the misnaming as theme."
+
+    - spread_idx: 7
+      spread_type: portrait-wall
+      kicker: "STILLS"
+      claim_title: "Six postures Luna found that the mission script didn't ask for."
+      proof_object:
+        kind: portrait_grid
+        ref: "portrait_wall.[1-6]"
+        why_carries_claim: "Approach / Pause / Touch / Listen / Climb / Look Back — postures, not actions. The script said 'walk and document'; she did more."
+      support_note: "Six 1:1 portraits captioned as gerunds-of-attention, not tasks."
+
+    - spread_idx: 8
+      spread_type: colophon
+      exempt: true
+      exempt_reason: "Colophon — credits, not a claim."
+
+    - spread_idx: 9
+      spread_type: back-cover
+      kicker: "CODA"
+      claim_title: "Look up. The Moon was always watching."
+      proof_object:
+        kind: image_slot
+        ref: back_coda
+        why_carries_claim: "Small-figure back-coda with negative sky — the image hands the line off to the reader."
+      support_note: "No attribution; the back cover speaks in the magazine's voice."
+
 spread_copy:
   - idx: 1
     type: cover

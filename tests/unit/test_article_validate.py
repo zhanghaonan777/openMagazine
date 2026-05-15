@@ -1,8 +1,12 @@
 """Tests for article ↔ layout cross-validation."""
+import pathlib
+
 import pytest
 import yaml
 
 from tools.validation.article_validate import validate_article
+
+SKILL_ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 
 @pytest.fixture
@@ -114,3 +118,164 @@ def test_missing_image_slot_override_is_flagged(valid_article, layout_editorial_
 
     errors = validate_article(valid_article, layout_editorial_16page)
     assert any("feature_hero" in e for e in errors)
+
+
+# ---------------------------------------------------------------------------
+# claim_spine tests (v0.3.2)
+# ---------------------------------------------------------------------------
+
+
+COSMOS_ARTICLE = SKILL_ROOT / "library" / "articles" / "cosmos-luna-may-2026.yaml"
+EDITORIAL_LAYOUT = SKILL_ROOT / "library" / "layouts" / "editorial-16page.yaml"
+
+
+def _cosmos_article_dict() -> dict:
+    return yaml.safe_load(COSMOS_ARTICLE.read_text(encoding="utf-8"))
+
+
+def _write(tmp_path, article: dict, name: str = "article.yaml") -> pathlib.Path:
+    p = tmp_path / name
+    p.write_text(yaml.safe_dump(article, sort_keys=False), encoding="utf-8")
+    return p
+
+
+def test_cosmos_luna_article_validates_clean():
+    """The real cosmos-luna article with claim_spine must pass."""
+    errors = validate_article(COSMOS_ARTICLE, EDITORIAL_LAYOUT)
+    assert errors == [], f"unexpected errors: {errors}"
+
+
+def test_article_without_claim_spine_validates_clean(tmp_path):
+    """Backward compat: removing claim_spine entirely must not error."""
+    a = _cosmos_article_dict()
+    a.pop("claim_spine", None)
+    article_path = _write(tmp_path, a)
+    errors = validate_article(article_path, EDITORIAL_LAYOUT)
+    assert errors == [], f"unexpected errors: {errors}"
+
+
+def test_claim_spine_idx_missing_from_spread_copy(tmp_path):
+    """spread_claims pointing to an idx that does not exist in spread_copy."""
+    a = _cosmos_article_dict()
+    # Add a bogus extra claim pointing at idx 99.
+    a["claim_spine"]["spread_claims"].append({
+        "spread_idx": 99,
+        "spread_type": "feature-spread",
+        "kicker": "BOGUS",
+        "claim_title": "This claim points to a spread that does not exist.",
+        "proof_object": {"kind": "image_slot", "ref": "feature_hero"},
+    })
+    article_path = _write(tmp_path, a)
+    errors = validate_article(article_path, EDITORIAL_LAYOUT)
+    assert any("99" in e and "not found in article.spread_copy" in e
+               for e in errors), errors
+
+
+def test_claim_spine_type_mismatches_spread_copy(tmp_path):
+    """spread_claims[i].spread_type must equal matching spread_copy.type."""
+    a = _cosmos_article_dict()
+    # Claim for idx 3 currently 'feature-spread'; flip to 'pull-quote'.
+    for claim in a["claim_spine"]["spread_claims"]:
+        if claim.get("spread_idx") == 3:
+            claim["spread_type"] = "pull-quote"
+            break
+    article_path = _write(tmp_path, a)
+    errors = validate_article(article_path, EDITORIAL_LAYOUT)
+    assert any("idx 3" in e and "does not match" in e for e in errors), errors
+
+
+def test_claim_spine_proof_ref_not_in_layout_image_slots(tmp_path):
+    """proof_object.ref pointing to an image_slot id absent from layout."""
+    a = _cosmos_article_dict()
+    for claim in a["claim_spine"]["spread_claims"]:
+        if claim.get("spread_idx") == 3:
+            claim["proof_object"] = {
+                "kind": "image_slot",
+                "ref": "nonexistent_slot",
+            }
+            break
+    article_path = _write(tmp_path, a)
+    errors = validate_article(article_path, EDITORIAL_LAYOUT)
+    assert any("nonexistent_slot" in e and "does not match" in e
+               for e in errors), errors
+
+
+def test_claim_spine_proof_ref_pattern_matches_prefix(tmp_path):
+    """A pattern ref like 'portrait_wall.[1-6]' must not error when the
+    base prefix matches at least one image_slot id-prefix."""
+    a = _cosmos_article_dict()
+    # Spread 7 already uses portrait_wall.[1-6]; assert it still passes after
+    # rewriting it explicitly through this fixture path (defensive).
+    for claim in a["claim_spine"]["spread_claims"]:
+        if claim.get("spread_idx") == 7:
+            claim["proof_object"] = {
+                "kind": "image_slot",
+                "ref": "portrait_wall.[1-6]",
+                "why_carries_claim": "pattern test",
+            }
+            break
+    article_path = _write(tmp_path, a)
+    errors = validate_article(article_path, EDITORIAL_LAYOUT)
+    # Specifically no claim_spine error on spread 7's proof_object.
+    assert not any("portrait_wall.[1-6]" in e for e in errors), errors
+
+
+def test_claim_spine_proof_ref_on_wrong_spread(tmp_path):
+    """proof_object.ref points to an image_slot that exists in the layout
+    but on a different spread than this claim. Should produce a clear
+    'on spread(s) [M] but this claim is on spread N' error."""
+    a = _cosmos_article_dict()
+    # spread 7 (portrait-wall) claim — repoint its proof at 'cover_hero',
+    # which lives on spread 1 in the editorial-16page layout.
+    for claim in a["claim_spine"]["spread_claims"]:
+        if claim.get("spread_idx") == 7:
+            claim["proof_object"] = {
+                "kind": "image_slot",
+                "ref": "cover_hero",
+            }
+            break
+    article_path = _write(tmp_path, a)
+    errors = validate_article(article_path, EDITORIAL_LAYOUT)
+    assert any(
+        "cover_hero" in e
+        and "spread(s) [1]" in e
+        and "claim is on spread 7" in e
+        for e in errors
+    ), errors
+
+
+def test_claim_spine_proof_ref_pattern_on_wrong_spread(tmp_path):
+    """A pattern ref whose prefix matches slots only on another spread
+    must also produce the wrong-spread error, not a not-found error."""
+    a = _cosmos_article_dict()
+    # spread 3 (feature-spread) claim — repoint at portrait_wall.[1-6]
+    # whose prefix 'portrait_wall' lives only on spread 7.
+    for claim in a["claim_spine"]["spread_claims"]:
+        if claim.get("spread_idx") == 3 and claim.get("proof_object"):
+            claim["proof_object"] = {
+                "kind": "image_grid",
+                "ref": "portrait_wall.[1-6]",
+            }
+            break
+    article_path = _write(tmp_path, a)
+    errors = validate_article(article_path, EDITORIAL_LAYOUT)
+    assert any(
+        "portrait_wall.[1-6]" in e
+        and "spread(s) [7]" in e
+        and "claim is on spread 3" in e
+        for e in errors
+    ), errors
+
+
+def test_spread_copy_idx_without_matching_claim(tmp_path):
+    """When claim_spine is present, every spread_copy idx must have a claim."""
+    a = _cosmos_article_dict()
+    # Drop the claim for spread 7 entirely.
+    a["claim_spine"]["spread_claims"] = [
+        c for c in a["claim_spine"]["spread_claims"]
+        if c.get("spread_idx") != 7
+    ]
+    article_path = _write(tmp_path, a)
+    errors = validate_article(article_path, EDITORIAL_LAYOUT)
+    assert any("spread_copy idx 7" in e and "no matching entry" in e
+               for e in errors), errors
