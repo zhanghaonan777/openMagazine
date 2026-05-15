@@ -15,6 +15,16 @@ from tools.base_tool import BaseTool
 SKILL_ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 
+def _parse_slide_size(raw: str | None) -> tuple[int, int] | None:
+    if not raw or "x" not in str(raw).lower():
+        return None
+    left, right = str(raw).lower().split("x", 1)
+    try:
+        return int(left), int(right)
+    except ValueError:
+        return None
+
+
 def _load_schema() -> dict:
     return json.loads(
         (SKILL_ROOT / "schemas" / "design-system.schema.json").read_text()
@@ -41,6 +51,35 @@ def validate_design_system(path: pathlib.Path) -> list[str]:
         if not cfg.get("fallback_chain"):
             errors.append(
                 f"typography_resolution/{slot}: fallback_chain must have >= 1 entry"
+            )
+
+    for idx, target in enumerate(data.get("output_targets") or []):
+        fmt = target.get("format")
+        if fmt != "magazine-pptx":
+            continue
+        if target.get("realizer") != "presentations":
+            errors.append(
+                f"output_targets/{idx}: magazine-pptx must use realizer=presentations"
+            )
+        size = _parse_slide_size(target.get("slide_size"))
+        if not size:
+            errors.append(
+                f"output_targets/{idx}: magazine-pptx requires slide_size like 720x1080"
+            )
+            continue
+        width, height = size
+        if height <= width:
+            errors.append(
+                f"output_targets/{idx}: magazine-pptx slide_size must be portrait 2:3"
+            )
+        ratio = width / height
+        if abs(ratio - (2 / 3)) > 0.03:
+            errors.append(
+                f"output_targets/{idx}: magazine-pptx slide_size must be near 2:3"
+            )
+        if not target.get("page_count"):
+            errors.append(
+                f"output_targets/{idx}: magazine-pptx requires page_count"
             )
 
     return errors

@@ -11,7 +11,7 @@ pre-computed design-system as input. This adapter is responsible for:
   2. After the agent has driven Presentations to completion, reading
      back the artifact tree at
      `<issue_dir>/outputs/<thread_id>/presentations/<task_slug>/`.
-  3. Copying the final .pptx into `<issue_dir>/deck/<slug>.pptx`.
+  3. Copying the final .pptx into the issue output directory.
   4. Validating that the expected artifact files exist.
 
 Limitation: we cannot exercise the full PPTX export path in unit
@@ -53,6 +53,7 @@ class PresentationsAdapter(BaseTool):
         design_system: dict,
         brand: dict,
         article: dict,
+        target: dict | None = None,
         regions_by_spread_type: dict | None = None,
     ) -> dict:
         """Produce the spec the agent will use to drive Presentations.
@@ -60,7 +61,11 @@ class PresentationsAdapter(BaseTool):
         Returns a serializable dict:
           {
             "presentations_profile": "consumer-retail",
-            "task_slug": "cosmos-luna-deck",
+            "task_slug": "cosmos-luna-magazine-pptx",
+            "output_format": "magazine-pptx",
+            "slide_size": "720x1080",
+            "page_count": 16,
+            "purpose": "editable-portrait-magazine",
             "design_system_inputs": { ... },
             "brand_authenticity": { ... },
             "text_safe_rules": "...",
@@ -69,9 +74,27 @@ class PresentationsAdapter(BaseTool):
             "regions_summary": { spread types + role + rect_norm } ,
           }
         """
+        target = target or {
+            "format": "magazine-pptx",
+            "slide_size": "720x1080",
+            "page_count": 16,
+            "purpose": "editable-portrait-magazine",
+        }
+        output_format = target.get("format", "magazine-pptx")
+        suffix = "magazine-pptx" if output_format == "magazine-pptx" else "deck"
+
         bundle = {
             "presentations_profile": design_system.get("profile", "consumer-retail"),
-            "task_slug": f"{design_system['slug']}-deck",
+            "task_slug": f"{design_system['slug']}-{suffix}",
+            "output_format": output_format,
+            "slide_size": target.get("slide_size", "720x1080"),
+            "page_count": target.get("page_count", 16),
+            "purpose": target.get(
+                "purpose",
+                "editable-portrait-magazine"
+                if output_format == "magazine-pptx"
+                else "pitch-deck",
+            ),
             "brand_authenticity": design_system.get("brand_authenticity", {}),
             "text_safe_rules": (
                 design_system.get("text_safe_contracts", {})
@@ -157,12 +180,18 @@ class PresentationsAdapter(BaseTool):
         }
 
     def copy_final_to_issue_deck(
-        self, *, pptx_source: str, issue_dir: pathlib.Path, slug: str
+        self,
+        *,
+        pptx_source: str,
+        issue_dir: pathlib.Path,
+        slug: str,
+        output_format: str = "deck-pptx",
     ) -> pathlib.Path:
-        """Copy the produced .pptx into output/<slug>/deck/<slug>.pptx."""
-        deck_dir = pathlib.Path(issue_dir) / "deck"
-        deck_dir.mkdir(parents=True, exist_ok=True)
-        target = deck_dir / f"{slug}.pptx"
+        """Copy the produced .pptx into the issue's target-specific subdir."""
+        subdir = "magazine-pptx" if output_format == "magazine-pptx" else "deck"
+        out_dir = pathlib.Path(issue_dir) / subdir
+        out_dir.mkdir(parents=True, exist_ok=True)
+        target = out_dir / f"{slug}.pptx"
         shutil.copy2(pptx_source, target)
         return target
 
@@ -175,6 +204,7 @@ class PresentationsAdapter(BaseTool):
         article,
         spec,
         design_system,
+        target=None,
         **kwargs,
     ):
         """The director skill drives Presentations; this run() returns
@@ -188,6 +218,7 @@ class PresentationsAdapter(BaseTool):
             design_system=design_system,
             brand=brand,
             article=article,
+            target=target,
             regions_by_spread_type=kwargs.get("regions_by_spread_type"),
         )
         return {

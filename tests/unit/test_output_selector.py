@@ -16,6 +16,12 @@ def test_photobook_routes_to_reportlab():
     assert backend.provider == "reportlab"
 
 
+def test_magazine_pptx_routes_to_presentations():
+    sel = OutputSelector()
+    backend = sel.choose_backend(target={"format": "magazine-pptx", "realizer": "presentations"})
+    assert backend.provider == "presentations"
+
+
 def test_unknown_realizer_raises():
     sel = OutputSelector()
     with pytest.raises(ValueError, match="realizer"):

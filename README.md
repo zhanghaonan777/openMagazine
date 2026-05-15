@@ -23,11 +23,12 @@ Current branch: `feat/v0.3-editorial-engine`.
 | Pipeline | Status | Output | Compose Engine |
 |---|---|---|---|
 | `smoke-test-4page` | production MVP | 4-page photo magazine | ReportLab |
-| `editorial-16page` | experimental v0.3.2 | 16-page editorial magazine + 9-slide PPTX deck, regions-driven, multi-realizer | WeasyPrint + Presentations |
+| `editorial-16page` | experimental v0.3.2 | 16-page editorial magazine + editable 2:3 portrait PPTX magazine, regions-driven, multi-realizer | WeasyPrint + Presentations |
 
 **v0.3.2 update (2026-05-13):** Output now multi-realizer. Same upstream
-pipeline can produce both A4 magazine PDF (WeasyPrint) and 9-slide deck
-PPTX (Codex Presentations skill) from one spec. Design decisions
+pipeline can produce both A4 magazine PDF (WeasyPrint) and an editable
+2:3 portrait magazine PPTX (Codex Presentations skill) from one spec.
+Design decisions
 (typography fallback chains, text-safe contracts, brand authenticity
 gates) are lifted into `library/profiles/` + `library/design-systems/`
 shared data layers. See
@@ -145,18 +146,17 @@ This path adds:
 ## Verify Locally
 
 ```bash
-source .venv/bin/activate
-python -m pytest tests/ -v
+uv run python -m pytest tests/ -v
 ```
 
 Useful targeted checks:
 
 ```bash
-python -m tools.validation.article_validate \
+uv run python -m tools.validation.article_validate \
   library/articles/cosmos-luna-may-2026.yaml \
   --layout library/layouts/editorial-16page.yaml
 
-python -m pytest tests/integration/test_render_dry_run.py -v
+uv run python -m pytest tests/integration/test_render_dry_run.py -v
 ```
 
 If WeasyPrint fails with a missing `libpango`, `cairo`, or `harfbuzz`
@@ -172,6 +172,8 @@ See:
 - [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) for the original architecture map.
 - [docs/v0.3-ARCHITECTURE.md](docs/v0.3-ARCHITECTURE.md) for the editorial
   layout engine.
+- [docs/pipeline-flow.html](docs/pipeline-flow.html) for a visual pipeline
+  walkthrough.
 - [docs/regions-reference.md](docs/regions-reference.md) — every spread's
   regions yaml + region field schema (v0.3.1).
 - [docs/component-registry-reference.md](docs/component-registry-reference.md)
@@ -192,11 +194,9 @@ See:
 - **TOC + colophon literal headings lost.** During the regions migration,
   fixed strings like "CONTENTS" and "COLOPHON" became empty `text_decorative`
   divs. Fix path: add a `component_props.literal_text` field.
-- **`Verify4K` still validates v1 paths.** It expects
-  `images/page-NN.png`; v0.3 uses nested `images/spread-NN/<slot>.png`.
-  Publish stage will fail until this is extended.
-- **Some artifact schemas still v1-shaped.** `upscale_result.schema.json`
-  and a few others assume the v1 flat path layout.
+- **Some artifact schemas are still permissive.** `upscale_result.schema.json`
+  and a few others do not yet distinguish v1 flat image paths from v0.3 nested
+  spread/slot image paths.
 - **WeasyPrint requires native system libraries** in addition to Python
   packages (`brew install weasyprint` on macOS).
 

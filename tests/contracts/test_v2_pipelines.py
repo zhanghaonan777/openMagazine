@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 import yaml
-from jsonschema import validate
+from jsonschema import Draft7Validator
 
 from tools.validation.article_validate import validate_article
 from tools.validation.regions_validate import validate_regions
@@ -39,7 +39,7 @@ def _v2_pipelines() -> list[Path]:
 )
 def test_v2_pipeline_validates(pipeline_path, pipeline_schema):
     data = yaml.safe_load(pipeline_path.read_text())
-    validate(instance=data, schema=pipeline_schema)
+    Draft7Validator(pipeline_schema).validate(data)
 
 
 def test_editorial_16page_layout_article_consistency():

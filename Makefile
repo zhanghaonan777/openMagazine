@@ -12,10 +12,10 @@ install:
 	uv pip install -e ".[dev]"
 
 test:
-	python -m pytest tests/ -v
+	uv run python -m pytest tests/ -v
 
 probe:
-	python -c "from tools.image.vertex_gemini_image import VertexGeminiImage; VertexGeminiImage().probe()"
+	uv run python -c "from tools.image.vertex_gemini_image import VertexGeminiImage; VertexGeminiImage().probe()"
 
 lint:
-	ruff check . || echo "ruff not installed; skip"
+	uv run ruff check . || echo "ruff not installed; skip"

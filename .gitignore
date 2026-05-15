@@ -7,6 +7,7 @@ __pycache__/
 
 # Project artifacts
 /output/
+/outputs/
 !tools/output/
 .DS_Store
 

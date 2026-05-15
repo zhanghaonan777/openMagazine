@@ -27,6 +27,52 @@ def test_adapter_workspace_path_constructed_from_thread_and_slug(tmp_path):
     assert "cosmos-luna-deck" in str(path)
 
 
+def test_magazine_pptx_bundle_sets_portrait_contract():
+    adapter = PresentationsAdapter()
+    bundle = adapter.build_input_bundle(
+        design_system={"slug": "cosmos-luna", "profile": "consumer-retail"},
+        brand={"masthead": "MEOW LIFE"},
+        article={"spread_copy": []},
+        target={
+            "format": "magazine-pptx",
+            "realizer": "presentations",
+            "slide_size": "720x1080",
+            "page_count": 16,
+        },
+    )
+    assert bundle["task_slug"] == "cosmos-luna-magazine-pptx"
+    assert bundle["output_format"] == "magazine-pptx"
+    assert bundle["slide_size"] == "720x1080"
+    assert bundle["page_count"] == 16
+    assert bundle["purpose"] == "editable-portrait-magazine"
+
+
+def test_adapter_defaults_to_magazine_pptx_contract():
+    adapter = PresentationsAdapter()
+    bundle = adapter.build_input_bundle(
+        design_system={"slug": "cosmos-luna", "profile": "consumer-retail"},
+        brand={"masthead": "MEOW LIFE"},
+        article={"spread_copy": []},
+    )
+    assert bundle["output_format"] == "magazine-pptx"
+    assert bundle["slide_size"] == "720x1080"
+    assert bundle["page_count"] == 16
+
+
+def test_copy_magazine_pptx_uses_target_specific_dir(tmp_path):
+    adapter = PresentationsAdapter()
+    source = tmp_path / "source.pptx"
+    source.write_bytes(b"pptx")
+    target = adapter.copy_final_to_issue_deck(
+        pptx_source=str(source),
+        issue_dir=tmp_path / "issue",
+        slug="cosmos-luna",
+        output_format="magazine-pptx",
+    )
+    assert target == tmp_path / "issue" / "magazine-pptx" / "cosmos-luna.pptx"
+    assert target.read_bytes() == b"pptx"
+
+
 def test_adapter_raises_when_no_artifacts(tmp_path):
     """If Codex didn't actually run, reading back should error clearly."""
     adapter = PresentationsAdapter()

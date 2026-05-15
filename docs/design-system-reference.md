@@ -40,7 +40,8 @@ for the design rationale.
 ## Authoring
 
 Most fields auto-derive; edit only when you want to:
-- Add an `output_targets` entry (e.g. add `deck-pptx`)
+- Add an `output_targets` entry (e.g. add `magazine-pptx` for an editable
+  2:3 portrait magazine, or `deck-pptx` for a 16:9 derivative pitch deck)
 - Tighten brand authenticity for a specific issue
 - Override typography for one issue without changing brand.yaml
 - Adjust `layout_quality` thresholds

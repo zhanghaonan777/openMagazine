@@ -32,7 +32,7 @@ def test_output_selector_routes_to_each_realizer(issue_dir):
     sel = OutputSelector()
     wp = sel.choose_backend(target={"format": "a4-magazine", "realizer": "weasyprint"})
     rl = sel.choose_backend(target={"format": "photobook-plain", "realizer": "reportlab"})
-    pr = sel.choose_backend(target={"format": "deck-pptx", "realizer": "presentations"})
+    pr = sel.choose_backend(target={"format": "magazine-pptx", "realizer": "presentations"})
     assert wp.provider == "weasyprint"
     assert rl.provider == "reportlab"
     assert pr.provider == "presentations"
@@ -62,9 +62,10 @@ def test_multi_output_compose_result_shape(issue_dir, tmp_path):
         "outputs": [
             {"format": "a4-magazine", "realizer": "weasyprint",
              "path": str(issue_dir / "magazine.pdf"), "page_count": 16},
-            {"format": "deck-pptx", "realizer": "presentations",
-             "path": str(issue_dir / "deck" / "test.pptx"),
-             "slide_count": 9, "thread_id": SMOKE_THREAD},
+            {"format": "magazine-pptx", "realizer": "presentations",
+             "path": str(issue_dir / "magazine-pptx" / "test.pptx"),
+             "slide_count": 16, "slide_size": "720x1080",
+             "thread_id": SMOKE_THREAD},
         ],
         "spec_slug": "test",
     }

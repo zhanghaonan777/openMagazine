@@ -50,7 +50,10 @@ For `consumer-retail` issues, always include:
 
 If spec.output_targets is set, copy it through. If not, infer:
 - editorial-16page layout + meow-life brand → `a4-magazine`
-- explicit deck request → add `deck-pptx`
+- explicit editable magazine/PPTX request → add `magazine-pptx`
+  with `slide_size: 720x1080`, `page_count: 16`
+- explicit pitch/share deck request → add `deck-pptx`
+  with `slide_size: 1280x720`
 
 ### 5. Auto-persistence at the checkpoint
 

@@ -2,10 +2,11 @@
 
 ## Purpose
 
-Realize a `deck-pptx` output target via the Codex Presentations skill.
+Realize a `magazine-pptx` or `deck-pptx` output target via the Codex
+Presentations skill.
 This director is invoked when `design_system.output_targets` contains
-a `deck-pptx` entry. The PDF output (`a4-magazine`) is handled by the
-sibling compose-director.md.
+a Presentations-backed entry. The PDF output (`a4-magazine`) is handled
+by the sibling compose-director.md.
 
 ## Inputs
 
@@ -15,6 +16,9 @@ sibling compose-director.md.
   storyboard, upscale_result, design-system).
 - `output/<slug>/images/spread-NN/<slot>.png` × 21 — the 4K image
   slots are reused; PPTX uses crops/thumbs of the same source PNGs.
+- `target` from `design_system.output_targets`. For magazine output this
+  should be `format: magazine-pptx`, `slide_size: 720x1080`,
+  `page_count: 16`.
 
 ## Read first
 
@@ -37,6 +41,7 @@ bundle = adapter.build_input_bundle(
     design_system=design_system,
     brand=layers["brand"],
     article=article,
+    target=target,
     regions_by_spread_type=layers.get("regions_by_spread_type"),
 )
 ~~~
@@ -47,8 +52,8 @@ The agent invokes Presentations with this prompt structure. The
 `task-slug` is critical — it determines where Presentations writes:
 
 ~~~text
-Use the Presentations skill to build a {slide_count}-slide editorial deck
-that mirrors my openMagazine v0.3.2 issue.
+Use the Presentations skill to build a {bundle["page_count"]}-slide
+{bundle["output_format"]} output that mirrors my openMagazine v0.3.2 issue.
 
 WORKSPACE: outputs/$CODEX_THREAD_ID/presentations/{task_slug}
 
@@ -59,6 +64,10 @@ PRE-RESOLVED INPUTS (do not redecide these):
 - brand authenticity gates: {bundle["brand_authenticity"]}
 - brand masthead: {bundle["brand_masthead"]}
 - accent color: {bundle["brand_color_accent"]}
+- output_format: {bundle["output_format"]}
+- slide_size: {bundle["slide_size"]}
+- page_count: {bundle["page_count"]}
+- purpose: {bundle["purpose"]}
 
 ARTICLE TITLES PER SPREAD:
 {json.dumps(bundle["article_titles"], indent=2)}
@@ -70,10 +79,16 @@ CONSTRAINTS:
 - Task mode: create (no reference deck supplied)
 - Preserve all intermediate artifacts under $WORKSPACE
 - Final .pptx → $WORKSPACE/output/{spec_slug}.pptx
+- Build with artifact-tool `--slide-size {bundle["slide_size"]}`.
 - Do not approximate logos / mascots / app icons per brand
   authenticity gate above
-- Match openMagazine's spread types one-to-one when possible (cover,
-  toc, 3 features, pull-quote, portrait-wall, colophon, back-cover)
+- If output_format is `magazine-pptx`: this is NOT a 16:9 presentation.
+  Build a portrait 2:3 editable magazine; every slide is one magazine
+  page, using the magazine's cover / toc / features / pull-quote /
+  portrait-wall / colophon / back-cover rhythm. Do not convert it into
+  an analytics or pitch deck.
+- If output_format is `deck-pptx`: build a 16:9 derivative pitch deck,
+  not the canonical magazine.
 
 REPORT BACK with:
 - $CODEX_THREAD_ID so I can find the artifacts
@@ -99,6 +114,7 @@ final_pptx = adapter.copy_final_to_issue_deck(
     pptx_source=artifacts["pptx_path"],
     issue_dir=issue_dir,
     slug=spec["slug"],
+    output_format=bundle["output_format"],
 )
 print(f"PPTX → {final_pptx}")
 print(f"Slides: {artifacts['slide_count']}")
@@ -126,10 +142,11 @@ informational for the user.
 compose_result_path = issue_dir / "compose_result.json"
 existing = json.loads(compose_result_path.read_text()) if compose_result_path.is_file() else {"outputs": []}
 existing["outputs"].append({
-    "format": "deck-pptx",
+    "format": bundle["output_format"],
     "realizer": "presentations",
     "path": str(final_pptx),
     "slide_count": artifacts["slide_count"],
+    "slide_size": bundle["slide_size"],
     "thread_id": codex_thread_id,
 })
 compose_result_path.write_text(json.dumps(existing, indent=2))
@@ -141,8 +158,9 @@ compose_result_path.write_text(json.dumps(existing, indent=2))
 
 ## Success criteria
 
-- `output/<slug>/deck/<slug>.pptx` exists and is ≥ 100 KB
-- `compose_result.json` has a `deck-pptx` entry
+- `output/<slug>/magazine-pptx/<slug>.pptx` exists and is ≥ 100 KB for
+  `magazine-pptx`, or `output/<slug>/deck/<slug>.pptx` for `deck-pptx`
+- `compose_result.json` has the corresponding Presentations entry
 - `check_layout_quality.mjs` ran on all layouts (output captured)
 
 ## Failure modes

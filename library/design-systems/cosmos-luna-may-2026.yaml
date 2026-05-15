@@ -60,10 +60,11 @@ output_targets:
     realizer: weasyprint
     page_size: A4
     bleed_mm: 3
-  - format: deck-pptx
+  - format: magazine-pptx
     realizer: presentations
-    slide_size: 1280x720
-    page_count: 9
+    slide_size: 720x1080
+    page_count: 16
+    purpose: editable-portrait-magazine
 
 contact_sheet_rubric:
   distinct_layouts_required: 7

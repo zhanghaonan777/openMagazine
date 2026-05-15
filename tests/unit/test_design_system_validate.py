@@ -69,6 +69,43 @@ def test_unknown_realizer_rejected(tmp_path):
     assert any("realizer" in e or "InventedRealizer" in e for e in errors)
 
 
+def test_magazine_pptx_requires_portrait_two_to_three(tmp_path):
+    p = _write_yaml(tmp_path, {
+        "schema_version": 1,
+        "slug": "test",
+        "profile": "consumer-retail",
+        "brand": "meow-life",
+        "typography_resolution": {},
+        "brand_authenticity": {},
+        "output_targets": [{
+            "format": "magazine-pptx",
+            "realizer": "presentations",
+            "slide_size": "1280x720",
+            "page_count": 16,
+        }],
+    })
+    errors = validate_design_system(p)
+    assert any("portrait" in e or "2:3" in e for e in errors)
+
+
+def test_magazine_pptx_portrait_target_validates(tmp_path):
+    p = _write_yaml(tmp_path, {
+        "schema_version": 1,
+        "slug": "test",
+        "profile": "consumer-retail",
+        "brand": "meow-life",
+        "typography_resolution": {},
+        "brand_authenticity": {},
+        "output_targets": [{
+            "format": "magazine-pptx",
+            "realizer": "presentations",
+            "slide_size": "720x1080",
+            "page_count": 16,
+        }],
+    })
+    assert validate_design_system(p) == []
+
+
 def test_validates_shipped_example():
     """The cosmos-luna-may-2026.yaml shipped in the repo must validate."""
     import pathlib

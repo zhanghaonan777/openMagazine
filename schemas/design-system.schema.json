@@ -84,7 +84,7 @@
           "format": {
             "enum": [
               "a4-magazine", "photobook-plain",
-              "deck-pptx", "deck-html", "video-mp4"
+              "magazine-pptx", "deck-pptx", "deck-html", "video-mp4"
             ]
           },
           "realizer": {
@@ -95,7 +95,8 @@
           },
           "page_size": {"type": "string"},
           "slide_size": {"type": "string"},
-          "page_count": {"type": "integer"}
+          "page_count": {"type": "integer"},
+          "purpose": {"type": "string"}
         }
       }
     },

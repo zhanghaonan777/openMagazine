@@ -1,0 +1,1619 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>openMagazine Interactive Pipeline</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172126;
+      --muted: #66737a;
+      --line: #d7ddd8;
+      --paper: #f4f5f2;
+      --surface: #ffffff;
+      --soft: #eef3ee;
+      --green: #12695e;
+      --red: #a94835;
+      --amber: #b7831e;
+      --blue: #355e88;
+      --code-bg: #20292d;
+      --code-ink: #f3efe8;
+      --shadow: 0 18px 42px rgba(23, 33, 38, .08);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+      line-height: 1.5;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    code,
+    pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+    }
+
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      border-right: 1px solid var(--line);
+      background: #fbfcfa;
+      overflow: auto;
+    }
+
+    .brand {
+      padding: 24px 22px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: ui-serif, Georgia, "Times New Roman", serif;
+      font-size: 32px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .brand p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .mode-card {
+      margin: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--soft);
+      padding: 14px;
+    }
+
+    .mode-card strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .mode-card span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .rail {
+      padding: 8px 12px 22px;
+    }
+
+    .step-button {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      margin: 8px 0;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--ink);
+      text-align: left;
+      padding: 9px;
+      cursor: pointer;
+    }
+
+    .step-button:hover,
+    .step-button:focus-visible {
+      border-color: var(--line);
+      background: #fff;
+      outline: none;
+    }
+
+    .step-button.active {
+      border-color: rgba(18, 105, 94, .36);
+      background: #fff;
+      box-shadow: 0 8px 20px rgba(23, 33, 38, .06);
+    }
+
+    .step-num {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--green);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .step-button.gate .step-num {
+      background: var(--red);
+    }
+
+    .step-title {
+      display: block;
+      font-weight: 800;
+      font-size: 14px;
+      line-height: 1.15;
+    }
+
+    .step-meta {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    main {
+      min-width: 0;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(244, 245, 242, .9);
+      backdrop-filter: blur(12px);
+      padding: 12px 24px;
+    }
+
+    .progress {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .dot {
+      height: 8px;
+      border: 0;
+      border-radius: 999px;
+      background: #cfd7d1;
+      cursor: pointer;
+    }
+
+    .dot.active {
+      background: var(--green);
+    }
+
+    .dot.gate.active {
+      background: var(--red);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-actions button,
+    .primary-link {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      padding: 8px 12px;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .nav-actions button:hover,
+    .primary-link:hover {
+      border-color: rgba(18, 105, 94, .42);
+      color: var(--green);
+    }
+
+    .page {
+      display: none;
+      padding: 34px min(5vw, 58px) 70px;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .page-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 260px;
+      gap: 24px;
+      align-items: end;
+      margin-bottom: 22px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 64px);
+      line-height: .96;
+      letter-spacing: 0;
+      font-family: ui-serif, Georgia, "Times New Roman", serif;
+    }
+
+    .summary {
+      max-width: 820px;
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .status-box {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .status-box dl {
+      margin: 0;
+      display: grid;
+      gap: 8px;
+    }
+
+    .status-box div {
+      display: grid;
+      grid-template-columns: 86px minmax(0, 1fr);
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .status-box dt {
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .status-box dd {
+      margin: 0;
+      min-width: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel.span-4 {
+      grid-column: span 4;
+    }
+
+    .panel.span-5 {
+      grid-column: span 5;
+    }
+
+    .panel.span-6 {
+      grid-column: span 6;
+    }
+
+    .panel.span-7 {
+      grid-column: span 7;
+    }
+
+    .panel.span-8 {
+      grid-column: span 8;
+    }
+
+    .panel.span-12 {
+      grid-column: span 12;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfa;
+      padding: 13px 15px;
+    }
+
+    .panel-head h3 {
+      margin: 0;
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    .panel-body {
+      padding: 15px;
+    }
+
+    .panel-body p {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      border: 1px solid rgba(18, 105, 94, .28);
+      background: rgba(18, 105, 94, .08);
+      color: var(--green);
+      padding: 3px 8px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .tag.red {
+      border-color: rgba(169, 72, 53, .28);
+      background: rgba(169, 72, 53, .08);
+      color: var(--red);
+    }
+
+    .tag.amber {
+      border-color: rgba(183, 131, 30, .32);
+      background: rgba(183, 131, 30, .10);
+      color: #7a570f;
+    }
+
+    .kv {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+    }
+
+    .kv div {
+      display: grid;
+      grid-template-columns: 150px minmax(0, 1fr);
+      gap: 12px;
+      border-top: 1px solid rgba(215, 221, 216, .85);
+      padding-top: 8px;
+      font-size: 14px;
+    }
+
+    .kv div:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .kv dt {
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .kv dd {
+      margin: 0;
+      min-width: 0;
+    }
+
+    .flow {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+
+    .flow li {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px;
+      background: #fbfcfa;
+    }
+
+    .flow b {
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--green);
+      color: #fff;
+      font-size: 12px;
+    }
+
+    .flow strong {
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .flow span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .code {
+      margin: 0;
+      max-height: 520px;
+      overflow: auto;
+      background: var(--code-bg);
+      color: var(--code-ink);
+      padding: 15px;
+      font-size: 13px;
+      line-height: 1.55;
+      tab-size: 2;
+      white-space: pre;
+    }
+
+    .prompt {
+      border-left: 5px solid var(--blue);
+    }
+
+    .data {
+      border-left: 5px solid var(--green);
+    }
+
+    .warning {
+      border-left: 5px solid var(--red);
+    }
+
+    .artifact-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .artifact-list li {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfcfa;
+      padding: 10px 11px;
+      font-size: 14px;
+    }
+
+    .artifact-list small {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .spread-map {
+      display: grid;
+      grid-template-columns: repeat(9, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .spread {
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfcfa;
+      padding: 10px;
+      font-size: 13px;
+    }
+
+    .spread.active {
+      border-color: rgba(169, 72, 53, .46);
+      background: rgba(169, 72, 53, .07);
+    }
+
+    .spread small {
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    .mock-layout {
+      position: relative;
+      min-height: 360px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #f0f2ef;
+      overflow: hidden;
+    }
+
+    .mock-layout div {
+      position: absolute;
+      border: 1px solid rgba(23, 33, 38, .28);
+      padding: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      overflow: hidden;
+    }
+
+    .hero-region {
+      inset: 0 50% 0 0;
+      background: linear-gradient(150deg, #536a76, #c7974c);
+      color: #fff;
+    }
+
+    .kicker-region {
+      left: 55%;
+      right: 5%;
+      top: 8%;
+      height: 4%;
+      background: rgba(255, 255, 255, .70);
+    }
+
+    .title-region {
+      left: 55%;
+      right: 5%;
+      top: 15%;
+      height: 15%;
+      background: rgba(255, 255, 255, .76);
+    }
+
+    .lead-region {
+      left: 55%;
+      right: 5%;
+      top: 33%;
+      height: 10%;
+      background: rgba(255, 255, 255, .68);
+    }
+
+    .body-region {
+      left: 55%;
+      right: 5%;
+      top: 46%;
+      height: 37%;
+      background: rgba(255, 255, 255, .82);
+    }
+
+    .strip-region {
+      left: 55%;
+      right: 5%;
+      top: 86%;
+      height: 12%;
+      background: rgba(18, 105, 94, .14);
+    }
+
+    .footer-note {
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      padding: 20px 24px 34px;
+    }
+
+    @media (max-width: 1100px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        position: relative;
+        height: auto;
+        border-right: 0;
+      }
+
+      .rail {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .step-button {
+        margin: 0;
+      }
+
+      .page-head {
+        grid-template-columns: 1fr;
+      }
+
+      .panel.span-4,
+      .panel.span-5,
+      .panel.span-6,
+      .panel.span-7,
+      .panel.span-8 {
+        grid-column: span 12;
+      }
+
+      .spread-map {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 680px) {
+      .topbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .rail {
+        grid-template-columns: 1fr;
+      }
+
+      .progress {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .page {
+        padding: 26px 14px 54px;
+      }
+
+      .status-box div,
+      .kv div {
+        grid-template-columns: 1fr;
+      }
+
+      .spread-map {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand">
+        <p class="eyebrow">openMagazine walkthrough</p>
+        <h1>Pipeline 可点击示例</h1>
+        <p>
+          用 <code>cosmos-luna-may-2026</code> 演示一次
+          <code>editorial-16page</code> 从输入到 PDF 的完整数据流。
+        </p>
+      </div>
+
+      <div class="mode-card">
+        <strong>示例性质</strong>
+        <span>页面里的 prompt 和 artifact 是为了说明流程而造的 mock 数据，字段形状贴近当前代码。</span>
+      </div>
+
+      <nav class="rail" id="rail" aria-label="Pipeline stages"></nav>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div class="progress" id="progress" aria-label="Step progress"></div>
+        <div class="nav-actions">
+          <button type="button" id="prevBtn">上一步</button>
+          <button type="button" id="nextBtn">下一步</button>
+        </div>
+      </div>
+
+      <div id="pages"></div>
+
+      <div class="footer-note">
+        Source of truth: <code>pipeline_defs/editorial-16page.yaml</code>,
+        <code>library/issue-specs/cosmos-luna-may-2026.yaml</code>,
+        <code>library/articles/cosmos-luna-may-2026.yaml</code>, and v0.3.1 regions.
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const steps = [
+      {
+        id: "overview",
+        title: "总览",
+        short: "先看整条链",
+        meta: "16 pages / 9 spreads / 21 slots",
+        gate: false,
+        summary: "这一页先把示例刊拆开。输入不是一句 prompt，而是一组可以复用、可验证的 YAML 引用。Agent 先解析这些引用，再按 pipeline stage 写出 artifact。",
+        status: {
+          "Pipeline": "editorial-16page",
+          "Issue": "cosmos-luna-may-2026",
+          "Budget": "$5.50 cap",
+          "Runtime": "Codex CLI + Vertex"
+        },
+        panels: [
+          {
+            span: 5,
+            title: "示例 issue spec",
+            tag: "input",
+            kind: "data",
+            body: "这份 spec 只是选择材料，不直接塞长文和 prompt。这样同一个 subject、theme、brand 可以被多个 issue 复用。",
+            code: `schema_version: 2
+slug: cosmos-luna-may-2026
+issue_number: "03"
+date: "MAY 2026"
+
+subject: luna
+style: national-geographic
+theme: cosmos
+layout: editorial-16page
+brand: meow-life
+article: cosmos-luna-may-2026`
+          },
+          {
+            span: 7,
+            title: "这条 pipeline 的 stage",
+            tag: "map",
+            kind: "",
+            body: "每个 stage 都有明确输入、输出和 checkpoint。真正付费的大量图片生成发生在 Upscale，所以前面两个 gate 是为了避免花钱后返工。",
+            flow: [
+              ["Research", "解析 6 层引用，写 research_brief.json"],
+              ["Proposal", "确认 21 个 slot、成本、页数、风险"],
+              ["Articulate", "确认文章 copy 和每张图的 scene，有 gate"],
+              ["Storyboard", "Codex 生成整本视觉草图，有 gate"],
+              ["Upscale", "Vertex 生成 21 张 4K slot 图片"],
+              ["Compose", "Jinja2 + WeasyPrint 合成 HTML/PDF"],
+              ["Publish", "验证、报告、contact sheet"]
+            ]
+          },
+          {
+            span: 12,
+            title: "16 页如何分成 9 个 spread",
+            tag: "layout",
+            custom: "spreadMap"
+          }
+        ]
+      },
+      {
+        id: "research",
+        title: "1. Research",
+        short: "解析引用",
+        meta: "writes research_brief.json",
+        gate: false,
+        summary: "Research 的工作是把 spec 里的短名字解析成完整层数据，并在任何生成前证明这些引用都存在、字段够用、彼此兼容。",
+        status: {
+          "Reads": "issue spec + six layer yamls",
+          "Writes": "research_brief.json",
+          "Cost": "$0",
+          "Reviewer": "enabled"
+        },
+        panels: [
+          {
+            span: 4,
+            title: "读入哪些文件",
+            tag: "resolved refs",
+            body: "这些路径是本例真实引用。Research brief 会把它们记录下来，让后续 stage 不再靠猜。",
+            list: [
+              ["subject", "library/subjects/luna.yaml"],
+              ["style", "styles/national-geographic.yaml"],
+              ["theme", "library/themes/cosmos.yaml"],
+              ["layout", "library/layouts/editorial-16page.yaml"],
+              ["brand", "library/brands/meow-life.yaml"],
+              ["article", "library/articles/cosmos-luna-may-2026.yaml"]
+            ]
+          },
+          {
+            span: 4,
+            title: "执行逻辑",
+            tag: "checks",
+            flow: [
+              ["Load", "读取 spec，确认 schema_version = 2"],
+              ["Resolve", "把 subject/style/theme/layout/brand/article 解析成绝对路径"],
+              ["Validate", "检查 required fields 和 article-layout consistency"],
+              ["Summarize", "写 research brief，给 Proposal 使用"]
+            ]
+          },
+          {
+            span: 4,
+            title: "Research 指令示例",
+            tag: "agent prompt",
+            kind: "prompt",
+            code: `Read AGENT_GUIDE.md and pipeline_defs/editorial-16page.yaml.
+
+Resolve this issue spec:
+library/issue-specs/cosmos-luna-may-2026.yaml
+
+Return a schema-shaped research brief:
+- every referenced layer path
+- subject identity and reference image
+- selected style/theme/layout/brand/article
+- page count, spread count, image slot count
+- validation status
+
+Do not generate images. Do not call paid tools.`
+          },
+          {
+            span: 4,
+            title: "失败时停在哪里",
+            tag: "risk",
+            kind: "warning",
+            body: "如果 article 缺某个 spread 的 image_slot_overrides，或者 layout 的 21 个 slot 和 article 对不上，这一步应直接失败。不要补一个临时 prompt 继续跑。"
+          },
+          {
+            span: 12,
+            title: "持久化 artifact 示例",
+            tag: "output/cosmos-luna-may-2026/research_brief.json",
+            kind: "data",
+            code: `{
+  "spec_slug": "cosmos-luna-may-2026",
+  "pipeline": "editorial-16page",
+  "resolved_layers": {
+    "subject": "library/subjects/luna.yaml",
+    "style": "styles/national-geographic.yaml",
+    "theme": "library/themes/cosmos.yaml",
+    "layout": "library/layouts/editorial-16page.yaml",
+    "brand": "library/brands/meow-life.yaml",
+    "article": "library/articles/cosmos-luna-may-2026.yaml"
+  },
+  "layout_summary": {
+    "page_count": 16,
+    "spread_count": 9,
+    "image_slot_count": 21,
+    "compose_engine": "weasyprint"
+  },
+  "validation": {
+    "spec_validate": "passed",
+    "article_validate": "passed",
+    "regions_validate": "passed"
+  }
+}`
+          }
+        ]
+      },
+      {
+        id: "proposal",
+        title: "2. Proposal",
+        short: "排期和预算",
+        meta: "writes proposal.json",
+        gate: false,
+        summary: "Proposal 把一本杂志的结构摊开：哪些 spread 有图、哪些图要 4K、预计花多少钱、并发度是多少。这里的价值是把生成风险提前量化。",
+        status: {
+          "Reads": "research_brief + layout",
+          "Writes": "proposal.json",
+          "Budget": "$5.08 estimated",
+          "Parallelism": "3"
+        },
+        panels: [
+          {
+            span: 6,
+            title: "Slot 预算怎么来",
+            tag: "cost model",
+            body: "editorial-16page 共有 21 个图片 slot。每个 slot 走 Vertex Gemini 3 Pro Image 生成 4K，按 $0.24 估算。",
+            code: `21 image slots x $0.24 = $5.04
+1 Codex storyboard call ~= $0.04
+--------------------------------
+estimated total       ~= $5.08
+budget_default_usd      $5.50`
+          },
+          {
+            span: 6,
+            title: "Proposal 阶段会确认什么",
+            tag: "review",
+            flow: [
+              ["Scope", "16 pages, 9 spreads, 21 image slots"],
+              ["Variety", "cover hero, feature portraits, scenes, environment, square portrait wall, back coda"],
+              ["Budget", "预计成本低于 $5.50"],
+              ["Runtime", "Storyboard 需要 Codex CLI；Upscale 需要 Vertex auth"]
+            ]
+          },
+          {
+            span: 12,
+            title: "Proposal 指令示例",
+            tag: "agent prompt",
+            kind: "prompt",
+            code: `Using research_brief.json and editorial-16page.yaml, draft the proposal.
+
+The proposal must include:
+1. issue title and editorial premise
+2. spread-by-spread plan
+3. flattened image slot list
+4. estimated cost by provider
+5. checkpoint plan
+6. risks before paid image generation
+
+Hard constraints:
+- total image slots must be 21
+- page count must be 16
+- cost_estimate_usd must be <= 5.50
+- do not call image_gen or Vertex in this stage`
+          },
+          {
+            span: 12,
+            title: "持久化 artifact 示例",
+            tag: "output/cosmos-luna-may-2026/proposal.json",
+            kind: "data",
+            code: `{
+  "spec_slug": "cosmos-luna-may-2026",
+  "pipeline": "editorial-16page",
+  "issue_plan": {
+    "title": "Luna Walks the Moon",
+    "page_count": 16,
+    "spreads": [
+      {"idx": 1, "type": "cover", "pages": [1], "image_slots": ["cover_hero"]},
+      {"idx": 3, "type": "feature-spread", "pages": [4, 5], "image_slots": ["feature_hero", "feature_captioned.1", "feature_captioned.2", "feature_captioned.3"]},
+      {"idx": 7, "type": "portrait-wall", "pages": [12, 13], "image_slots": ["portrait_wall.1", "portrait_wall.2", "portrait_wall.3", "portrait_wall.4", "portrait_wall.5", "portrait_wall.6"]}
+    ]
+  },
+  "cost_estimate_usd": {
+    "storyboard": 0.04,
+    "vertex_4k": 5.04,
+    "total": 5.08,
+    "budget": 5.50
+  },
+  "approval_gates": ["articulate", "storyboard"]
+}`
+          }
+        ]
+      },
+      {
+        id: "articulate",
+        title: "3. Articulate",
+        short: "确认文案",
+        meta: "required gate",
+        gate: true,
+        summary: "Articulate 是第一道人工确认门。它确认文章、标题、caption、每个 slot 的 scene 是否成立。通过后，后面的 storyboard 和 21 张图都会围绕这些文字生成。",
+        status: {
+          "Reads": "article yaml + layout text slots",
+          "Writes": "article.yaml / checkpoint",
+          "Gate": "required",
+          "Validation": "article_validate"
+        },
+        panels: [
+          {
+            span: 5,
+            title: "Spread 3 的真实 copy",
+            tag: "article layer",
+            kind: "data",
+            code: `idx: 3
+type: feature-spread
+pages: [4, 5]
+title:
+  en: "DEPARTURE"
+kicker:
+  en: "Chapter 01"
+lead:
+  en: "She steps from the module into a silence that has waited four billion years for the sound of a paw."
+image_slot_overrides:
+  feature_hero: "Luna in EVA suit at module airlock, hand on hatch, hero portrait at moment of egress, Earth visible upper right"
+  feature_captioned.1: "Luna's footprints in lunar regolith, 3:2 wide angle, low sun raking shadows"
+  feature_captioned.2: "Luna mid-stride on lunar plain, 3:2 medium wide, Earth small in upper-right of frame"
+  feature_captioned.3: "Luna's gloved paw on rock surface, 3:2 close-up, regolith grain visible"`
+          },
+          {
+            span: 7,
+            title: "本页为什么要停下来让人看",
+            tag: "gate",
+            kind: "warning",
+            flow: [
+              ["Narrative", "如果 DEPARTURE 这一章方向错了，后面图像会全部围绕错误故事生成"],
+              ["Slot scenes", "每个 image_slot_overrides 都会进入 prompt，错一个就会生成错一张图"],
+              ["Text length", "feature-spread 的 body 要能放进右侧 body region"],
+              ["Language", "当前 issue 有 en/zh 字段，但运行时可选择 brand.default_language"]
+            ]
+          },
+          {
+            span: 12,
+            title: "Article writer prompt 示例",
+            tag: "prompts/articulate.article-writer.prompt.md",
+            kind: "prompt",
+            code: `Write or refine article copy for an editorial 16-page A4 magazine.
+
+Issue:
+- slug: cosmos-luna-may-2026
+- display_title: Luna Walks the Moon
+- subject: Luna, realistic cat astronaut
+- theme: cosmos / lunar mission
+- brand: MEOW LIFE
+
+Required spread copy from layout:
+- cover: no local text fields; use root cover_line and cover_kicker
+- toc: table_of_contents
+- feature-spread: title, kicker, lead, body, image_slot_overrides
+- pull-quote: quote, quote_attribution, image_slot_overrides
+- portrait-wall: title, captions, image_slot_overrides
+- colophon: credits
+- back-cover: quote, quote_attribution, image_slot_overrides
+
+For every image slot in layout.image_slots, write one concrete visual scene.
+Keep prose concise enough to fit the declared regions.
+Return YAML only.`
+          },
+          {
+            span: 12,
+            title: "人工确认 sidecar 示例",
+            tag: "output/cosmos-luna-may-2026/checkpoints/articulate.json",
+            kind: "data",
+            code: `{
+  "stage": "articulate",
+  "checkpoint": "required",
+  "status": "approved",
+  "approved_by": "user",
+  "approved_at": "2026-05-12T11:42:00+08:00",
+  "article_path": "library/articles/cosmos-luna-may-2026.yaml",
+  "validation": {
+    "article_validate": "passed",
+    "missing_text_slots": [],
+    "missing_image_slot_overrides": []
+  },
+  "notes": "Copy approved for storyboard. Keep Luna as realistic astronaut cat, no cartoon treatment."
+}`
+          }
+        ]
+      },
+      {
+        id: "storyboard",
+        title: "4. Storyboard",
+        short: "锁定视觉方向",
+        meta: "required gate",
+        gate: true,
+        summary: "Storyboard 是第二道人工确认门。它用一次 Codex 原生 image_gen 生成整本视觉草图，再切成 21 个 cell。只有确认草图方向正确，才进入 Vertex 4K 批量生成。",
+        status: {
+          "Reads": "proposal + article + regions",
+          "Writes": "storyboard.png / storyboard.json / cells",
+          "Tool": "image_gen.imagegen",
+          "Gate": "required"
+        },
+        panels: [
+          {
+            span: 6,
+            title: "Storyboard prompt 示例",
+            tag: "prompts/storyboard.prompt.md",
+            kind: "prompt",
+            code: `Create a single 2:3 vertical storyboard sheet for an editorial photo magazine.
+
+Issue: Luna Walks the Moon
+Subject: Luna, a realistic cat in an EVA astronaut suit.
+Style: National Geographic documentary photography, photoreal, field-report mood.
+Theme: lunar surface, Earth visible in selected frames, hard solar shadows.
+
+Grid: 1024 x 1536, multi-cell storyboard, 21 cells.
+Each cell must be visually distinct and labeled only in metadata, not painted into the image.
+
+Cells:
+spread-01.cover_hero (3:4 cover_hero) - Luna in EVA suit standing on lunar regolith, Earth horizon upper-right.
+spread-03.feature_hero (3:4 portrait) - Luna at module airlock, hand on hatch, moment of egress.
+spread-03.feature_captioned.1 (3:2 scene) - Luna's footprints in lunar regolith, low sun raking shadows.
+spread-05.pullquote_environment (16:10 environment) - sweeping lunar landscape, Luna tiny on horizon.
+spread-07.portrait_wall.6 (1:1 portrait) - Luna looking back over shoulder toward Earth.
+spread-09.back_coda (2:3 back_coda) - Luna small distant figure on lunar horizon, quiet coda.`
+          },
+          {
+            span: 6,
+            title: "Storyboard JSON 示例",
+            tag: "output/.../storyboard.json",
+            kind: "data",
+            code: `{
+  "spec_slug": "cosmos-luna-may-2026",
+  "storyboard_path": "output/cosmos-luna-may-2026/storyboard.png",
+  "grid": {"outer_aspect": "2:3", "size_px": [1024, 1536]},
+  "cells": [
+    {
+      "slot_id": "spread-03.feature_hero",
+      "source_rect_px": [0, 342, 256, 684],
+      "cell_path": "output/cosmos-luna-may-2026/cells/spread-03/feature_hero.png",
+      "approved": true
+    },
+    {
+      "slot_id": "spread-03.feature_captioned.1",
+      "source_rect_px": [256, 342, 512, 512],
+      "cell_path": "output/cosmos-luna-may-2026/cells/spread-03/feature_captioned.1.png",
+      "approved": true
+    }
+  ],
+  "checkpoint": "approved"
+}`
+          },
+          {
+            span: 12,
+            title: "本阶段持久化文件",
+            tag: "artifact tree",
+            list: [
+              ["storyboard.png", "整本 2:3 草图图板，用于人眼确认整体方向"],
+              ["storyboard.json", "记录每个 slot 对应的 cell 裁剪坐标和路径"],
+              ["cells/spread-03/feature_hero.png", "后续 upscale 的参考 cell"],
+              ["prompts/storyboard.prompt.md", "完整 storyboard prompt，可审计和复跑"],
+              ["checkpoints/storyboard.json", "用户确认结果；未通过则不进入 upscale"]
+            ]
+          }
+        ]
+      },
+      {
+        id: "upscale",
+        title: "5. Upscale",
+        short: "生成 4K 图片",
+        meta: "21 Vertex calls",
+        gate: false,
+        summary: "Upscale 把每个 storyboard cell 变成 4K 成片。这里的 prompt 不只是 scene，还会带上 regions_context，告诉模型哪些区域未来要放 PDF 文本，不能画复杂细节或伪文字。",
+        status: {
+          "Reads": "cells + article scenes + regions",
+          "Writes": "images/spread-NN/*.png + upscale_result.json",
+          "Provider": "Vertex Gemini 3 Pro Image",
+          "Cost": "21 x $0.24"
+        },
+        panels: [
+          {
+            span: 6,
+            title: "以 spread-03/feature_hero 为例",
+            tag: "slot trace",
+            flow: [
+              ["Cell", "cells/spread-03/feature_hero.png 提供低清构图参考"],
+              ["Scene", "article 的 feature_hero scene 提供语义"],
+              ["Role", "layout 说 role=portrait, aspect=3:4"],
+              ["Regions", "feature-spread.regions.yaml 说 hero_image 在左半页，右侧文字区保持 calm"],
+              ["Output", "images/spread-03/feature_hero.png"]
+            ]
+          },
+          {
+            span: 6,
+            title: "Regions 布局示意",
+            tag: "feature-spread",
+            custom: "regionDemo"
+          },
+          {
+            span: 12,
+            title: "Upscale prompt 示例",
+            tag: "prompts/upscale/spread-03/feature_hero.prompt.md",
+            kind: "prompt",
+            code: `This image fills region 'hero_image' at rect (0.00, 0.00, 0.50, 1.00).
+The protagonist subject lives in this region. Sharp focus, primary lighting, full color, dominant composition element.
+
+The same spread contains sibling regions that will receive HTML/PDF overlays.
+DO NOT paint readable text or layout chrome into these areas; keep them calm and low-detail:
+- region 'kicker' (role=text, rect (0.55, 0.08, 0.95, 0.12)): calm zone for a small uppercase mono label
+- region 'title' (role=text, rect (0.55, 0.15, 0.95, 0.30)): uniform low-detail background for display-serif title
+- region 'body' (role=text, rect (0.55, 0.46, 0.95, 0.83)): negative space, no important detail behind body text
+- region 'captioned_strip' (role=image_grid, rect (0.55, 0.86, 0.95, 0.98)): three small thumbnails will be placed here
+
+Generate a photoreal 3:4 portrait image.
+Subject: Luna, realistic cat astronaut in EVA suit.
+Scene: Luna in EVA suit at module airlock, hand on hatch, hero portrait at moment of egress, Earth visible upper right.
+Style: National Geographic documentary photography, hard lunar sunlight, real camera optics, no illustration.
+Output: clean 4K PNG, no captions, no page numbers, no embedded typography.`
+          },
+          {
+            span: 12,
+            title: "Upscale result 示例",
+            tag: "output/cosmos-luna-may-2026/upscale_result.json",
+            kind: "data",
+            code: `{
+  "spec_slug": "cosmos-luna-may-2026",
+  "vertex_calls_made": 21,
+  "total_cost_usd": 5.04,
+  "images": [
+    "images/spread-01/cover_hero.png",
+    "images/spread-03/feature_hero.png",
+    "images/spread-03/feature_captioned.1.png",
+    "images/spread-03/feature_captioned.2.png",
+    "images/spread-03/feature_captioned.3.png",
+    "images/spread-05/pullquote_environment.png",
+    "images/spread-07/portrait_wall.1.png",
+    "images/spread-09/back_coda.png"
+  ],
+  "parallelism": 3,
+  "skipped_existing": [],
+  "warnings": []
+}`
+          }
+        ]
+      },
+      {
+        id: "compose",
+        title: "6. Compose",
+        short: "合成 HTML/PDF",
+        meta: "WeasyPrint",
+        gate: false,
+        summary: "Compose 不再让图片模型画文字。v0.3 editorial path 用 Jinja2 + WeasyPrint 把真实文本放进 PDF，同时复用 regions yaml 控制每个区域的位置。",
+        status: {
+          "Reads": "layout html + components + regions + images + article",
+          "Writes": "magazine.html / magazine.pdf / compose_result.json",
+          "Engine": "WeasyPrint",
+          "Native deps": "Pango/Cairo/HarfBuzz"
+        },
+        panels: [
+          {
+            span: 6,
+            title: "Compose 如何消费同一份 regions",
+            tag: "shared contract",
+            flow: [
+              ["Template", "editorial-16page.html.j2 遍历 spread_plan"],
+              ["Component", "feature-spread.html.j2 渲染 spread 3"],
+              ["Regions", "render_region macro 读取 rect_norm 生成 absolute div"],
+              ["Images", "images/spread-03/feature_hero.png 填入 hero_image"],
+              ["Text", "DEPARTURE / lead / body 作为真实 PDF 文本覆盖到右侧"]
+            ]
+          },
+          {
+            span: 6,
+            title: "Compose 执行指令示例",
+            tag: "agent command plan",
+            kind: "prompt",
+            code: `Run compose for output/cosmos-luna-may-2026.
+
+Use PdfSelector so schema_version routes correctly:
+- layout.schema_version = 2
+- backend = WeasyprintCompose
+
+Inputs:
+- layout: library/layouts/editorial-16page.yaml
+- layout template: library/layouts/editorial-16page.html.j2
+- article: library/articles/cosmos-luna-may-2026.yaml
+- brand: library/brands/meow-life.yaml
+- images_root: output/cosmos-luna-may-2026/images
+
+Persist:
+- magazine.html
+- magazine.pdf
+- compose_result.json`
+          },
+          {
+            span: 6,
+            title: "生成 HTML 片段示例",
+            tag: "magazine.html",
+            kind: "data",
+            code: `<section class="spread feature-spread" data-spread="3">
+  <div class="region region-hero_image" data-role="image"
+       style="left:0%; top:0%; width:50%; height:100%;">
+    <img src="images/spread-03/feature_hero.png" alt="">
+  </div>
+
+  <div class="region region-title" data-role="text"
+       style="left:55%; top:15%; width:40%; height:15%;">
+    <h1>DEPARTURE</h1>
+  </div>
+
+  <div class="region region-body" data-role="text"
+       style="left:55%; top:46%; width:40%; height:37%;">
+    <p class="dropcap">First steps onto the lunar surface...</p>
+  </div>
+</section>`
+          },
+          {
+            span: 12,
+            title: "Compose result 示例",
+            tag: "output/cosmos-luna-may-2026/compose_result.json",
+            kind: "data",
+            code: `{
+  "spec_slug": "cosmos-luna-may-2026",
+  "engine": "weasyprint",
+  "html_path": "output/cosmos-luna-may-2026/magazine.html",
+  "pdf_path": "output/cosmos-luna-may-2026/magazine.pdf",
+  "page_count": 16,
+  "size_mb": 74.2,
+  "layout": "editorial-16page",
+  "regions_loaded": [
+    "cover.regions.yaml",
+    "toc.regions.yaml",
+    "feature-spread.regions.yaml",
+    "pull-quote.regions.yaml",
+    "portrait-wall.regions.yaml",
+    "colophon.regions.yaml",
+    "back-cover.regions.yaml"
+  ]
+}`
+          }
+        ]
+      },
+      {
+        id: "publish",
+        title: "7. Publish",
+        short: "验证和交付",
+        meta: "final checks",
+        gate: false,
+        summary: "Publish 是收尾阶段。它不再花图像生成预算，而是检查文件是否完整、4K 输出是否合理、PDF 是否存在，并生成报告和 contact sheet。",
+        status: {
+          "Reads": "images + magazine.pdf + compose_result",
+          "Writes": "publish_report.json + contact_sheet.jpg",
+          "Reviewer": "disabled",
+          "Cost": "$0"
+        },
+        panels: [
+          {
+            span: 4,
+            title: "最终检查",
+            tag: "verify",
+            flow: [
+              ["Images", "verify_4k 检查 nested images/spread-*/*.png"],
+              ["PDF", "确认 magazine.pdf 存在且页数为 16"],
+              ["Artifacts", "确认 storyboard/upscale/compose result 都存在"],
+              ["Sheet", "生成 contact_sheet.jpg 方便快速浏览"]
+            ]
+          },
+          {
+            span: 4,
+            title: "Publish 执行指令示例",
+            tag: "agent command plan",
+            kind: "prompt",
+            code: `Publish output/cosmos-luna-may-2026.
+
+Checks:
+1. Verify4K().run(issue_dir) returns 0
+2. magazine.pdf exists
+3. compose_result.page_count == 16
+4. image count == 21
+5. contact_sheet.jpg can be written
+
+Persist:
+- publish_report.json
+- contact_sheet.jpg
+
+Do not call paid image tools in publish.`
+          },
+          {
+            span: 4,
+            title: "最终目录示例",
+            tag: "output tree",
+            kind: "data",
+            code: `output/cosmos-luna-may-2026/
+  research_brief.json
+  proposal.json
+  storyboard.png
+  storyboard.json
+  cells/spread-03/feature_hero.png
+  images/spread-03/feature_hero.png
+  prompts/storyboard.prompt.md
+  prompts/upscale/spread-03/feature_hero.prompt.md
+  prompts/run_manifest.json
+  magazine.html
+  magazine.pdf
+  compose_result.json
+  publish_report.json
+  contact_sheet.jpg`
+          },
+          {
+            span: 4,
+            title: "Publish report 示例",
+            tag: "publish_report.json",
+            kind: "data",
+            code: `{
+  "spec_slug": "cosmos-luna-may-2026",
+  "status": "ready",
+  "pdf": {
+    "path": "magazine.pdf",
+    "page_count": 16,
+    "size_mb": 74.2
+  },
+  "images": {
+    "expected": 21,
+    "found": 21,
+    "verify_4k": "passed"
+  },
+  "contact_sheet": "contact_sheet.jpg",
+  "total_cost_usd": 5.08
+}`
+          },
+          {
+            span: 12,
+            title: "Run manifest 示例",
+            tag: "prompts/run_manifest.json",
+            kind: "data",
+            code: `{
+  "spec_slug": "cosmos-luna-may-2026",
+  "pipeline": "editorial-16page",
+  "prompt_files": [
+    "prompts/storyboard.prompt.md",
+    "prompts/upscale/spread-01/cover_hero.prompt.md",
+    "prompts/upscale/spread-03/feature_hero.prompt.md",
+    "prompts/upscale/spread-03/feature_captioned.1.prompt.md",
+    "prompts/upscale/spread-09/back_coda.prompt.md"
+  ],
+  "model_calls": [
+    {"stage": "storyboard", "provider": "codex", "model": "image_gen.imagegen", "cost_usd": 0.04},
+    {"stage": "upscale", "provider": "vertex", "model": "gemini-3-pro-image-preview", "count": 21, "cost_usd": 5.04}
+  ],
+  "checkpoints": {
+    "articulate": "approved",
+    "storyboard": "approved"
+  }
+}`
+          }
+        ]
+      },
+      {
+        id: "takeaways",
+        title: "读代码时抓这几条线",
+        short: "回到代码",
+        meta: "where to look",
+        gate: false,
+        summary: "这套 pipeline 的关键不是某一个模型调用，而是所有阶段都围绕可持久化 artifact 工作。要调试或扩展时，优先沿着下面这些文件链路查。",
+        status: {
+          "Pipeline": "pipeline_defs/editorial-16page.yaml",
+          "Prompts": "lib/prompt_builder_v2.py",
+          "Regions": "lib/regions_loader.py",
+          "Compose": "tools/pdf/weasyprint_compose.py"
+        },
+        panels: [
+          {
+            span: 6,
+            title: "最重要的代码路径",
+            tag: "map",
+            list: [
+              ["pipeline_defs/editorial-16page.yaml", "stage 顺序、预算、产物、checkpoint 的声明"],
+              ["skills/pipelines/editorial-16page/*.md", "每个 stage 的 agent 执行手册"],
+              ["lib/prompt_builder_v2.py", "把 subject/style/theme/article/regions 合并成 storyboard/upscale prompt"],
+              ["lib/regions_loader.py", "加载 regions yaml，并为 image prompt 找 own region + sibling regions"],
+              ["tools/pdf/weasyprint_compose.py", "渲染 Jinja2 HTML 并写 PDF"],
+              ["tools/validation/article_validate.py", "检查文章 copy 是否满足 layout 的 text/image slot 要求"]
+            ]
+          },
+          {
+            span: 6,
+            title: "扩展新 layout 时要补什么",
+            tag: "extension checklist",
+            flow: [
+              ["Layout YAML", "新增 spread_plan、image_slots、text_slots_required"],
+              ["Regions", "为每个 spread type 写 *.regions.yaml"],
+              ["Components", "新增或复用 _components/*.html.j2"],
+              ["Prompts", "确认角色能映射到现有 upscale prompt template"],
+              ["Validation", "补 article/layout/regions contract tests"],
+              ["Dry run", "用 placeholder PNG 先跑 WeasyPrint integration"]
+            ]
+          },
+          {
+            span: 12,
+            title: "一句话总结",
+            tag: "mental model",
+            body: "Spec 选择材料，Research 解析材料，Proposal 控制范围，Articulate 锁文字，Storyboard 锁视觉，Upscale 花钱产图，Compose 写真实 PDF 文本，Publish 做最终验收。所有关键 prompt 和 artifact 都应该落盘，方便审计、复跑和定位失败。"
+          }
+        ]
+      }
+    ];
+
+    const spreadMap = `
+      <div class="spread"><strong>1 Cover</strong><small>page 1<br><code>cover_hero</code></small></div>
+      <div class="spread"><strong>2 TOC</strong><small>pages 2-3<br>目录文本</small></div>
+      <div class="spread active"><strong>3 Departure</strong><small>pages 4-5<br>hero + 3 strips</small></div>
+      <div class="spread"><strong>4 Lunar Plain</strong><small>pages 6-7<br>hero + 3 strips</small></div>
+      <div class="spread"><strong>5 Pull Quote</strong><small>pages 8-9<br>16:10 environment</small></div>
+      <div class="spread"><strong>6 Earthrise</strong><small>pages 10-11<br>hero + 3 strips</small></div>
+      <div class="spread"><strong>7 Portrait Wall</strong><small>pages 12-13<br>6 square portraits</small></div>
+      <div class="spread"><strong>8 Colophon</strong><small>pages 14-15<br>credits</small></div>
+      <div class="spread"><strong>9 Back Cover</strong><small>page 16<br><code>back_coda</code></small></div>
+    `;
+
+    const regionDemo = `
+      <div class="mock-layout">
+        <div class="hero-region">hero_image<br><code>feature_hero</code></div>
+        <div class="kicker-region">kicker</div>
+        <div class="title-region">title</div>
+        <div class="lead-region">lead</div>
+        <div class="body-region">body</div>
+        <div class="strip-region">captioned_strip x3</div>
+      </div>
+    `;
+
+    function esc(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    function renderPanel(panel) {
+      let inner = "";
+      if (panel.code) {
+        inner = `<pre class="code">${esc(panel.code)}</pre>`;
+      } else if (panel.flow) {
+        inner = `<div class="panel-body"><ol class="flow">${
+          panel.flow.map((item, idx) => `
+            <li><b>${idx + 1}</b><span><strong>${esc(item[0])}</strong>${esc(item[1])}</span></li>
+          `).join("")
+        }</ol></div>`;
+      } else if (panel.list) {
+        inner = `<div class="panel-body"><ul class="artifact-list">${
+          panel.list.map(item => `<li><code>${esc(item[0])}</code><small>${esc(item[1])}</small></li>`).join("")
+        }</ul></div>`;
+      } else if (panel.custom === "spreadMap") {
+        inner = `<div class="panel-body"><div class="spread-map">${spreadMap}</div></div>`;
+      } else if (panel.custom === "regionDemo") {
+        inner = `<div class="panel-body">${regionDemo}</div>`;
+      } else {
+        inner = `<div class="panel-body"><p>${esc(panel.body || "")}</p></div>`;
+      }
+
+      const bodyText = panel.body && (panel.code || panel.flow || panel.list || panel.custom)
+        ? `<div class="panel-body"><p>${esc(panel.body)}</p></div>`
+        : "";
+      const kind = panel.kind ? ` ${panel.kind}` : "";
+      const tagClass = panel.kind === "warning" ? "tag red" : panel.kind === "prompt" ? "tag amber" : "tag";
+      return `
+        <section class="panel span-${panel.span || 6}${kind}">
+          <div class="panel-head">
+            <h3>${esc(panel.title)}</h3>
+            ${panel.tag ? `<span class="${tagClass}">${esc(panel.tag)}</span>` : ""}
+          </div>
+          ${bodyText}
+          ${inner}
+        </section>
+      `;
+    }
+
+    function renderPage(step, idx) {
+      const status = Object.entries(step.status || {}).map(([key, value]) => `
+        <div><dt>${esc(key)}</dt><dd>${esc(value)}</dd></div>
+      `).join("");
+      return `
+        <article class="page" id="page-${step.id}" data-step="${step.id}">
+          <header class="page-head">
+            <div>
+              <p class="eyebrow">Step ${idx + 1} / ${steps.length}</p>
+              <h2>${esc(step.title)}</h2>
+              <p class="summary">${esc(step.summary)}</p>
+            </div>
+            <aside class="status-box" aria-label="Step metadata">
+              <dl>${status}</dl>
+            </aside>
+          </header>
+          <div class="grid">
+            ${(step.panels || []).map(renderPanel).join("")}
+          </div>
+        </article>
+      `;
+    }
+
+    function setStep(index, pushHash = true) {
+      const next = Math.max(0, Math.min(index, steps.length - 1));
+      document.querySelectorAll(".page").forEach((page, idx) => {
+        page.classList.toggle("active", idx === next);
+      });
+      document.querySelectorAll(".step-button").forEach((button, idx) => {
+        button.classList.toggle("active", idx === next);
+      });
+      document.querySelectorAll(".dot").forEach((dot, idx) => {
+        dot.classList.toggle("active", idx === next);
+      });
+      document.getElementById("prevBtn").disabled = next === 0;
+      document.getElementById("nextBtn").disabled = next === steps.length - 1;
+      if (pushHash) {
+        history.replaceState(null, "", `#${steps[next].id}`);
+      }
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+
+    function init() {
+      document.getElementById("rail").innerHTML = steps.map((step, idx) => `
+        <button type="button" class="step-button${step.gate ? " gate" : ""}" data-index="${idx}">
+          <span class="step-num">${idx + 1}</span>
+          <span>
+            <span class="step-title">${esc(step.short)}</span>
+            <span class="step-meta">${esc(step.meta)}</span>
+          </span>
+        </button>
+      `).join("");
+
+      document.getElementById("progress").innerHTML = steps.map((step, idx) => `
+        <button type="button" class="dot${step.gate ? " gate" : ""}" data-index="${idx}" aria-label="${esc(step.title)}"></button>
+      `).join("");
+
+      document.getElementById("pages").innerHTML = steps.map(renderPage).join("");
+
+      document.querySelectorAll("[data-index]").forEach(button => {
+        button.addEventListener("click", () => setStep(Number(button.dataset.index)));
+      });
+
+      document.getElementById("prevBtn").addEventListener("click", () => {
+        const active = steps.findIndex(step => document.getElementById(`page-${step.id}`).classList.contains("active"));
+        setStep(active - 1);
+      });
+
+      document.getElementById("nextBtn").addEventListener("click", () => {
+        const active = steps.findIndex(step => document.getElementById(`page-${step.id}`).classList.contains("active"));
+        setStep(active + 1);
+      });
+
+      const fromHash = steps.findIndex(step => `#${step.id}` === window.location.hash);
+      setStep(fromHash >= 0 ? fromHash : 0, fromHash >= 0);
+    }
+
+    init();
+  </script>
+</body>
+</html>

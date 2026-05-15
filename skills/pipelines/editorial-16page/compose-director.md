@@ -55,7 +55,11 @@ design_system = layers.get("design_system") or {}
 
 selector = OutputSelector()
 results = []
+presentations_targets = []
 for target in design_system.get("output_targets", [{"format": "a4-magazine", "realizer": "weasyprint"}]):
+    if target["realizer"] == "presentations":
+        presentations_targets.append(target)
+        continue
     backend = selector.choose_backend(target=target)
     result = backend.run(
         issue_dir=issue_dir,
@@ -64,11 +68,13 @@ for target in design_system.get("output_targets", [{"format": "a4-magazine", "re
         article=article,
         spec=spec,
         design_system=design_system,
+        target=target,
     )
     results.append({"target": target, "result": result})
 
 (issue_dir / "compose_result.json").write_text(json.dumps({
     "outputs": results,
+    "pending_presentations_targets": presentations_targets,
     "spec_slug": spec["slug"],
 }, indent=2))
 ~~~
@@ -116,24 +122,21 @@ time alongside the contact sheet and verify report.
 
 ## Multi-Realizer Orchestration (v0.3.2)
 
-`design_system.output_targets` may list multiple realizers. The PDF
-realizer runs first (above); for each non-PDF realizer, invoke the
-appropriate director skill:
+`design_system.output_targets` may list multiple realizers. PDF realizers
+run directly above; for each Presentations realizer, invoke the appropriate
+director skill:
 
 ~~~python
-for target in design_system.get("output_targets", []):
+for target in presentations_targets:
     if target["realizer"] == "presentations":
         # → see compose-director-deck.md
         # Agent should now read that file and follow it for this target.
         pass
-    elif target["realizer"] in ("weasyprint", "reportlab"):
-        # Already handled above
-        continue
-    else:
-        print(f"WARNING: unknown realizer {target['realizer']!r}; skipping")
 ~~~
 
-Each realizer appends its result to `compose_result.json.outputs`.
+Each Presentations realizer appends its final result to
+`compose_result.json.outputs` and may remove itself from
+`pending_presentations_targets`.
 Final structure:
 
 ~~~json
@@ -141,8 +144,8 @@ Final structure:
   "outputs": [
     {"format": "a4-magazine", "realizer": "weasyprint",
      "path": "output/<slug>/magazine.pdf", "page_count": 16, "size_mb": 42.1},
-    {"format": "deck-pptx", "realizer": "presentations",
-     "path": "output/<slug>/deck/<slug>.pptx", "slide_count": 9,
+    {"format": "magazine-pptx", "realizer": "presentations",
+     "path": "output/<slug>/magazine-pptx/<slug>.pptx", "slide_count": 16,
      "thread_id": "..."}
   ],
   "spec_slug": "<slug>"

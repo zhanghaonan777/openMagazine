@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 import yaml
-from jsonschema import validate
+from jsonschema import Draft7Validator
 
 
 SKILL_ROOT = Path(__file__).resolve().parents[2]
@@ -25,7 +25,7 @@ def _all_pipelines():
 def test_pipeline_manifest_valid(pipeline_path, pipeline_schema):
     """Each pipeline_defs/*.yaml must validate against pipeline.schema.json."""
     data = yaml.safe_load(pipeline_path.read_text())
-    validate(instance=data, schema=pipeline_schema)
+    Draft7Validator(pipeline_schema).validate(data)
 
 
 @pytest.mark.parametrize("pipeline_path", _all_pipelines(), ids=lambda p: p.name)
