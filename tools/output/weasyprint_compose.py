@@ -170,9 +170,44 @@ class WeasyprintCompose(BaseTool):
 
         return self.render_html_string(html, out_path, base_url=project_root)
 
+    def render_from_manifest(
+        self,
+        manifest: dict,
+        *,
+        issue_dir: pathlib.Path,
+        out_path: pathlib.Path | None = None,
+        save_html: bool = True,
+    ) -> dict:
+        """Render a slide_manifest directly to PDF.
+
+        Manifest-driven path, parallel to render_template(). Skips the
+        Jinja2 + per-spread component templates and emits absolute-
+        positioned region divs from the manifest's resolved data. Use this
+        to prove the manifest contract is sufficient; the Jinja path is
+        canonical for visual fidelity in v0.3.2.
+        """
+        from lib.manifest_to_html import manifest_to_html
+
+        issue_dir = pathlib.Path(issue_dir)
+        out_path = pathlib.Path(out_path) if out_path else issue_dir / "magazine.pdf"
+
+        html = manifest_to_html(manifest, issue_dir=issue_dir)
+
+        if save_html:
+            html_path = out_path.with_suffix(".html")
+            html_path.parent.mkdir(parents=True, exist_ok=True)
+            html_path.write_text(html, encoding="utf-8")
+
+        return self.render_html_string(html, out_path, base_url=issue_dir)
+
     def run(self, *, issue_dir: pathlib.Path, layout: dict, brand: dict,
-            article: dict, spec: dict) -> dict:
-        """High-level entry: derive layout_j2 from layout name and render."""
+            article: dict, spec: dict, **kwargs) -> dict:
+        """High-level entry: derive layout_j2 from layout name and render.
+
+        Accepts and ignores extra kwargs (e.g. design_system, target) so
+        OutputSelector can call this with the v0.3.2 multi-realizer kwarg
+        set without crashing.
+        """
         project_root = pathlib.Path(__file__).resolve().parents[2]
         layout_j2 = project_root / "library" / "layouts" / f"{layout['name']}.html.j2"
         out_path = pathlib.Path(issue_dir) / "magazine.pdf"

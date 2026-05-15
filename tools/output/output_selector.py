@@ -19,8 +19,9 @@ class OutputSelector(BaseTool):
         super().__init__()
         self._reportlab = ReportlabCompose()
         self._weasyprint = WeasyprintCompose()
-        # PresentationsAdapter lazily imported (added in S5)
+        # PresentationsAdapter + HtmlInteractiveCompose lazily imported.
         self._presentations = None
+        self._html_interactive = None
 
     def choose_backend(
         self, *, target: dict | None = None, layout: dict | None = None
@@ -47,6 +48,11 @@ class OutputSelector(BaseTool):
                 from tools.output.presentations_adapter import PresentationsAdapter
                 self._presentations = PresentationsAdapter()
             return self._presentations
+        if realizer == "html-interactive":
+            if self._html_interactive is None:
+                from tools.output.html_interactive_compose import HtmlInteractiveCompose
+                self._html_interactive = HtmlInteractiveCompose()
+            return self._html_interactive
         raise ValueError(f"unknown realizer {realizer!r}")
 
     def run(self, *, target: dict | None = None, layout: dict | None = None, **kwargs):
